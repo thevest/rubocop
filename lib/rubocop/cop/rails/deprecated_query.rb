@@ -11,8 +11,12 @@ module RuboCop
           (send (const ...) :find (sym {:all :first :last}) (hash ...) ...)
         PATTERN
 
+        def_node_matcher :count_options?, <<-PATTERN
+          (send (const ...) :count (sym {:all}) (hash ...) ...)
+        PATTERN
+
         def on_send(node)
-          return unless find_options?(node)
+          return unless find_options?(node) || count_options?(node)
           add_offense(node)
         end
 
@@ -33,6 +37,10 @@ module RuboCop
             else
               "#{model_call}.#{chained_methods}"
             end
+
+          if count_options?(node)
+            new_expression += ".count"
+          end
 
           lambda do |corrector|
             corrector.replace(node.loc.expression, new_expression)
