@@ -50,7 +50,7 @@ module RuboCop
         def make_method_chain(node)
           chained_methods = node.children[3].child_nodes.map do |cnode|
             seperator = cnode.source.include?('=>') ? '=>' : ':'
-            seperated = cnode.source.split(seperator).map do |s|
+            seperated = cnode.source.split(seperator, 2).map do |s|
               s.strip.gsub(/^:{1}/, '')
             end
             "#{seperated[0]}(#{seperated[1]})".gsub(/\A^conditions/, 'where')
@@ -75,3 +75,7 @@ end
 # keywords.each.with_index do |keyword, idx|
 #   corrector.insert_before(args[idx].loc.expression, keyword)
 # end
+
+# prev_email = BreadcrumbEmail.find(:first, conditions: ["user_id = ? and date(created_at) = ?", params[:id].to_i, Time.now.in_time_zone.to_date])
+
+# 'awts = AssignableWorkType.find(:all, :conditions => ["deleted_id = 0 and id in (?)",params[:sort_order_ids].map(&:to_i)], :order => "field(id,#{params[:sort_order_ids].map(&:to_i).join(",")})")'
