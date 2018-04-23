@@ -15,8 +15,12 @@ module RuboCop
           (send (const ...) :count (sym {:all}) (hash ...) ...)
         PATTERN
 
+        def_node_matcher :paginate_options?, <<-PATTERN
+          (send (const ...) :paginate (hash ...) ...)
+        PATTERN
+
         def on_send(node)
-          return unless find_options?(node) || count_options?(node)
+          return unless find_options?(node) || count_options?(node) || paginate_options?(node)
           add_offense(node)
         end
 
@@ -48,11 +52,21 @@ module RuboCop
         end
 
         def make_method_chain(node)
+          page_per_page = nil
+
           chained_methods = node.children[3].child_nodes.map do |cnode|
             seperator = cnode.source.include?('=>') ? '=>' : ':'
-            seperated = cnode.source.split(seperator, 2).map do |s|
+            seperated = cnode.source.split(seperator, 2)
+            .filter do |s|
+              if s[0] == "page"
+                page_per_page = s
+              end
+              s[0] != "page" && s[0] != "per_page"
+            end
+            .map do |s|
               s.strip.gsub(/^:{1}/, '')
             end
+
             "#{seperated[0]}(#{seperated[1]})".gsub(/\A^conditions/, 'where')
           end
 
@@ -63,7 +77,11 @@ module RuboCop
             chained_methods[select_indx] = old
           end
 
-          chained_methods.join('.')
+          chained = chained_methods.join('.')
+
+          if page_per_page
+            chained = chained + ".pagerize(page: #{s[1]})"
+          end
         end
 
       end
