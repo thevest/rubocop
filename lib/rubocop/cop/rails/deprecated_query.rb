@@ -16,7 +16,7 @@ module RuboCop
         PATTERN
 
         def_node_matcher :paginate_options?, <<-PATTERN
-          (send (const ...) :paginate (hash ...) ...)
+          (send (const ...) :paginate (hash ...))
         PATTERN
 
         def on_send(node)
@@ -53,11 +53,20 @@ module RuboCop
 
         def make_method_chain(node)
           page_per_page = nil
+          unless node.children[3]
+            puts '====='
+            puts node.children[2]
+            puts "\n"
+            puts node.children.count
+            puts '====='
 
+            puts "\n\n\n"
+            return ""
+          end
           chained_methods = node.children[3].child_nodes.map do |cnode|
             seperator = cnode.source.include?('=>') ? '=>' : ':'
             seperated = cnode.source.split(seperator, 2)
-            .filter do |s|
+            .select do |s|
               if s[0] == "page"
                 page_per_page = s
               end
