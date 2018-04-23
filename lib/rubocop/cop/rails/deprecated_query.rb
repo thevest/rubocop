@@ -59,15 +59,12 @@ module RuboCop
             seperated = cnode.source.split(seperator, 2).map do |s|
               s.strip.gsub(/^:{1}/, '')
             end
-
+            next if seperated[0].match(/A^per_page/)
             "#{seperated[0]}(#{seperated[1]})".gsub(/\A^conditions/, 'where').gsub(/\A^page/, "pagerize")
           end
 
-          per_page_indx = chained_methods.index { |i| i.match(/A^per_page/) }
-          chained_methods.delete_at(per_page_indx) if per_page_indx
-
           page_indx = chained_methods.index { |i| i.match(/A^pagerize/) }
-          if page_indx && select_indx != chained_methods.count-1
+          if page_indx && page_indx != chained_methods.count-1
             old = chained_methods[page_indx]
             chained_methods[page_indx] = chained_methods[1]
             chained_methods[chained_methods.count-1] = old
