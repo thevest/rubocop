@@ -66,7 +66,6 @@ module RuboCop
           per_page_indx = chained_methods.index { |i| i.match(/A^per_page/) }
           chained_methods.delete_at(per_page_indx) if per_page_indx
 
-
           page_indx = chained_methods.index { |i| i.match(/A^pagerize/) }
           if page_indx && select_indx != chained_methods.count-1
             old = chained_methods[page_indx]
