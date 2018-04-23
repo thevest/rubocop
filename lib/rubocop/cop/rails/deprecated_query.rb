@@ -19,35 +19,67 @@ module RuboCop
           (send (const ...) :paginate (hash ...))
         PATTERN
 
+        def_node_matcher :find_create_chain?, <<-PATTERN
+          (send (const ...) ...)
+        PATTERN
+
         def on_send(node)
-          return unless find_options?(node) || count_options?(node) || paginate_options?(node)
+          return unless find_options?(node) || count_options?(node) || paginate_options?(node) || find_create_chain?(node)
+
+          if find_create_chain?(node)
+            return unless node.source.match(/(.*).(find_or_create_by|find_or_initialize_by)_(.*)\W/)
+          end
+
           add_offense(node)
         end
 
         def autocorrect(node)
           _receiver, method, *args = *node
 
-          model_call = node.children[0].source
+          if find_create_chain?(node)
+            return unless node.source.match(/(.*).(find_or_create_by|find_or_initialize_by)_(.*)\W/)
 
-          find_type = node.children[2].source
+            src = node.source
+            final = ''
+            dotsplit = src.split('.', 2)
+            start = dotsplit[0]
+            meth = dotsplit[1]
+            type = meth.match(/find_or_create_by_(.*)/) ? :create : :initialize
 
-          chained_methods = make_method_chain(node)
+            split = meth.split("find_or_#{type.to_s}_by_")
+            first = split[1]
+            args = first.split('(')[1].gsub(')', '').split(',').map { |s| s.strip }
+            puts args
+            fields = first.split('_and_')
+            strs = fields.map.with_index { |f, i| "#{f}: #{args[i]}" }.join(',')
+            final = "#{start}.find_or_#{type.to_s}_by(#{strs})"
 
-          new_expression =
-            if find_type == ":first"
-              "#{model_call}.#{chained_methods}.first"
-            elsif find_type == ":last"
-              "#{model_call}.#{chained_methods}.last"
-            else
-              "#{model_call}.#{chained_methods}"
+            lambda do |corrector|
+              corrector.replace(node.loc.expression, final)
+            end
+          else
+            model_call = node.children[0].source
+
+            find_type = node.children[2].source
+
+            chained_methods = make_method_chain(node)
+
+            new_expression =
+              if find_type == ":first"
+                "#{model_call}.#{chained_methods}.first"
+              elsif find_type == ":last"
+                "#{model_call}.#{chained_methods}.last"
+              else
+                "#{model_call}.#{chained_methods}"
+              end
+
+            if count_options?(node)
+              new_expression += ".count"
             end
 
-          if count_options?(node)
-            new_expression += ".count"
-          end
-
-          lambda do |corrector|
-            corrector.replace(node.loc.expression, new_expression)
+            lambda do |corrector|
+              corrector.replace(node.loc.expression, new_expression)
+            end
           end
         end
 
@@ -64,12 +96,12 @@ module RuboCop
           end
           .compact
 
-          # page_indx = chained_methods.index { |i| i.match(/\A^pagerize/) }
-          # if page_indx && page_indx != chained_methods.count-1
-          #   old = chained_methods[page_indx]
-          #    =
-          #   chained_methods[chained_methods.count-1] = old
-          # end
+          page_indx = chained_methods.index { |i| i.match(/\A^pagerize/) }
+          if page_indx && page_indx != chained_methods.count-1
+            old = chained_methods[page_indx]
+            chained_methods[page_indx] = chained_methods[chained_methods.count-1]
+            chained_methods[chained_methods.count-1] = old
+          end
 
           select_indx = chained_methods.index { |i| i.match(/\A^select/) }
           if select_indx && select_indx != 1
