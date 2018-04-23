@@ -52,31 +52,26 @@ module RuboCop
         end
 
         def make_method_chain(node)
-          page_per_page = nil
-          unless node.children[3]
-            puts '====='
-            puts node.children[2]
-            puts "\n"
-            puts node.children.count
-            puts '====='
-
-            puts "\n\n\n"
-            return ""
-          end
-          chained_methods = node.children[3].child_nodes.map do |cnode|
+          split_node = node.children[3]
+          split_node = node.children[2] unless split_node
+          chained_methods = split_node.child_nodes.map do |cnode|
             seperator = cnode.source.include?('=>') ? '=>' : ':'
-            seperated = cnode.source.split(seperator, 2)
-            .select do |s|
-              if s[0] == "page"
-                page_per_page = s
-              end
-              s[0] != "page" && s[0] != "per_page"
-            end
-            .map do |s|
+            seperated = cnode.source.split(seperator, 2).map do |s|
               s.strip.gsub(/^:{1}/, '')
             end
 
-            "#{seperated[0]}(#{seperated[1]})".gsub(/\A^conditions/, 'where')
+            "#{seperated[0]}(#{seperated[1]})".gsub(/\A^conditions/, 'where').gsub(/\A^page/, "pagerize")
+          end
+
+          per_page_indx = chained_methods.index { |i| i.match(/A^per_page/) }
+          chained_methods.delete_at(per_page_indx) if per_page_indx
+
+
+          page_indx = chained_methods.index { |i| i.match(/A^pagerize/) }
+          if page_indx && select_indx != chained_methods.count-1
+            old = chained_methods[page_indx]
+            chained_methods[page_indx] = chained_methods[1]
+            chained_methods[chained_methods.count-1] = old
           end
 
           select_indx = chained_methods.index { |i| i.match(/A^select/) }
@@ -88,9 +83,7 @@ module RuboCop
 
           chained = chained_methods.join('.')
 
-          if page_per_page
-            chained = chained + ".pagerize(page: #{s[1]})"
-          end
+          chained
         end
 
       end
