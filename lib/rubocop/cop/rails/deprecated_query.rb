@@ -42,17 +42,17 @@ module RuboCop
             src = node.source
             final = ''
             dotsplit = src.split('.', 2)
+
             start = dotsplit[0]
             meth = dotsplit[1]
             type = meth.match(/find_or_create_by_(.*)/) ? :create : :initialize
 
-            split = meth.split("find_or_#{type.to_s}_by_")
-            first = split[1]
-            args = first.split('(')[1].gsub(')', '').split(',').map { |s| s.strip }
-            puts args
-            fields = first.split('_and_')
-            strs = fields.map.with_index { |f, i| "#{f}: #{args[i]}" }.join(',')
-            final = "#{start}.find_or_#{type.to_s}_by(#{strs})"
+            s = meth.split("find_or_#{type.to_s}_by_")
+            ss = s[1].split('(')
+            fields = ss[0].split('_and_')
+            args = ss[1].gsub(')', '').split(',').map { |s| s.strip }
+            strs = fields.map.with_index { |f, i| "#{f}: #{args[i]}" }.join(', ')
+            final = "#{start}.find_or_#{type.to_s}_by(#{strs.strip})"
 
             lambda do |corrector|
               corrector.replace(node.loc.expression, final)
