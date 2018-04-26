@@ -3,6 +3,7 @@
 module RuboCop
   module Cop
     module Rails
+      # TODO: Use the helper functionality provided by parser and rubocop instead of manual parsing most errything
 
       class DeprecatedQuery < Cop
         MSG = '`find(:first and find(:all` are deprecated, used `where` with chained methods.'.freeze
@@ -26,7 +27,7 @@ module RuboCop
         def on_send(node)
           return unless find_options?(node) || count_options?(node) || paginate_options?(node) || find_create_chain?(node)
 
-          if find_create_chain?(node)
+          if find_create_chain?(node) && !(find_options?(node) || count_options?(node) || paginate_options?(node))
             return unless node.source.match(/(.*).(find_or_create_by|find_or_initialize_by)_(.*)\W/)
           end
 
@@ -36,7 +37,7 @@ module RuboCop
         def autocorrect(node)
           _receiver, method, *args = *node
 
-          if find_create_chain?(node)
+          if find_create_chain?(node) && !(find_options?(node) || count_options?(node) || paginate_options?(node))
             return unless node.source.match(/(.*).(find_or_create_by|find_or_initialize_by)_(.*)\W/)
 
             src = node.source
