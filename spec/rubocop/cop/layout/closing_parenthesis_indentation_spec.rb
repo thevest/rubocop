@@ -1,14 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe RuboCop::Cop::Layout::ClosingParenthesisIndentation do
-  subject(:cop) { described_class.new(config) }
-
-  let(:config) do
-    RuboCop::Config.new('Layout/AlignParameters' => {
-                          'EnforcedStyle' => align_parameters_config
-                        })
-  end
-  let(:align_parameters_config) { 'with_first_parameter' }
+  subject(:cop) { described_class.new }
 
   context 'for method calls' do
     context 'with line break before 1st parameter' do
@@ -17,7 +10,7 @@ RSpec.describe RuboCop::Cop::Layout::ClosingParenthesisIndentation do
           some_method(
             a
             )
-            ^ Indent `)` the same as the start of the line where `(` is.
+            ^ Indent `)` to column 0 (not 2)
         RUBY
       end
 
@@ -70,45 +63,339 @@ RSpec.describe RuboCop::Cop::Layout::ClosingParenthesisIndentation do
         RUBY
       end
 
+      it 'accepts a correctly indented )' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          some_method(a,
+            x: 1,
+            y: 2
+          )
+          b =
+            some_method(a,
+                       )
+        RUBY
+      end
+
+      it 'accepts a correctly indented ) inside a block' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          block_adds_extra_indentation do
+            some_method(a,
+              x: 1,
+              y: 2
+            )
+            b =
+              some_method(a,
+                         )
+          end
+        RUBY
+      end
+
+      it 'autocorrects misindented )' do
+        corrected = autocorrect_source(<<-RUBY.strip_indent)
+          some_method(a,
+            x: 1,
+            y: 2
+                      )
+          b =
+            some_method(a,
+                        )
+        RUBY
+        expect(corrected).to eq <<-RUBY.strip_indent
+          some_method(a,
+            x: 1,
+            y: 2
+          )
+          b =
+            some_method(a,
+                       )
+        RUBY
+      end
+    end
+
+    context 'without arguments' do
       it 'accepts empty ()' do
         expect_no_offenses('some_method()')
       end
 
-      context 'with fixed indentation of parameters' do
-        let(:align_parameters_config) { 'with_fixed_indentation' }
+      it 'can handle indentation up against the left edge' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          some_method(
+          )
+        RUBY
+      end
 
-        it 'accepts a correctly indented )' do
-          expect_no_offenses(<<-RUBY.strip_indent)
-            some_method(a,
-              x: 1,
-              y: 2
+      it 'accepts a correctly aligned ) against (' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          some_method(
+                     )
+        RUBY
+      end
+    end
+
+    context 'with first multiline arg on new line' do
+      it 'accepts ) on the same level as ( with args on same line' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          where(
+            "multiline
+             condition", second_arg
+          )
+        RUBY
+      end
+
+      it 'accepts ) on the same level as ( with second arg on new line' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          where(
+            "multiline
+             condition",
+            second_arg
+          )
+        RUBY
+      end
+    end
+  end
+
+  context 'for method assignments with indented parameters' do
+    context 'with line break before 1st parameter' do
+      it 'registers an offense for misaligned )' do
+        expect_offense(<<-RUBY.strip_indent)
+          foo = some_method(
+                             a
             )
-            b =
-              some_method(a,
-              )
-          RUBY
-        end
+            ^ Align `)` with `(`.
+        RUBY
+      end
 
-        it 'autocorrects misindented )' do
-          corrected = autocorrect_source(<<-RUBY.strip_indent)
+      it 'autocorrects misaligned )' do
+        corrected = autocorrect_source(<<-RUBY.strip_indent)
+          foo = some_method(
+                             a
+            )
+        RUBY
+        expect(corrected).to eq <<-RUBY.strip_indent
+          foo = some_method(
+                             a
+                           )
+        RUBY
+      end
+
+      it 'accepts a correctly aligned )' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          foo = some_method(
+                             a
+                           )
+        RUBY
+      end
+    end
+
+    context 'with no line break before 1st parameter' do
+      it 'registers an offense for misaligned )' do
+        expect_offense(<<-RUBY.strip_indent)
+          foo = some_method(a
+          )
+          ^ Align `)` with `(`.
+        RUBY
+      end
+
+      it 'can handle inner method calls' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          expect(response).to contain_exactly(
+                                { a: 1, b: 'x' },
+                                { a: 2, b: 'y' }
+                              )
+        RUBY
+      end
+
+      it 'can handle individual arguments that are broken over lines' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          corrector.insert_before(
+            range,
+            "\n" + ' ' * (node.loc.keyword.column +
+                          indent_steps * configured_width)
+          )
+        RUBY
+      end
+
+      it 'can handle indentation up against the left edge' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          foo(
+          a: b
+          )
+        RUBY
+      end
+
+      it 'can handle hash arguments that are not broken over lines' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          corrector.insert_before(
+                                   range,
+                                   arg_1: 'foo', arg_2: 'bar'
+                                 )
+        RUBY
+      end
+
+      it 'autocorrects misaligned )' do
+        corrected = autocorrect_source(<<-RUBY.strip_indent)
+          foo = some_method(a
+          )
+        RUBY
+        expect(corrected).to eq <<-RUBY.strip_indent
+          foo = some_method(a
+                           )
+        RUBY
+      end
+
+      it 'accepts a correctly aligned )' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          foo = some_method(a
+                           )
+        RUBY
+      end
+      it 'accepts a correctly indented )' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          foo = some_method(a,
+                            x: 1,
+                            y: 2
+                           )
+          b =
             some_method(a,
-              x: 1,
-              y: 2
                        )
-            b =
-              some_method(a,
-                         )
-          RUBY
-          expect(corrected).to eq <<-RUBY.strip_indent
+        RUBY
+      end
+
+      it 'autocorrects misindented )' do
+        corrected = autocorrect_source(<<-RUBY.strip_indent)
+          some_method(a,
+                      x: 1,
+                      y: 2
+                      )
+          b =
             some_method(a,
-              x: 1,
-              y: 2
+                        )
+        RUBY
+        expect(corrected).to eq <<-RUBY.strip_indent
+          some_method(a,
+                      x: 1,
+                      y: 2
+                     )
+          b =
+            some_method(a,
+                       )
+        RUBY
+      end
+    end
+
+    context 'without arguments' do
+      it 'accepts empty ()' do
+        expect_no_offenses('foo = some_method()')
+      end
+
+      it 'accepts a correctly aligned ) against (' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          foo = some_method(
+                           )
+        RUBY
+      end
+
+      it 'can handle indentation up against the left edge' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          foo = some_method(
+          )
+        RUBY
+      end
+
+      it 'can handle indentation up against the method' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          foo = some_method(
+                )
+        RUBY
+      end
+
+      it 'registers an offense for misaligned )' do
+        expect_offense(<<-RUBY.strip_indent)
+          foo = some_method(
             )
-            b =
-              some_method(a,
-              )
-          RUBY
-        end
+            ^ Indent `)` to column 0 (not 2)
+        RUBY
+
+        expect_correction(<<-RUBY.strip_indent)
+          foo = some_method(
+          )
+        RUBY
+      end
+    end
+  end
+
+  context 'for method chains' do
+    it 'can handle multiple chains with differing breaks' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        good = foo.methA(:arg1, :arg2, options: :hash)
+                 .methB(
+                   :arg1,
+                   :arg2,
+                 )
+                 .methC
+
+        good = foo.methA(
+                   :arg1,
+                   :arg2,
+                   options: :hash,
+                 )
+                 .methB(
+                   :arg1,
+                   :arg2,
+                 )
+                 .methC
+      RUBY
+    end
+
+    it 'can autocorrect method chains' do
+      corrected = autocorrect_source(<<-RUBY.strip_indent)
+        good = foo.methA(:arg1, :arg2, options: :hash)
+                 .methB(
+                   :arg1,
+                   :arg2,
+             )
+                 .methC
+
+        good = foo.methA(
+                   :arg1,
+                   :arg2,
+                   options: :hash,
+            )
+                 .methB(
+                   :arg1,
+                   :arg2,
+               )
+                 .methC
+      RUBY
+
+      expect(corrected).to eq <<-RUBY.strip_indent
+        good = foo.methA(:arg1, :arg2, options: :hash)
+                 .methB(
+                   :arg1,
+                   :arg2,
+                 )
+                 .methC
+
+        good = foo.methA(
+                   :arg1,
+                   :arg2,
+                   options: :hash,
+                 )
+                 .methB(
+                   :arg1,
+                   :arg2,
+                 )
+                 .methC
+      RUBY
+    end
+
+    context 'when using safe navigation operator', :ruby23 do
+      it 'registers an offense for misaligned )' do
+        expect_offense(<<-RUBY.strip_indent)
+          receiver&.some_method(
+            a
+            )
+            ^ Indent `)` to column 0 (not 2)
+        RUBY
       end
     end
   end
@@ -120,7 +407,7 @@ RSpec.describe RuboCop::Cop::Layout::ClosingParenthesisIndentation do
           def some_method(
             a
             )
-            ^ Indent `)` the same as the start of the line where `(` is.
+            ^ Indent `)` to column 0 (not 2)
           end
         RUBY
       end
@@ -197,7 +484,7 @@ RSpec.describe RuboCop::Cop::Layout::ClosingParenthesisIndentation do
           w = x * (
             y + z
             )
-            ^ Indent `)` the same as the start of the line where `(` is.
+            ^ Indent `)` to column 0 (not 2)
         RUBY
       end
 

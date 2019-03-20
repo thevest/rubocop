@@ -7,7 +7,7 @@ module RuboCop
       # literal are aligned according to configuration. The configuration
       # options are:
       #
-      #   - key (left align keys)
+      #   - key (left align keys, one space before hash rockets and values)
       #   - separator (align hash rockets and colons, right align keys)
       #   - table (left align keys, hash rockets, and values)
       #
@@ -24,6 +24,10 @@ module RuboCop
       #   {
       #     :foo => bar,
       #      :ba => baz
+      #   }
+      #   {
+      #     :foo => bar,
+      #     :ba  => baz
       #   }
       #
       #   # good
@@ -67,6 +71,10 @@ module RuboCop
       #   {
       #     foo: bar,
       #      ba: baz
+      #   }
+      #   {
+      #     foo: bar,
+      #     ba:  baz
       #   }
       #
       #   # good
@@ -174,6 +182,7 @@ module RuboCop
 
         def on_send(node)
           return if double_splat?(node)
+          return unless node.arguments?
 
           last_argument = node.last_argument
 
@@ -182,6 +191,8 @@ module RuboCop
 
           ignore_node(last_argument)
         end
+        alias on_super on_send
+        alias on_yield on_send
 
         def on_hash(node)
           return if ignored_node?(node)

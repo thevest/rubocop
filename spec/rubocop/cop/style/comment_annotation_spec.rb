@@ -130,4 +130,19 @@ RSpec.describe RuboCop::Cop::Style::CommentAnnotation, :config do
       expect_no_offenses('# TODO make better')
     end
   end
+
+  context 'offenses in consecutive inline comments' do
+    it 'registers each of them' do
+      expect_offense(<<-RUBY.strip_indent)
+        class ToBeDone
+          ITEMS = [
+            '', # TODO Item 1
+                  ^^^^^ Annotation keywords like `TODO` should be all upper case, followed by a colon, and a space, then a note describing the problem.
+            '', # TODO Item 2
+                  ^^^^^ Annotation keywords like `TODO` should be all upper case, followed by a colon, and a space, then a note describing the problem.
+          ].freeze
+        end
+      RUBY
+    end
+  end
 end

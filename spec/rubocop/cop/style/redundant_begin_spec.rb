@@ -4,37 +4,36 @@ RSpec.describe RuboCop::Cop::Style::RedundantBegin, :config do
   subject(:cop) { described_class.new(config) }
 
   it 'reports an offense for single line def with redundant begin block' do
-    src = '  def func; begin; x; y; rescue; z end end'
-    inspect_source(src)
-    expect(cop.offenses.size).to eq(1)
+    expect_offense(<<-RUBY.strip_indent)
+      def func; begin; x; y; rescue; z end; end
+                ^^^^^ Redundant `begin` block detected.
+    RUBY
   end
 
   it 'reports an offense for def with redundant begin block' do
-    src = <<-RUBY.strip_indent
+    expect_offense(<<-RUBY.strip_indent)
       def func
         begin
+        ^^^^^ Redundant `begin` block detected.
           ala
         rescue => e
           bala
         end
       end
     RUBY
-    inspect_source(src)
-    expect(cop.offenses.size).to eq(1)
   end
 
   it 'reports an offense for defs with redundant begin block' do
-    src = <<-RUBY.strip_indent
+    expect_offense(<<-RUBY.strip_indent)
       def Test.func
         begin
+        ^^^^^ Redundant `begin` block detected.
           ala
         rescue => e
           bala
         end
       end
     RUBY
-    inspect_source(src)
-    expect(cop.offenses.size).to eq(1)
   end
 
   it 'accepts a def with required begin block' do
@@ -78,25 +77,28 @@ RSpec.describe RuboCop::Cop::Style::RedundantBegin, :config do
 
   it 'auto-corrects source separated by newlines ' \
      'by removing redundant begin blocks' do
-    src = <<-RUBY.strip_margin('|')
-      |  def func
-      |    begin
-      |      foo
-      |      bar
-      |    rescue
-      |      baz
-      |    end
-      |  end
+    src = <<-RUBY.strip_indent
+      def func
+        begin
+          foo
+          bar
+        rescue
+          baz
+        end
+      end
     RUBY
-    result_src = ['  def func',
-                  '    ',
-                  '      foo',
-                  '      bar',
-                  '    rescue',
-                  '      baz',
-                  '    ',
-                  '  end',
-                  ''].join("\n")
+
+    result_src = <<-RUBY.strip_indent
+      def func
+        
+          foo
+          bar
+        rescue
+          baz
+        
+      end
+    RUBY
+
     new_source = autocorrect_source(src)
     expect(new_source).to eq(result_src)
   end
@@ -127,21 +129,23 @@ RSpec.describe RuboCop::Cop::Style::RedundantBegin, :config do
       end
     RUBY
 
-    result_src = ['def method',
-                  '  ',
-                  '    BlockA do |strategy|',
-                  '      foo',
-                  '    end',
-                  '',
-                  '    BlockB do |portfolio|',
-                  '      foo',
-                  '    end',
-                  '',
-                  '  rescue => e # some problem',
-                  '    bar',
-                  '  ',
-                  'end',
-                  ''].join("\n")
+    result_src = <<-RUBY.strip_indent
+      def method
+        
+          BlockA do |strategy|
+            foo
+          end
+
+          BlockB do |portfolio|
+            foo
+          end
+
+        rescue => e # some problem
+          bar
+        
+      end
+    RUBY
+
     new_source = autocorrect_source(src)
     expect(new_source).to eq(result_src)
   end
@@ -215,6 +219,30 @@ RSpec.describe RuboCop::Cop::Style::RedundantBegin, :config do
             ala
           rescue => e
             bala
+          end
+        end
+      RUBY
+    end
+
+    it 'accepts a stabby lambda with a begin-end' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        -> do
+          begin
+            foo
+          rescue => e
+            bar
+          end
+        end
+      RUBY
+    end
+
+    it 'accepts super with block' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        def a_method
+          super do |arg|
+            foo
+          rescue => e
+            bar
           end
         end
       RUBY

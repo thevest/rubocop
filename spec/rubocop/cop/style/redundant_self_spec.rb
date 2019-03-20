@@ -4,9 +4,10 @@ RSpec.describe RuboCop::Cop::Style::RedundantSelf do
   subject(:cop) { described_class.new }
 
   it 'reports an offense a self receiver on an rvalue' do
-    src = 'a = self.b'
-    inspect_source(src)
-    expect(cop.offenses.size).to eq(1)
+    expect_offense(<<-RUBY.strip_indent)
+      a = self.b
+          ^^^^^^ Redundant `self` detected.
+    RUBY
   end
 
   it 'does not report an offense when receiver and lvalue have the same name' do
@@ -143,14 +144,12 @@ RSpec.describe RuboCop::Cop::Style::RedundantSelf do
 
     it 'accepts a self receiver used to distinguish from an argument' \
       ' when an inner method is defined' do
-      src = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         def foo(bar)
           def inner_method(); end
           puts bar, self.bar
         end
       RUBY
-      inspect_source(src)
-      expect(cop.offenses.empty?).to be(true)
     end
   end
 
@@ -200,14 +199,19 @@ RSpec.describe RuboCop::Cop::Style::RedundantSelf do
     expect_no_offenses('self.()')
   end
 
-  it 'reports an offence a self receiver of .call' do
-    src = 'self.call'
-    inspect_source(src)
-    expect(cop.offenses.size).to eq(1)
+  it 'reports an offense a self receiver of .call' do
+    expect_offense(<<-RUBY.strip_indent)
+      self.call
+      ^^^^^^^^^ Redundant `self` detected.
+    RUBY
   end
 
   it 'auto-corrects by removing redundant self' do
     new_source = autocorrect_source('self.x')
     expect(new_source).to eq('x')
+  end
+
+  it 'accepts a self receiver of methods also defined on `Kernel`' do
+    expect_no_offenses('self.open')
   end
 end

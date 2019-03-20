@@ -6,82 +6,68 @@ RSpec.describe RuboCop::Cop::Style::CommentedKeyword do
   let(:config) { RuboCop::Config.new }
 
   it 'registers an offense when commenting on the same line as `end`' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       if x
         y
       end # comment
+          ^^^^^^^^^ Do not place comments on the same line as the `end` keyword.
     RUBY
-    expect(cop.highlights).to eq(['# comment'])
-    expect(cop.messages).to eq(['Do not place comments on the same line as ' \
-                                'the `end` keyword.'])
   end
 
   it 'registers an offense when commenting on the same line as `begin`' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       begin # comment
+            ^^^^^^^^^ Do not place comments on the same line as the `begin` keyword.
         y
       end
     RUBY
-    expect(cop.highlights).to eq(['# comment'])
-    expect(cop.messages).to eq(['Do not place comments on the same line as ' \
-                                'the `begin` keyword.'])
   end
 
   it 'registers an offense when commenting on the same line as `class`' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       class X # comment
+              ^^^^^^^^^ Do not place comments on the same line as the `class` keyword.
         y
       end
     RUBY
-    expect(cop.highlights).to eq(['# comment'])
-    expect(cop.messages).to eq(['Do not place comments on the same line as ' \
-                                'the `class` keyword.'])
   end
 
   it 'registers an offense when commenting on the same line as `module`' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       module X # comment
+               ^^^^^^^^^ Do not place comments on the same line as the `module` keyword.
         y
       end
     RUBY
-    expect(cop.highlights).to eq(['# comment'])
-    expect(cop.messages).to eq(['Do not place comments on the same line as ' \
-                                'the `module` keyword.'])
   end
 
   it 'registers an offense when commenting on the same line as `def`' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       def x # comment
+            ^^^^^^^^^ Do not place comments on the same line as the `def` keyword.
         y
       end
     RUBY
-    expect(cop.highlights).to eq(['# comment'])
-    expect(cop.messages).to eq(['Do not place comments on the same line as ' \
-                                'the `def` keyword.'])
   end
 
   it 'registers an offense when commenting on indented keywords' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       module X
         class Y # comment
+                ^^^^^^^^^ Do not place comments on the same line as the `class` keyword.
           z
         end
       end
     RUBY
-    expect(cop.highlights).to eq(['# comment'])
-    expect(cop.messages).to eq(['Do not place comments on the same line as ' \
-                                'the `class` keyword.'])
   end
 
   it 'registers an offense when commenting after keyword with spaces' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       def x(a, b) # comment
+                  ^^^^^^^^^ Do not place comments on the same line as the `def` keyword.
         y
       end
     RUBY
-    expect(cop.highlights).to eq(['# comment'])
-    expect(cop.messages).to eq(['Do not place comments on the same line as ' \
-                                'the `def` keyword.'])
   end
 
   it 'registers an offense for one-line cases' do
@@ -134,6 +120,13 @@ RSpec.describe RuboCop::Cop::Style::CommentedKeyword do
     expect_no_offenses(<<-RUBY.strip_indent)
       class X # :nodoc:
         y
+      end
+    RUBY
+    expect_no_offenses(<<-RUBY.strip_indent)
+      class X
+        def y # :yields:
+          yield
+        end
       end
     RUBY
     expect_no_offenses(<<-RUBY.strip_indent)

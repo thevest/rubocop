@@ -4,86 +4,94 @@ RSpec.describe RuboCop::Cop::Layout::FirstMethodArgumentLineBreak do
   subject(:cop) { described_class.new }
 
   context 'args listed on the first line' do
-    let(:source) do
-      <<-RUBY.strip_indent
+    it 'detects the offense' do
+      expect_offense(<<-RUBY.strip_indent)
         foo(bar,
+            ^^^ Add a line break before the first argument of a multi-line method argument list.
           baz)
       RUBY
     end
 
-    it 'detects the offense' do
-      inspect_source(source)
+    it 'autocorrects the offense' do
+      new_source = autocorrect_source(<<-RUBY.strip_indent)
+        foo(bar,
+          baz)
+      RUBY
 
-      expect(cop.offenses.length).to eq(1)
-      expect(cop.offenses.first.line).to eq(1)
-      expect(cop.highlights).to eq(['bar'])
+      expect(new_source).to eq(<<-RUBY.strip_indent)
+        foo(
+        bar,
+          baz)
+      RUBY
     end
 
-    it 'autocorrects the offense' do
-      new_source = autocorrect_source(source)
+    context 'when using safe navigation operator', :ruby23 do
+      it 'detects the offense' do
+        expect_offense(<<-RUBY.strip_indent)
+          receiver&.foo(bar,
+                        ^^^ Add a line break before the first argument of a multi-line method argument list.
+            baz)
+        RUBY
+      end
 
-      expect(new_source).to eq([
-        'foo(',
-        'bar,',
-        '  baz)',
-        ''
-      ].join("\n"))
+      it 'autocorrects the offense' do
+        new_source = autocorrect_source(<<-RUBY.strip_indent)
+          receiver&.foo(bar,
+            baz)
+        RUBY
+
+        expect(new_source).to eq(<<-RUBY.strip_indent)
+          receiver&.foo(
+          bar,
+            baz)
+        RUBY
+      end
     end
   end
 
   context 'hash arg spanning multiple lines' do
-    let(:source) do
-      <<-RUBY.strip_indent
+    it 'detects the offense' do
+      expect_offense(<<-RUBY.strip_indent)
         something(3, bar: 1,
+                  ^ Add a line break before the first argument of a multi-line method argument list.
         baz: 2)
       RUBY
     end
 
-    it 'detects the offense' do
-      inspect_source(source)
-
-      expect(cop.offenses.length).to eq(1)
-      expect(cop.offenses.first.line).to eq(1)
-      expect(cop.highlights).to eq(['3'])
-    end
-
     it 'autocorrects the offense' do
-      new_source = autocorrect_source(source)
+      new_source = autocorrect_source(<<-RUBY.strip_indent)
+        something(3, bar: 1,
+        baz: 2)
+      RUBY
 
-      expect(new_source).to eq([
-        'something(',
-        '3, bar: 1,',
-        'baz: 2)',
-        ''
-      ].join("\n"))
+      expect(new_source).to eq(<<-RUBY.strip_indent)
+        something(
+        3, bar: 1,
+        baz: 2)
+      RUBY
     end
   end
 
   context 'hash arg without a line break before the first pair' do
-    let(:source) do
-      <<-RUBY.strip_indent
+    it 'detects the offense' do
+      expect_offense(<<-RUBY.strip_indent)
         something(bar: 1,
+                  ^^^^^^ Add a line break before the first argument of a multi-line method argument list.
         baz: 2)
       RUBY
     end
 
-    it 'detects the offense' do
-      inspect_source(source)
-
-      expect(cop.offenses.length).to eq(1)
-      expect(cop.offenses.first.line).to eq(1)
-      expect(cop.highlights).to eq(['bar: 1'])
-    end
-
     it 'autocorrects the offense' do
-      new_source = autocorrect_source(source)
+      new_source = autocorrect_source(<<-RUBY.strip_indent)
+        something(bar: 1,
+        baz: 2)
+      RUBY
 
-      expect(new_source).to eq([
-        'something(',
-        'bar: 1,',
-        'baz: 2)',
-        ''
-      ].join("\n"))
+      expect(new_source).to eq(<<-RUBY.strip_indent)
+        something(
+        bar: 1,
+        baz: 2)
+      RUBY
     end
   end
 

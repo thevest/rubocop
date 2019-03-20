@@ -2,13 +2,14 @@
 
 ## Metrics/AbcSize
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.27 | 0.66
 
 This cop checks that the ABC size of methods is not higher than the
 configured maximum. The ABC size is based on assignments, branches
 (method calls), and conditions. See http://c2.com/cgi/wiki?AbcMetric
+and https://en.wikipedia.org/wiki/ABC_Software_Metric.
 
 ### Configurable attributes
 
@@ -19,12 +20,13 @@ Max | `15` | Integer
 ### References
 
 * [http://c2.com/cgi/wiki?AbcMetric](http://c2.com/cgi/wiki?AbcMetric)
+* [https://en.wikipedia.org/wiki/ABC_Software_Metric'](https://en.wikipedia.org/wiki/ABC_Software_Metric')
 
 ## Metrics/BlockLength
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.44 | 0.66
 
 This cop checks if the length of a block exceeds some maximum value.
 Comment lines can optionally be ignored.
@@ -37,13 +39,14 @@ Name | Default value | Configurable values
 --- | --- | ---
 CountComments | `false` | Boolean
 Max | `25` | Integer
-ExcludedMethods | `[]` | Array
+ExcludedMethods | `refine` | Array
+Exclude | `**/*.gemspec` | Array
 
 ## Metrics/BlockNesting
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.25 | 0.47
 
 This cop checks for excessive nesting of conditional and looping
 constructs.
@@ -63,13 +66,13 @@ Max | `3` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#three-is-the-number-thou-shalt-count](https://github.com/bbatsov/ruby-style-guide#three-is-the-number-thou-shalt-count)
+* [https://github.com/rubocop-hq/ruby-style-guide#three-is-the-number-thou-shalt-count](https://github.com/rubocop-hq/ruby-style-guide#three-is-the-number-thou-shalt-count)
 
 ## Metrics/ClassLength
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.25 | -
 
 This cop checks if the length a class exceeds some maximum value.
 Comment lines can optionally be ignored.
@@ -84,9 +87,9 @@ Max | `100` | Integer
 
 ## Metrics/CyclomaticComplexity
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.25 | -
 
 This cop checks that the cyclomatic complexity of methods is not higher
 than the configured maximum. The cyclomatic complexity is the number of
@@ -107,12 +110,14 @@ Max | `6` | Integer
 
 ## Metrics/LineLength
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.25 | 0.46
 
 This cop checks the length of lines in the source code.
 The maximum length is configurable.
+The tab size is configured in the `IndentationWidth`
+of the `Layout/Tab` cop.
 
 ### Configurable attributes
 
@@ -127,13 +132,13 @@ IgnoredPatterns | `[]` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#80-character-limits](https://github.com/bbatsov/ruby-style-guide#80-character-limits)
+* [https://github.com/rubocop-hq/ruby-style-guide#80-character-limits](https://github.com/rubocop-hq/ruby-style-guide#80-character-limits)
 
 ## Metrics/MethodLength
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.25 | 0.59.2
 
 This cop checks if the length of a method exceeds some maximum value.
 Comment lines can optionally be ignored.
@@ -145,16 +150,17 @@ Name | Default value | Configurable values
 --- | --- | ---
 CountComments | `false` | Boolean
 Max | `10` | Integer
+ExcludedMethods | `[]` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#short-methods](https://github.com/bbatsov/ruby-style-guide#short-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#short-methods](https://github.com/rubocop-hq/ruby-style-guide#short-methods)
 
 ## Metrics/ModuleLength
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.31 | -
 
 This cop checks if the length a module exceeds some maximum value.
 Comment lines can optionally be ignored.
@@ -169,9 +175,9 @@ Max | `100` | Integer
 
 ## Metrics/ParameterLists
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.25 | -
 
 This cop checks for methods with too many parameters.
 The maximum number of parameters is configurable.
@@ -186,13 +192,13 @@ CountKeywordArgs | `true` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#too-many-params](https://github.com/bbatsov/ruby-style-guide#too-many-params)
+* [https://github.com/rubocop-hq/ruby-style-guide#too-many-params](https://github.com/rubocop-hq/ruby-style-guide#too-many-params)
 
 ## Metrics/PerceivedComplexity
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.25 | -
 
 This cop tries to produce a complexity score that's a measure of the
 complexity the reader experiences when looking at a method. For that

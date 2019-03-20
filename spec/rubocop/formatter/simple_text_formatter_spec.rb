@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe RuboCop::Formatter::SimpleTextFormatter do
+  subject(:formatter) { described_class.new(output) }
+
   before do
     Rainbow.enabled = true
   end
 
-  subject(:formatter) { described_class.new(output) }
+  after do
+    Rainbow.enabled = false
+  end
 
   let(:output) { StringIO.new }
 
@@ -129,9 +133,5 @@ RSpec.describe RuboCop::Formatter::SimpleTextFormatter do
         OUTPUT
       end
     end
-  end
-
-  after do
-    Rainbow.enabled = false
   end
 end

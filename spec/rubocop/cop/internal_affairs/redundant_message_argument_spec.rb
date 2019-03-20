@@ -5,44 +5,36 @@ RSpec.describe RuboCop::Cop::InternalAffairs::RedundantMessageArgument do
 
   context 'when `MSG` is passed' do
     it 'registers an offense' do
-      expect_offense(<<-RUBY, 'example_cop.rb')
-      add_offense(node, message: MSG)
-                        ^^^^^^^^^^^^ Redundant message argument to `#add_offense`.
+      expect_offense(<<-RUBY.strip_indent, 'example_cop.rb')
+        add_offense(node, message: MSG)
+                          ^^^^^^^^^^^^ Redundant message argument to `#add_offense`.
       RUBY
-    end
 
-    it 'auto-corrects' do
-      new_source = autocorrect_source('add_offense(node, message: MSG)')
-
-      expect(new_source).to eq('add_offense(node)')
+      expect_correction(<<-RUBY.strip_indent)
+        add_offense(node)
+      RUBY
     end
   end
 
   it 'does not register an offense when formatted `MSG` is passed' do
-    expect_no_offenses(<<-RUBY, 'example_cop.rb')
+    expect_no_offenses(<<-RUBY.strip_indent, 'example_cop.rb')
       add_offense(node, location: :expression, message: MSG % foo)
     RUBY
   end
 
   context 'when `#message` is passed' do
     it 'registers an offense' do
-      expect_offense(<<-RUBY, 'example_cop.rb')
-      add_offense(node, location: :expression, message: message)
-                                               ^^^^^^^^^^^^^^^^ Redundant message argument to `#add_offense`.
-      RUBY
-    end
-
-    it 'auto-corrects' do
-      new_source = autocorrect_source(<<-RUBY)
+      expect_offense(<<-RUBY.strip_indent)
         add_offense(
           node,
           location: :expression,
           message: message,
+          ^^^^^^^^^^^^^^^^ Redundant message argument to `#add_offense`.
           severity: :error
         )
       RUBY
 
-      expect(new_source).to eq(<<-RUBY)
+      expect_correction(<<-RUBY.strip_indent)
         add_offense(
           node,
           location: :expression,
@@ -55,41 +47,28 @@ RSpec.describe RuboCop::Cop::InternalAffairs::RedundantMessageArgument do
   context 'when `#message` with offending node is passed' do
     context 'when message is the only keyword argument' do
       it 'registers an offense' do
-        expect_offense(<<-RUBY, 'example_cop.rb')
+        expect_offense(<<-RUBY.strip_indent, 'example_cop.rb')
           add_offense(node, message: message(node))
                             ^^^^^^^^^^^^^^^^^^^^^^ Redundant message argument to `#add_offense`.
         RUBY
-      end
 
-      it 'auto-corrects' do
-        new_source =
-          autocorrect_source('add_offense(node, message: message(node))')
-
-        expect(new_source).to eq('add_offense(node)')
+        expect_correction(<<-RUBY.strip_indent)
+          add_offense(node)
+        RUBY
       end
     end
 
     context 'when there are others keyword arguments' do
       it 'registers an offense' do
-        expect_offense(<<-RUBY, 'example_cop.rb')
+        expect_offense(<<-RUBY.strip_indent, 'example_cop.rb')
           add_offense(node,
                       location: :selector,
                       message: message(node),
                       ^^^^^^^^^^^^^^^^^^^^^^ Redundant message argument to `#add_offense`.
                       severity: :fatal)
         RUBY
-      end
 
-      it 'auto-corrects' do
-        new_source =
-          autocorrect_source(<<-RUBY.strip_indent)
-            add_offense(node,
-                        location: :selector,
-                        message: message(node),
-                        severity: :fatal)
-          RUBY
-
-        expect(new_source).to eq(<<-RUBY.strip_indent)
+        expect_correction(<<-RUBY.strip_indent)
           add_offense(node,
                       location: :selector,
                       severity: :fatal)
@@ -100,7 +79,7 @@ RSpec.describe RuboCop::Cop::InternalAffairs::RedundantMessageArgument do
 
   it 'does not register an offense when `#message` with another node ' \
      ' is passed' do
-    expect_no_offenses(<<-RUBY, 'example_cop.rb')
+    expect_no_offenses(<<-RUBY.strip_indent, 'example_cop.rb')
       add_offense(node, message: message(other_node))
     RUBY
   end

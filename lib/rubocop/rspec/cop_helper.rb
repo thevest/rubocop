@@ -14,24 +14,16 @@ module CopHelper
     Tempfile.open('tmp') { |f| inspect_source(source, f) }
   end
 
-  def inspect_gemfile(source)
-    inspect_source(source, 'Gemfile')
-  end
-
   def inspect_source(source, file = nil)
-    if source.is_a?(Array) && source.size == 1
-      raise "Don't use an array for a single line of code: #{source}"
-    end
     RuboCop::Formatter::DisabledConfigFormatter.config_to_allow_offenses = {}
     RuboCop::Formatter::DisabledConfigFormatter.detected_styles = {}
     processed_source = parse_source(source, file)
     raise 'Error parsing example code' unless processed_source.valid_syntax?
+
     _investigate(cop, processed_source)
   end
 
   def parse_source(source, file = nil)
-    source = source.join($RS) if source.is_a?(Array)
-
     if file && file.respond_to?(:write)
       file.write(source)
       file.rewind
@@ -46,6 +38,8 @@ module CopHelper
   end
 
   def autocorrect_source(source, file = nil)
+    RuboCop::Formatter::DisabledConfigFormatter.config_to_allow_offenses = {}
+    RuboCop::Formatter::DisabledConfigFormatter.detected_styles = {}
     cop.instance_variable_get(:@options)[:auto_correct] = true
     processed_source = parse_source(source, file)
     _investigate(cop, processed_source)
@@ -56,17 +50,24 @@ module CopHelper
   end
 
   def autocorrect_source_with_loop(source, file = nil)
+    cnt = 0
     loop do
       cop.instance_variable_set(:@corrections, [])
       new_source = autocorrect_source(source, file)
       return new_source if new_source == source
+
       source = new_source
+      cnt += 1
+      if cnt > RuboCop::Runner::MAX_ITERATIONS
+        raise RuboCop::Runner::InfiniteCorrectionLoop.new(file, [])
+      end
     end
   end
 
   def _investigate(cop, processed_source)
     forces = RuboCop::Cop::Force.all.each_with_object([]) do |klass, instances|
       next unless cop.join_force?(klass)
+
       instances << klass.new([cop])
     end
 

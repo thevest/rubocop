@@ -24,8 +24,8 @@ module RuboCop
         include PercentLiteral
 
         QUOTES_AND_COMMAS = [/,$/, /^'.*'$/, /^".*"$/].freeze
-        LEADING_QUOTE = /^['"]/
-        TRAILING_QUOTE = /['"]?,?$/
+        LEADING_QUOTE = /^['"]/.freeze
+        TRAILING_QUOTE = /['"]?,?$/.freeze
 
         MSG = "Within `%w`/`%W`, quotes and ',' are unnecessary and may be " \
           'unwanted in the resulting strings.'.freeze
@@ -62,7 +62,7 @@ module RuboCop
             literal = value.children.first.to_s.scrub
 
             # To avoid likely false positives (e.g. a single ' or ")
-            next if literal.gsub(/[^\p{Alnum}]/, '').empty?
+            next if literal.gsub(/[^[[:alnum:]]]/, '').empty?
 
             QUOTES_AND_COMMAS.any? { |pat| literal =~ pat }
           end

@@ -1,10 +1,10 @@
-[![Gem Version](https://badge.fury.io/rb/rubocop.svg)](http://badge.fury.io/rb/rubocop)
-[![Dependency Status](https://gemnasium.com/bbatsov/rubocop.svg)](https://gemnasium.com/bbatsov/rubocop)
-[![Travis Status](https://travis-ci.org/bbatsov/rubocop.svg?branch=master)](https://travis-ci.org/bbatsov/rubocop)
-[![Appveyor status](https://ci.appveyor.com/api/projects/status/e5jdwocv30oqm4sm?svg=true)](https://ci.appveyor.com/project/bbatsov/rubocop)
-[![Coverage Status](https://img.shields.io/codeclimate/coverage/github/bbatsov/rubocop.svg)](https://codeclimate.com/github/bbatsov/rubocop)
+[![Gem Version](https://badge.fury.io/rb/rubocop.svg)](https://badge.fury.io/rb/rubocop)
+[![CircleCI Status](https://circleci.com/gh/rubocop-hq/rubocop/tree/master.svg?style=svg)](https://circleci.com/gh/rubocop-hq/rubocop/tree/master)
+[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/sj3ye7n5690d0nvg?svg=true)](https://ci.appveyor.com/project/bbatsov/rubocop)
+[![Coverage Status](https://api.codeclimate.com/v1/badges/ad6e76460499c8c99697/test_coverage)](https://codeclimate.com/github/bbatsov/rubocop)
 [![Code Climate](https://codeclimate.com/github/bbatsov/rubocop/badges/gpa.svg)](https://codeclimate.com/github/bbatsov/rubocop)
-[![Inline docs](http://inch-ci.org/github/bbatsov/rubocop.svg)](http://inch-ci.org/github/bbatsov/rubocop)
+[![Inline docs](https://inch-ci.org/github/bbatsov/rubocop.svg)](https://inch-ci.org/github/bbatsov/rubocop)
+[![SemVer](https://api.dependabot.com/badges/compatibility_score?dependency-name=rubocop&package-manager=bundler&version-scheme=semver)](https://dependabot.com/compatibility-score.html?dependency-name=rubocop&package-manager=bundler&version-scheme=semver)
 
 [![Patreon](https://img.shields.io/badge/patreon-donate-orange.svg)](https://www.patreon.com/bbatsov)
 [![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/bbatsov/donate)
@@ -12,25 +12,26 @@
 [![OpenCollective](https://opencollective.com/rubocop/sponsors/badge.svg)](#open-collective-sponsors)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/bbatsov/rubocop/master/logo/rubo-logo-horizontal.png" alt="RuboCop Logo"/>
+  <img src="https://raw.githubusercontent.com/rubocop-hq/rubocop/master/logo/rubo-logo-horizontal.png" alt="RuboCop Logo"/>
 </p>
 
 > Role models are important. <br/>
 > -- Officer Alex J. Murphy / RoboCop
 
-**RuboCop** is a Ruby static code analyzer. Out of the box it will
-enforce many of the guidelines outlined in the community
-[Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide).
+**RuboCop** is a Ruby static code analyzer and code formatter. Out of
+the box it will enforce many of the guidelines outlined in the
+community [Ruby Style
+Guide](https://github.com/rubocop-hq/ruby-style-guide).
 
-Most aspects of its behavior can be tweaked via various
-[configuration options](https://github.com/bbatsov/rubocop/blob/master/config/default.yml).
+RuboCop is extremely flexible and most aspects of its behavior can be tweaked via various
+[configuration options](https://github.com/rubocop-hq/rubocop/blob/master/config/default.yml).
 
 Apart from reporting problems in your code, RuboCop can also
 automatically fix some of the problems for you.
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/bbatsov/rubocop?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-**Please consider [supporting financially its ongoing development](#funding).**
+**Please consider [financially supporting its ongoing development](#funding).**
 
 ## Installation
 
@@ -49,10 +50,10 @@ gem 'rubocop', require: false
 RuboCop's development is moving at a very rapid pace and there are
 often backward-incompatible changes between minor releases (since we
 haven't reached version 1.0 yet). To prevent an unwanted RuboCop update you
-might want to use a conservative version locking in your `Gemfile`:
+might want to use a conservative version lock in your `Gemfile`:
 
 ```rb
-gem 'rubocop', '~> 0.55.0', require: false
+gem 'rubocop', '~> 0.66.0', require: false
 ```
 
 ## Quickstart
@@ -66,13 +67,13 @@ $ rubocop
 
 ## Official manual
 
-You can read a ton more about RuboCop in its [official manual](http://rubocop.readthedocs.io).
+You can read a ton more about RuboCop in its [official manual](https://docs.rubocop.org).
 
 ## Compatibility
 
 RuboCop supports the following Ruby implementations:
 
-* MRI 2.1+
+* MRI 2.2+
 * JRuby 9.0+
 
 The Rails cops support the following versions:
@@ -83,24 +84,26 @@ The Rails cops support the following versions:
 
 Here's a list of RuboCop's core developers:
 
-* [Bozhidar Batsov](https://github.com/bbatsov)
+* [Bozhidar Batsov](https://github.com/bbatsov) (author & head maintainer)
 * [Jonas Arvidsson](https://github.com/jonas054)
-* [Yuji Nakayama](https://github.com/yujinakayama)
+* [Yuji Nakayama](https://github.com/yujinakayama) (retired)
 * [Evgeni Dzhelyov](https://github.com/edzhelyov) (retired)
 * [Ted Johansson](https://github.com/drenmi)
 * [Masataka Kuwabara](https://github.com/pocke)
+* [Koichi Ito](https://github.com/koic)
+* [Maxim Krizhanovski](https://github.com/darhazer)
 
 ## Logo
 
 RuboCop's logo was created by [Dimiter Petrov](https://www.chadomoto.com/). You can find the logo in various
-formats [here](https://github.com/bbatsov/rubocop/tree/master/logo).
+formats [here](https://github.com/rubocop-hq/rubocop/tree/master/logo).
 
 The logo is licensed under a
-[Creative Commons Attribution-NonCommercial 4.0 International License](http://creativecommons.org/licenses/by-nc/4.0/deed.en_GB).
+[Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/deed.en_GB).
 
 ## Contributors
 
-Here's a [list](https://github.com/bbatsov/rubocop/graphs/contributors) of
+Here's a [list](https://github.com/rubocop-hq/rubocop/graphs/contributors) of
 all the people who have contributed to the development of RuboCop.
 
 I'm extremely grateful to each and every one of them!
@@ -214,5 +217,5 @@ RuboCop's changelog is available [here](CHANGELOG.md).
 
 ## Copyright
 
-Copyright (c) 2012-2018 Bozhidar Batsov. See [LICENSE.txt](LICENSE.txt) for
+Copyright (c) 2012-2019 Bozhidar Batsov. See [LICENSE.txt](LICENSE.txt) for
 further details.

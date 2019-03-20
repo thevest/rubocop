@@ -85,6 +85,30 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
   context 'when EnforcedStyle is empty_lines' do
     let(:cop_config) { { 'EnforcedStyle' => 'empty_lines' } }
 
+    it 'does not register offenses' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        class Foo
+
+          def do_something
+          end
+
+        end
+      RUBY
+    end
+
+    it 'does not register offenses when specifying a superclass ' \
+       'that breaks the line' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        class Foo <
+              Bar
+
+          def do_something
+          end
+
+        end
+      RUBY
+    end
+
     it 'registers an offense for class body not starting or ending with a ' \
        'blank' do
       inspect_source(<<-RUBY.strip_indent)
@@ -164,7 +188,7 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
         RUBY
       end
 
-      it 'registers offence for namespace body starting with a blank' do
+      it 'registers offense for namespace body starting with a blank' do
         inspect_source(<<-RUBY.strip_indent)
           class Parent
 
@@ -178,7 +202,7 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
         expect(cop.messages).to eq([extra_begin])
       end
 
-      it 'registers offence for namespace body ending with a blank' do
+      it 'registers offense for namespace body ending with a blank' do
         inspect_source(<<-RUBY.strip_indent)
           class Parent
             class Child
@@ -192,7 +216,7 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
         expect(cop.messages).to eq([extra_end])
       end
 
-      it 'registers offences for namespaced class body not starting '\
+      it 'registers offenses for namespaced class body not starting '\
           'with a blank' do
         inspect_source(<<-RUBY.strip_indent)
           class Parent
@@ -205,7 +229,7 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
         expect(cop.messages).to eq([missing_begin])
       end
 
-      it 'registers offences for namespaced class body not ending '\
+      it 'registers offenses for namespaced class body not ending '\
           'with a blank' do
         inspect_source(<<-RUBY.strip_indent)
           class Parent
@@ -251,7 +275,7 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
         RUBY
       end
 
-      it 'registers offence for namespace body starting with a blank' do
+      it 'registers offense for namespace body starting with a blank' do
         inspect_source(<<-RUBY.strip_indent)
           class Parent
 
@@ -263,7 +287,7 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
         expect(cop.messages).to eq([extra_begin])
       end
 
-      it 'registers offence for namespace body ending with a blank' do
+      it 'registers offense for namespace body ending with a blank' do
         inspect_source(<<-RUBY.strip_indent)
           class Parent
             module Child
@@ -294,7 +318,7 @@ RSpec.describe RuboCop::Cop::Layout::EmptyLinesAroundClassBody, :config do
         RUBY
       end
 
-      it 'registers offences for namespace body starting '\
+      it 'registers offenses for namespace body starting '\
         'and ending without a blank' do
         inspect_source(<<-RUBY.strip_indent)
           class Parent

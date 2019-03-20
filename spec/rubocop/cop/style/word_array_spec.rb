@@ -26,10 +26,10 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
     end
 
     it 'registers an offense for arrays of single quoted strings' do
-      inspect_source("['one', 'two', 'three']")
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(['Use `%w` or `%W` for an array of words.'])
-      expect(cop.config_to_allow_offenses).to eq('EnforcedStyle' => 'brackets')
+      expect_offense(<<-RUBY.strip_indent)
+        ['one', 'two', 'three']
+        ^^^^^^^^^^^^^^^^^^^^^^^ Use `%w` or `%W` for an array of words.
+      RUBY
     end
 
     it 'registers an offense for arrays of double quoted strings' do
@@ -82,15 +82,11 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
       expect_no_offenses('%w(one two three)')
     end
 
-    it 'does not register an offense for array with one element' do
-      expect_no_offenses('["three"]')
-    end
-
     it 'does not register an offense for array with empty strings' do
       expect_no_offenses('["", "two", "three"]')
     end
 
-    # Bug: https://github.com/bbatsov/rubocop/issues/4481
+    # Bug: https://github.com/rubocop-hq/rubocop/issues/4481
     it 'does not register an offense in an ambiguous block context' do
       expect_no_offenses('foo ["bar", "baz"] { qux }')
     end
@@ -118,20 +114,32 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
     end
 
     it 'registers an offense for an array with comments outside of it' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         [
+        ^ Use `%w` or `%W` for an array of words.
         "foo",
         "bar",
         "baz"
         ] # test
       RUBY
 
-      expect(cop.offenses.size).to eq(1)
+      expect_correction(<<-RUBY.strip_indent)
+        %w(
+        foo
+        bar
+        baz
+        ) # test
+      RUBY
     end
 
     it 'auto-corrects an array of words' do
       new_source = autocorrect_source("['one', %q(two), 'three']")
       expect(new_source).to eq('%w(one two three)')
+    end
+
+    it 'auto-corrects an array with one element' do
+      new_source = autocorrect_source("['one']")
+      expect(new_source).to eq('%w(one)')
     end
 
     it 'auto-corrects an array of words and character constants' do
@@ -140,10 +148,14 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
     end
 
     it 'keeps the line breaks in place after auto-correct' do
-      new_source = autocorrect_source(["['one',",
-                                       "'two', 'three']"])
-      expect(new_source).to eq(['%w(one',
-                                'two three)'].join("\n"))
+      new_source = autocorrect_source(<<-RUBY.strip_indent)
+        ['one',
+        'two', 'three']
+      RUBY
+      expect(new_source).to eq(<<-RUBY.strip_indent)
+        %w(one
+        two three)
+      RUBY
     end
 
     it 'auto-corrects an array of words in multiple lines' do
@@ -181,8 +193,7 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
         ['one', 'two', 'three']
         %w(a b c d)
       RUBY
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(['Use `%w` or `%W` for an array of words.'])
+
       expect(cop.config_to_allow_offenses).to eq('EnforcedStyle' => 'percent',
                                                  'MinSize' => 4)
     end
@@ -192,8 +203,7 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
         ['one', 'two', 'three']
         %w(a b)
       RUBY
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(['Use `%w` or `%W` for an array of words.'])
+
       expect(cop.config_to_allow_offenses).to eq('Enabled' => false)
     end
 
@@ -247,6 +257,12 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
     it 'autocorrects a %W() array which uses escapes' do
       new_source = autocorrect_source('%W(\\n \\t \\b \\v \\f)')
       expect(new_source).to eq('["\n", "\t", "\b", "\v", "\f"]')
+    end
+
+    it 'autocorrects a %W() array which uses string interpolation' do
+      new_source = autocorrect_source('%W(#{foo}bar baz)')
+
+      expect(new_source).to eq('["#{foo}bar", \'baz\']')
     end
 
     it "doesn't fail on strings which are not valid UTF-8" do
@@ -343,6 +359,18 @@ RSpec.describe RuboCop::Cop::Style::WordArray, :config do
         new_source = autocorrect_source("[')', ']', '(', '[']")
         expect(new_source).to eq('%w[) \\] ( \\[]')
       end
+    end
+  end
+
+  context 'with non-default MinSize' do
+    let(:cop_config) do
+      { 'MinSize' => 2,
+        'WordRegex' => /\A[\p{Word}\n\t]+\z/,
+        'EnforcedStyle' => 'percent' }
+    end
+
+    it 'does not autocorrects arrays of one symbol if MinSize > 1' do
+      expect_no_offenses('["one"]')
     end
   end
 end

@@ -69,6 +69,7 @@ module RuboCop
 
         def expand_elsif(node, elsif_branches = [])
           return [] if node.nil? || !node.if_type?
+
           _condition, elsif_branch, else_branch = *node
           elsif_branches << elsif_branch
           if else_branch && else_branch.if_type?
@@ -100,6 +101,7 @@ module RuboCop
         def assignment_rhs_exist?(node)
           parent = node.parent
           return true unless parent
+
           !(parent.mlhs_type? || parent.resbody_type?)
         end
       end
@@ -348,6 +350,8 @@ module RuboCop
         end
 
         def lhs_all_match?(branches)
+          return true if branches.empty?
+
           first_lhs = lhs(branches.first)
           branches.all? { |branch| lhs(branch) == first_lhs }
         end
@@ -370,7 +374,7 @@ module RuboCop
         def allowed_statements?(branches)
           return false unless branches.all?
 
-          statements = branches.map { |branch| tail(branch) }
+          statements = branches.map { |branch| tail(branch) }.compact
 
           lhs_all_match?(statements) && statements.none?(&:masgn_type?) &&
             assignment_types_match?(*statements)

@@ -6,14 +6,14 @@ RSpec.describe RuboCop::Formatter::WorstOffendersFormatter do
   let(:output) { StringIO.new }
 
   let(:files) do
-    %w[lib/rubocop.rb spec/spec_helper.rb bin/rubocop].map do |path|
+    %w[lib/rubocop.rb spec/spec_helper.rb exe/rubocop].map do |path|
       File.expand_path(path)
     end
   end
 
   describe '#finished' do
     context 'when there are many offenses' do
-      let(:offense) { double('offense') }
+      let(:offense) { instance_double(RuboCop::Cop::Offense) }
 
       before do
         formatter.started(files)
@@ -26,7 +26,7 @@ RSpec.describe RuboCop::Formatter::WorstOffendersFormatter do
         formatter.finished(files)
         expect(output.string).to eq(<<-OUTPUT.strip_indent)
 
-          4  bin/rubocop
+          4  exe/rubocop
           3  spec/spec_helper.rb
           2  lib/rubocop.rb
           --

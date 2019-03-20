@@ -98,6 +98,7 @@ RSpec.describe RuboCop::Formatter::DisabledConfigFormatter, :isolated_environmen
         Cop2:
           Exclude:
             - "**/*.blah"
+            - !ruby/regexp /.*/bar/*/foo\.rb$/
       YAML
 
       formatter.started(['test_a.rb', 'test_b.rb'])
@@ -121,6 +122,7 @@ RSpec.describe RuboCop::Formatter::DisabledConfigFormatter, :isolated_environmen
        'Cop2:',
        '  Exclude:',
        "    - '**/*.blah'",
+       "    - !ruby/regexp /.*/bar/*/foo\.rb$/",
        "    - 'test_a.rb'",
        ''].join("\n")
     end
@@ -240,6 +242,48 @@ RSpec.describe RuboCop::Formatter::DisabledConfigFormatter, :isolated_environmen
 
     it 'creates a .rubocop_todo.yml even in such case' do
       expect(output.string).to eq(heading)
+    end
+  end
+
+  context 'with auto-correct supported cop' do
+    before do
+      module Test
+        class Cop3 < ::RuboCop::Cop::Cop
+          def autocorrect
+            # Dummy method to respond to #support_autocorrect?
+          end
+        end
+      end
+
+      formatter.started(['test_auto_correct.rb'])
+      formatter.file_started('test_auto_correct.rb', {})
+      formatter.file_finished('test_auto_correct.rb', offenses)
+      formatter.finished(['test_auto_correct.rb'])
+    end
+
+    let(:expected_rubocop_todo) do
+      [heading,
+       '# Offense count: 1',
+       '# Cop supports --auto-correct.',
+       'Test/Cop3:',
+       '  Exclude:',
+       "    - 'test_auto_correct.rb'",
+       ''].join("\n")
+    end
+
+    let(:offenses) do
+      [
+        RuboCop::Cop::Offense.new(
+          :convention,
+          location,
+          'message',
+          'Test/Cop3'
+        )
+      ]
+    end
+
+    it 'adds a comment about --auto-correct option' do
+      expect(output.string).to eq(expected_rubocop_todo)
     end
   end
 end

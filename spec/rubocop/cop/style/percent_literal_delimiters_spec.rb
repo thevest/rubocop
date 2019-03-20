@@ -12,7 +12,7 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
       {
         'PreferredDelimiters' => {
           'default' => '[]',
-          '%'       => '()'
+          '%' => '()'
         }
       }
     end
@@ -48,14 +48,17 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'does not register an offense for other delimiters ' \
        'when containing preferred delimiter characters' do
-      inspect_source('%([string])')
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        %([string])
+      RUBY
     end
 
     it 'registers an offense for other delimiters ' \
        'when containing preferred delimiter characters in interpolation' do
-      inspect_source('%(#{[1].first})')
-      expect(cop.messages.size).to eq(1)
+      expect_offense(<<-'RUBY'.strip_indent)
+        %(#{[1].first})
+        ^^^^^^^^^^^^^^^ `%`-literals should be delimited by `[` and `]`.
+      RUBY
     end
   end
 
@@ -73,8 +76,9 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'does not register an offense for other delimiters ' \
        'when containing preferred delimiter characters' do
-      inspect_source('%q([string])')
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        %q([string])
+      RUBY
     end
   end
 
@@ -92,14 +96,17 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'does not register an offense for other delimiters ' \
        'when containing preferred delimiter characters' do
-      inspect_source('%Q([string])')
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        %Q([string])
+      RUBY
     end
 
     it 'registers an offense for other delimiters ' \
        'when containing preferred delimiter characters in interpolation' do
-      inspect_source('%Q(#{[1].first})')
-      expect(cop.messages.size).to eq(1)
+      expect_offense(<<-'RUBY'.strip_indent)
+        %Q(#{[1].first})
+        ^^^^^^^^^^^^^^^^ `%Q`-literals should be delimited by `[` and `]`.
+      RUBY
     end
   end
 
@@ -132,8 +139,7 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'does not register an offense for other delimiters ' \
        'when containing preferred delimiter characters' do
-      inspect_source('%w([some] [words])')
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses('%w([some] [words])')
     end
   end
 
@@ -151,14 +157,15 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'does not register an offense for other delimiters ' \
        'when containing preferred delimiter characters' do
-      inspect_source('%W([some] [words])')
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses('%W([some] [words])')
     end
 
     it 'registers an offense for other delimiters ' \
        'when containing preferred delimiter characters in interpolation' do
-      inspect_source('%W(#{[1].first})')
-      expect(cop.messages.size).to eq(1)
+      expect_offense(<<-'RUBY'.strip_indent)
+        %W(#{[1].first})
+        ^^^^^^^^^^^^^^^^ `%W`-literals should be delimited by `[` and `]`.
+      RUBY
     end
   end
 
@@ -176,14 +183,15 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'does not register an offense for other delimiters ' \
        'when containing preferred delimiter characters' do
-      inspect_source('%r([regexp])')
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses('%r([regexp])')
     end
 
     it 'registers an offense for other delimiters ' \
        'when containing preferred delimiter characters in interpolation' do
-      inspect_source('%r(#{[1].first})')
-      expect(cop.messages.size).to eq(1)
+      expect_offense(<<-'RUBY'.strip_indent)
+        %r(#{[1].first})
+        ^^^^^^^^^^^^^^^^ `%r`-literals should be delimited by `[` and `]`.
+      RUBY
     end
   end
 
@@ -214,10 +222,10 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'registers an offense for other delimiters ' \
        'when containing preferred delimiter characters in interpolation' do
-      inspect_source('%I(#{[1].first})')
-      expect(cop.messages).to eq(
-        ['`%I`-literals should be delimited by `[` and `]`.']
-      )
+      expect_offense(<<-'RUBY'.strip_indent)
+        %I(#{[1].first})
+        ^^^^^^^^^^^^^^^^ `%I`-literals should be delimited by `[` and `]`.
+      RUBY
     end
   end
 
@@ -248,14 +256,15 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
 
     it 'does not register an offense for other delimiters ' \
        'when containing preferred delimiter characters' do
-      inspect_source('%x([command])')
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses('%x([command])')
     end
 
     it 'registers an offense for other delimiters ' \
        'when containing preferred delimiter characters in interpolation' do
-      inspect_source('%x(#{[1].first})')
-      expect(cop.messages.size).to eq(1)
+      expect_offense(<<-'RUBY'.strip_indent)
+        %x(#{[1].first})
+        ^^^^^^^^^^^^^^^^ `%x`-literals should be delimited by `[` and `]`.
+      RUBY
     end
   end
 
@@ -369,7 +378,7 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
       expect(new_source).to eq(corrected_source)
     end
 
-    shared_examples :escape_characters do |percent_literal|
+    shared_examples 'escape characters' do |percent_literal|
       it "corrects #{percent_literal} with \\n in it" do
         new_source = autocorrect_source("#{percent_literal}{\n}")
 
@@ -383,14 +392,14 @@ RSpec.describe RuboCop::Cop::Style::PercentLiteralDelimiters, :config do
       end
     end
 
-    it_behaves_like(:escape_characters, '%')
-    it_behaves_like(:escape_characters, '%q')
-    it_behaves_like(:escape_characters, '%Q')
-    it_behaves_like(:escape_characters, '%s')
-    it_behaves_like(:escape_characters, '%w')
-    it_behaves_like(:escape_characters, '%W')
-    it_behaves_like(:escape_characters, '%x')
-    it_behaves_like(:escape_characters, '%r')
-    it_behaves_like(:escape_characters, '%i')
+    it_behaves_like('escape characters', '%')
+    it_behaves_like('escape characters', '%q')
+    it_behaves_like('escape characters', '%Q')
+    it_behaves_like('escape characters', '%s')
+    it_behaves_like('escape characters', '%w')
+    it_behaves_like('escape characters', '%W')
+    it_behaves_like('escape characters', '%x')
+    it_behaves_like('escape characters', '%r')
+    it_behaves_like('escape characters', '%i')
   end
 end

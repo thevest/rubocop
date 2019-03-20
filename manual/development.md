@@ -9,13 +9,13 @@ Files created:
   - spec/rubocop/cop/department/name_spec.rb
 File modified:
   - `require_relative 'rubocop/cop/department/name'` added into lib/rubocop.rb
-  - A configuration for the cop is added into config/enabled.yml
-    - If you want to disable the cop by default, move the added config to config/disabled.yml
+  - A configuration for the cop is added into config/default.yml
+    - If you want to disable the cop by default, set `Enabled` option to false.
 
 Do 3 steps:
   1. Add an entry to the "New features" section in CHANGELOG.md,
      e.g. "Add new `Department/Name` cop. ([@your_id][])"
-  2. Modify the description of Department/Name in config/enabled.yml
+  2. Modify the description of Department/Name in config/default.yml
   3. Implement your new cop in the generated file!
 ```
 
@@ -69,11 +69,11 @@ $ ruby-parse -e '!array.empty?'
 Now, it's time to debug our expression using the REPL from RuboCop:
 
 ```sh
-$ rake repl
+$ bin/console
 ```
 
 First we need to declare the code that we want to match, and use the
-[ProcessedSource](http://www.rubydoc.info/gems/rubocop/RuboCop/ProcessedSource)
+[ProcessedSource](https://www.rubydoc.info/gems/rubocop/RuboCop/ProcessedSource)
 that is a simple wrap to make the parser interpret the code and build the AST:
 
 ```ruby
@@ -94,10 +94,10 @@ node.source # => "!something.empty?"
 ### Writing rules to make node pattern matches:
 
 Now that you're familiar with AST, you can learn a bit about the
-[node pattern](http://www.rubydoc.info/gems/rubocop/RuboCop/NodePattern)
+[node pattern](https://www.rubydoc.info/gems/rubocop/RuboCop/NodePattern)
 and use patterns to match with specific nodes that you want to match.
 
-You can learn more about Node Pattern [here](https://rubocop.readthedocs.io/en/latest/node_pattern/).
+You can learn more about Node Pattern [here](https://docs.rubocop.org/en/latest/node_pattern/).
 
 Node pattern matches something very similar to the current output from AST
 representation, then let's start with something very generic:
@@ -107,7 +107,7 @@ NodePattern.new('send').match(node) # => true
 ```
 
 It matches because the root is a `send` type. Now lets match it deeply using
-parens to define details for sub-nodes. If you don't care about what a internal
+parens to define details for sub-nodes. If you don't care about what an internal
 node is, you can use `...` to skip it and just consider " a node".
 
 ```ruby
@@ -357,8 +357,7 @@ before `class YourCop`. While not all examples in the codebase follow this exact
 we strive to make this consistent. PRs improving RuboCop documentation are very welcome.
 
 Run `rake generate_cops_documentation` to apply your `yard` documentation into the manual.
-CI will fail if the manual and `yard` comments do not match exactly. `rake default` and
-`rake parallel` will also generate the new documentation.
+CI will fail if the manual and `yard` comments do not match exactly. `rake default` will also generate the new documentation.
 
 ### Testing your cop in a real codebase
 
@@ -369,7 +368,7 @@ To make it fast and do not get confused with other cops in action,  you can use
 `--only` parameter in the command line to filter by your cop name:
 
 ```sh
-rubocop --only Style/SimplifyNotEmptyWithAny
+$ rubocop --only Style/SimplifyNotEmptyWithAny
 ```
 
 In the end, do not forget to run `rake generate_cops_documentation` to update

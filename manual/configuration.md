@@ -1,7 +1,7 @@
 ## Configuration
 
 The behavior of RuboCop can be controlled via the
-[.rubocop.yml](https://github.com/bbatsov/rubocop/blob/master/.rubocop.yml)
+[.rubocop.yml](https://github.com/rubocop-hq/rubocop/blob/master/.rubocop.yml)
 configuration file. It makes it possible to enable/disable certain cops
 (checks) and to alter their behavior if they accept any parameters. The file
 can be placed either in your home directory or in some project directory.
@@ -21,21 +21,48 @@ Metrics/LineLength:
   Max: 99
 ```
 
-**Note**: Qualifying cop name with its type, e.g., `Style`, is recommended,
-  but not necessary as long as the cop name is unique across all types.
+!!! Note
+
+    Qualifying cop name with its type, e.g., `Style`, is recommended,
+    but not necessary as long as the cop name is unique across all types.
 
 ### Inheritance
 
-RuboCop supports inheriting configuration from one or more supplemental
-configuration files at runtime. Settings in the file that inherits
-override settings in the file that's inherited from. Configuration
-parameter that are hashes, for example `PreferredMethods` in
-`Style/CollectionMethods` are merged with the same parameter in the base
-configuration, while other parameter, such as `AllCops` / `Include`, are
-simply replaced by the local setting. If arrays were merged, there would
-be no way to remove elements through overriding them in local
-configuration. There is a way to have specific array settings merged using
-the `inherit_mode` setting.
+All configuration inherits from [RuboCop's default configuration][1] (See
+"Defaults").
+
+RuboCop also supports inheritance in user's configuration files. The most common
+example would be the `.rubocop_todo.yml` file (See "Automatically Generated
+Configuration" below).
+
+Settings in the child file (that which inherits) override those in the parent
+(that which is inherited), with the following caveats.
+
+#### Inheritance of hashes vs. other types
+
+Configuration parameters that are hashes, for example `PreferredMethods` in
+`Style/CollectionMethods`, are merged with the same parameter in the parent
+configuration. This means that any key-value pairs given in child configuration
+override the same keys in parent configuration. Giving `~`, YAML's
+representation of `nil`, as a value cancels the setting of the corresponding
+key in the parent configuration. For example:
+
+```yaml
+Style/CollectionMethods:
+  Enabled: true
+  PreferredMethods:
+    # No preference for collect, keep all others from default config.
+    collect: ~
+```
+
+Other types, such as `AllCops` / `Include` (an array), are overridden by the
+child setting.
+
+Arrays override because if they were merged, there would be no way to
+remove elements in child files.
+
+However, advanced users can still merge arrays using the `inherit_mode` setting.
+See "Merging arrays using inherit_mode" below.
 
 #### Inheriting from another configuration file in the project
 
@@ -113,23 +140,23 @@ inherit_gem:
     - strict.yml
 ```
 
-**Note**: If the shared dependency is declared using a [Bundler](http://bundler.io/)
+**Note**: If the shared dependency is declared using a [Bundler](https://bundler.io/)
 Gemfile and the gem was installed using `bundle install`, it would be
 necessary to also invoke RuboCop using Bundler in order to find the
 dependency's installation path at runtime:
 
-```
+```sh
 $ bundle exec rubocop <options...>
 ```
 
 #### Merging arrays using inherit_mode
 
-The optional directive `inherit_mode` is used to specify which configuration
-keys that have array values should be merged together instead of overriding the
-inherited value.
+The optional directive `inherit_mode` specifies which configuration keys that
+have array values should be merged together instead of overriding the inherited
+value.
 
-One caveat is that this directive only works with local and inherited
-configuration files, it is unable to merge with the default.yml config.
+This applies to explicit inheritance using `inherit_from` as well as implicit
+inheritance from [the default configuration][1].
 
 Given the following config:
 ```yaml
@@ -139,7 +166,11 @@ inherit_from:
 
 inherit_mode:
   merge:
-    - Exclude 
+    - Exclude
+
+AllCops:
+  Exclude:
+    - 'generated/**/*.rb'
 
 Style/For:
   Exclude:
@@ -154,7 +185,8 @@ Style/For:
 ```
 
 The list of `Exclude`s for the `Style/For` cop in this example will be
-`['foo.rb', 'bar.rb']`. 
+`['foo.rb', 'bar.rb']`. Similarly, the `AllCops:Exclude` list will contain all
+the default patterns plus the `generated/**/*.rb` entry that was added locally.
 
 The directive can also be used on individual cop configurations to override
 the global setting.
@@ -166,7 +198,7 @@ inherit_from:
 
 inherit_mode:
   merge:
-    - Exclude 
+    - Exclude
 
 Style/For:
   inherit_mode:
@@ -181,66 +213,112 @@ In this example the `Exclude` would only include `bar.rb`.
 
 ### Defaults
 
-The file
-[config/default.yml](https://github.com/bbatsov/rubocop/blob/master/config/default.yml)
-under the RuboCop home directory contains the default settings that
-all configurations inherit from. Project and personal `.rubocop.yml`
-files need only make settings that are different from the default
-ones. If there is no `.rubocop.yml` file in the project or home
-directory, `config/default.yml` will be used.
+The file [config/default.yml][1] under the RuboCop home directory contains the
+default settings that all configurations inherit from. Project and personal
+`.rubocop.yml` files need only make settings that are different from the default
+ones. If there is no `.rubocop.yml` file in the project or home directory,
+`config/default.yml` will be used.
 
 ### Including/Excluding files
 
-RuboCop checks all files found by a recursive search starting from the
-directory it is run in, or directories given as command line
-arguments.  However, it only recognizes files ending with `.rb` or
-extensionless files with a `#!.*ruby` declaration as Ruby files.
-Hidden directories (i.e., directories whose names start with a dot)
-are not searched by default.  If you'd like it to check files that are
-not included by default, you'll need to pass them in on the command
-line, or to add entries for them under `AllCops`/`Include`.  Files and
-directories can also be ignored through `AllCops`/`Exclude`.
+RuboCop does a recursive file search starting from the directory it is
+run in, or directories given as command line arguments. Files that
+match any pattern listed under `AllCops`/`Include` and extensionless
+files with a hash-bang (`#!`) declaration containing one of the known
+ruby interpreters listed under `AllCops`/`RubyInterpreters` are
+inspected, unless the file also matches a pattern in
+`AllCops`/`Exclude`. Hidden directories (i.e., directories whose names
+start with a dot) are not searched by default.
 
 Here is an example that might be used for a Rails project:
 
 ```yaml
 AllCops:
-  Include:
-    - '**/Rakefile'
-    - '**/config.ru'
   Exclude:
     - 'db/**/*'
     - 'config/**/*'
     - 'script/**/*'
+    - 'bin/{rails,rake}'
     - !ruby/regexp /old_and_unused\.rb$/
 
 # other configuration
 # ...
 ```
 
+#### Path relativity
+
 In `.rubocop.yml` and any other configuration file beginning with `.rubocop`,
-files and directories are specified relative to the directory where the
+files, and directories are specified relative to the directory where the
 configuration file is. In configuration files that don't begin with `.rubocop`,
 e.g. `our_company_defaults.yml`, paths are relative to the directory where
 `rubocop` is run.
 
-**Note**: Patterns that are just a file name, e.g. `Rakefile`, will match
+#### Unusual files, that would not be included by default
+
+RuboCop comes with a comprehensive list of common ruby file names and
+extensions. But, if you'd like RuboCop to check files that are not included by
+default, you'll need to pass them in on the command line, or to add entries for
+them under `AllCops`/`Include`. Remember that your configuration files override
+[RuboCops's defaults][1]. In the following example, we want to include
+`foo.unusual_extension`, but we also must copy any other patterns we need from
+the overridden `default.yml`.
+
+```yaml
+AllCops:
+  Include:
+    - foo.unusual_extension
+    - '**/*.rb'
+    - '**/*.gemfile'
+    - '**/*.gemspec'
+    - '**/*.rake'
+    - '**/*.ru'
+    - '**/Gemfile'
+    - '**/Rakefile'
+```
+
+This behavior of `Include` (overriding `default.yml`) was introduced in
+[0.56.0](https://github.com/rubocop-hq/rubocop/blob/master/CHANGELOG.md#0560-2018-05-14)
+via [#5882](https://github.com/rubocop-hq/rubocop/pull/5882). This change allows
+people to include/exclude precisely what they need to, without the defaults
+getting in the way.
+
+##### Another example, using `inherit_mode`
+
+```yaml
+inherit_mode:
+  merge:
+    - Include
+
+AllCops:
+  Include:
+    - foo.unusual_extension
+```
+
+See "Merging arrays using inherit_mode" above.
+
+#### Deprecated patterns
+
+Patterns that are just a file name, e.g. `Rakefile`, will match
 that file name in any directory, but this pattern style is deprecated. The
 correct way to match the file in any directory, including the current, is
 `**/Rakefile`.
 
-**Note**: The pattern `config/**` will match any file recursively under
+The pattern `config/**` will match any file recursively under
 `config`, but this pattern style is deprecated and should be replaced by
 `config/**/*`.
 
-**Note**: The `Include` and `Exclude` parameters are special. They are
+#### `Include` and `Exclude` are relative to their directory
+
+The `Include` and `Exclude` parameters are special. They are
 valid for the directory tree starting where they are defined. They are not
 shadowed by the setting of `Include` and `Exclude` in other `.rubocop.yml`
 files in subdirectories. This is different from all other parameters, who
 follow RuboCop's general principle that configuration for an inspected file
-is taken from the nearest `.rubocop.yml`, searching upwards.  _This behavior
+is taken from the nearest `.rubocop.yml`, searching upwards. _This behavior
 will be overridden if you specify the `--ignore-parent-exclusion` command line
 argument_.
+
+#### Cop-specific `Include` and `Exclude`
 
 Cops can be run only on specific sets of files when that's needed (for
 instance you might want to run some Rails model checks only on files whose
@@ -277,8 +355,8 @@ Metrics/LineLength:
   Enabled: false
 ```
 
-Most cops are enabled by default. Some cops, configured in
-[config/disabled.yml](https://github.com/bbatsov/rubocop/blob/master/config/disabled.yml),
+Most cops are enabled by default. Some cops, configured the above `Enabled: false`
+in [config/default.yml](https://github.com/rubocop-hq/rubocop/blob/master/config/default.yml),
 are disabled by default. The cop enabling process can be altered by
 setting `DisabledByDefault` or `EnabledByDefault` (but not both) to `true`.
 
@@ -287,7 +365,7 @@ AllCops:
   DisabledByDefault: true
 ```
 
-All cops are then disabled by default, and only cops appearing in user
+All cops are then disabled by default. Only cops appearing in user
 configuration files are enabled. `Enabled: true` does not have to be
 set for cops in user configuration. They will be enabled anyway. It is also
 possible to enable entire departments by adding for example
@@ -308,8 +386,8 @@ AllCops:
   EnabledByDefault: true
 ```
 
-All cops are then enabled by default, and only cops explicitly disabled
-using `Enabled: false` in user configuration files are enabled.
+All cops are then enabled by default. Only cops explicitly disabled
+using `Enabled: false` in user configuration files are disabled.
 
 #### Severity
 
@@ -342,9 +420,11 @@ Metrics/LineLength:
     If lines are too short, text becomes hard to read because you must
     constantly jump from one line to the next while reading. If lines are too
     long, the line jumping becomes too hard because you "lose the line" while
-    going back to the start of the next line.  80 characters is a good
+    going back to the start of the next line. 80 characters is a good
     compromise.
 ```
+
+These details will only be seen when rubocop is run with the `--extra-details` flag or if `ExtraDetails` is set to true in your global rubocop configuration. 
 
 #### AutoCorrect
 
@@ -390,6 +470,13 @@ Then you can start removing the entries in the generated
 `.rubocop_todo.yml` file one by one as you work through all the offenses
 in the code.
 
+The cops in the `Metrics` department will by default get `Max` parameters
+generated in `.rubocop_todo.yml`. The value of these will be just high enough
+so that no offenses are reported the next time you run `rubocop`. If you
+prefer to exclude files, like for other cops, add `--auto-gen-only-exclude`
+when running with `--auto-gen-config`. It will still change the maximum if the
+number of excluded files is higher than the exclude limit.
+
 ### Updating the configuration file
 
 When you update RuboCop version, sometimes you need to change `.rubocop.yml`.
@@ -397,7 +484,7 @@ If you use [mry](https://github.com/pocke/mry), you can update `.rubocop.yml`
 to latest version automatically.
 
 
-```bash
+```sh
 $ gem install mry
 # Update to latest version
 $ mry .rubocop.yml
@@ -432,3 +519,5 @@ comment.
 ```ruby
 for x in (0..19) # rubocop:disable Style/For
 ```
+
+[1]: https://github.com/rubocop-hq/rubocop/blob/master/config/default.yml

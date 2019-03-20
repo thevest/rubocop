@@ -28,6 +28,18 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedArgument, :config do
           RUBY
         end
 
+        context 'when argument was shadowed by zsuper' do
+          it 'registers an offense' do
+            expect_offense(<<-RUBY.strip_indent)
+              def select_fields(query, current_time)
+                query = super
+                ^^^^^^^^^^^^^ Argument `query` was shadowed by a local variable before it was used.
+                query.select('*')
+              end
+            RUBY
+          end
+        end
+
         context 'when IgnoreImplicitReferences config option is set to true' do
           let(:cop_config) { { 'IgnoreImplicitReferences' => true } }
 
@@ -39,6 +51,17 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedArgument, :config do
               end
             RUBY
           end
+
+          context 'when argument was shadowed by zsuper' do
+            it 'does not register an offense' do
+              expect_no_offenses(<<-RUBY.strip_indent)
+                def select_fields(query, current_time)
+                  query = super
+                  query.select('*')
+                end
+              RUBY
+            end
+          end
         end
       end
 
@@ -48,6 +71,29 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedArgument, :config do
             def do_something(bar)
               bar = 'baz' if foo
               bar ||= {}
+            end
+          RUBY
+        end
+      end
+
+      context 'when a splat argument is shadowed' do
+        it 'registers an offense' do
+          expect_offense(<<-RUBY.strip_indent)
+            def do_something(*items)
+              *items, last = [42, 42]
+               ^^^^^ Argument `items` was shadowed by a local variable before it was used.
+              puts items
+            end
+          RUBY
+        end
+      end
+
+      context 'when reassigning to splat variable' do
+        it 'does not register an offense' do
+          expect_no_offenses(<<-RUBY.strip_indent)
+            def do_something(*items)
+              *items, last = items
+              puts items
             end
           RUBY
         end
@@ -370,6 +416,19 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedArgument, :config do
   end
 
   describe 'block argument shadowing' do
+    context 'when a block local variable is assigned but no argument is' \
+            ' shadowed' do
+      it 'accepts' do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          numbers = [1, 2, 3]
+          numbers.each do |i; j|
+            j = i * 2
+            puts j
+          end
+        RUBY
+      end
+    end
+
     context 'when a single argument is shadowed' do
       it 'registers an offense' do
         expect_offense(<<-RUBY.strip_indent)

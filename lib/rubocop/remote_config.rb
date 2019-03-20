@@ -21,6 +21,7 @@ module RuboCop
       request do |response|
         next if response.is_a?(Net::HTTPNotModified)
         next if response.is_a?(SocketError)
+
         File.open cache_path, 'w' do |io|
           io.write response.body
         end
@@ -41,16 +42,25 @@ module RuboCop
       raise ArgumentError, 'HTTP redirect too deep' if limit.zero?
 
       http = Net::HTTP.new(uri.hostname, uri.port)
-      http.use_ssl = true if uri.instance_of? URI::HTTPS
+      http.use_ssl = uri.instance_of?(URI::HTTPS)
 
+      generate_request(uri) do |request|
+        begin
+          handle_response(http.request(request), limit, &block)
+        rescue SocketError => err
+          handle_response(err, limit, &block)
+        end
+      end
+    end
+
+    def generate_request(uri)
       request = Net::HTTP::Get.new(uri.request_uri)
+
       if cache_path_exists?
         request['If-Modified-Since'] = File.stat(cache_path).mtime.rfc2822
       end
 
-      handle_response(http.request(request), limit, &block)
-    rescue SocketError => err
-      handle_response(err, limit, &block)
+      yield request
     end
 
     def handle_response(response, limit, &block)
@@ -60,7 +70,11 @@ module RuboCop
       when Net::HTTPRedirection
         request(URI.parse(response['location']), limit - 1, &block)
       else
-        response.error!
+        begin
+          response.error!
+        rescue StandardError => e
+          raise e, "#{e.message} while downloading remote config file #{uri}"
+        end
       end
     end
 

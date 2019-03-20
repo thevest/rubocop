@@ -49,17 +49,14 @@ module RuboCop
 
         private
 
+        def_node_matcher :setter_call_to_local_variable?, <<-PATTERN
+          [(send (lvar _) ...) setter_method?]
+        PATTERN
+
         def last_expression(body)
           expression = body.begin_type? ? body.children : body
 
           expression.is_a?(Array) ? expression.last : expression
-        end
-
-        def setter_call_to_local_variable?(node)
-          return unless node && node.send_type?
-          return unless node.receiver && node.receiver.lvar_type?
-
-          node.method_name =~ /(?:\w|\[\])=$/
         end
 
         # This class tracks variable assignments in a method body
@@ -127,6 +124,7 @@ module RuboCop
           def process_logical_operator_assignment(asgn_node)
             lhs_node, rhs_node = *asgn_node
             return unless ASSIGNMENT_TYPES.include?(lhs_node.type)
+
             process_assignment(lhs_node, rhs_node)
 
             throw :skip_children
@@ -135,6 +133,7 @@ module RuboCop
           def process_binary_operator_assignment(op_asgn_node)
             lhs_node, = *op_asgn_node
             return unless ASSIGNMENT_TYPES.include?(lhs_node.type)
+
             lhs_variable_name, = *lhs_node
             @local[lhs_variable_name] = true
 
@@ -155,6 +154,7 @@ module RuboCop
           def constructor?(node)
             return true if node.literal?
             return false unless node.send_type?
+
             _receiver, method = *node
             method == :new
           end

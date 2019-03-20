@@ -18,8 +18,7 @@ RSpec.describe RuboCop::Cop::Style::RedundantParentheses do
 
   shared_examples 'plausible' do |expr|
     it 'accepts parentheses when arguments are unparenthesized' do
-      inspect_source(expr)
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(expr)
     end
   end
 
@@ -168,8 +167,7 @@ RSpec.describe RuboCop::Cop::Style::RedundantParentheses do
 
   it 'accepts parentheses around a method call with unparenthesized ' \
      'arguments' do
-    inspect_source('(a 1, 2) && (1 + 1)')
-    expect(cop.offenses.empty?).to be(true)
+    expect_no_offenses('(a 1, 2) && (1 + 1)')
   end
 
   it 'accepts parentheses inside an irange' do
@@ -250,6 +248,14 @@ RSpec.describe RuboCop::Cop::Style::RedundantParentheses do
       when(Const)
         bar
       end
+    RUBY
+  end
+
+  it 'accepts parentheses in super call with hash' do
+    expect_no_offenses(<<-RUBY.strip_indent)
+      super ({
+        foo: bar,
+      })
     RUBY
   end
 end

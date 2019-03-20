@@ -6,21 +6,20 @@ RSpec.describe RuboCop::Cop::Style::WhileUntilModifier do
   subject(:cop) { described_class.new(config) }
 
   let(:config) do
-    hash = { 'Metrics/LineLength' => { 'Max' => 80 } }
-    RuboCop::Config.new(hash)
+    RuboCop::Config.new('Metrics/LineLength' => { 'Max' => 80 })
   end
 
   it "accepts multiline unless that doesn't fit on one line" do
-    check_too_long(cop, 'unless')
+    check_too_long('unless')
   end
 
   it 'accepts multiline unless whose body is more than one line' do
-    check_short_multiline(cop, 'unless')
+    check_short_multiline('unless')
   end
 
   context 'multiline while that fits on one line' do
     it 'registers an offense' do
-      check_really_short(cop, 'while')
+      check_really_short('while')
     end
 
     it 'does auto-correction' do
@@ -29,11 +28,11 @@ RSpec.describe RuboCop::Cop::Style::WhileUntilModifier do
   end
 
   it "accepts multiline while that doesn't fit on one line" do
-    check_too_long(cop, 'while')
+    check_too_long('while')
   end
 
   it 'accepts multiline while whose body is more than one line' do
-    check_short_multiline(cop, 'while')
+    check_short_multiline('while')
   end
 
   it 'accepts oneline while when condition has local variable assignment' do
@@ -71,7 +70,7 @@ RSpec.describe RuboCop::Cop::Style::WhileUntilModifier do
 
   context 'multiline until that fits on one line' do
     it 'registers an offense' do
-      check_really_short(cop, 'until')
+      check_really_short('until')
     end
 
     it 'does auto-correction' do
@@ -80,16 +79,16 @@ RSpec.describe RuboCop::Cop::Style::WhileUntilModifier do
   end
 
   it "accepts multiline until that doesn't fit on one line" do
-    check_too_long(cop, 'until')
+    check_too_long('until')
   end
 
   it 'accepts multiline until whose body is more than one line' do
-    check_short_multiline(cop, 'until')
+    check_short_multiline('until')
   end
 
   it 'accepts an empty condition' do
-    check_empty(cop, 'while')
-    check_empty(cop, 'until')
+    check_empty('while')
+    check_empty('until')
   end
 
   it 'accepts modifier while' do
@@ -100,13 +99,33 @@ RSpec.describe RuboCop::Cop::Style::WhileUntilModifier do
     expect_no_offenses('ala until bala')
   end
 
-  # Regression: https://github.com/bbatsov/rubocop/issues/4006
+  # Regression: https://github.com/rubocop-hq/rubocop/issues/4006
   context 'when the modifier condition is multiline' do
     it 'registers an offense' do
       expect_offense(<<-RUBY.strip_indent)
         foo while bar ||
             ^^^^^ Favor modifier `while` usage when having a single-line body.
           baz
+      RUBY
+    end
+  end
+
+  context 'when Metrics/LineLength is disabled' do
+    let(:config) do
+      RuboCop::Config.new(
+        'Metrics/LineLength' => {
+          'Enabled' => false,
+          'Max' => 80
+        }
+      )
+    end
+
+    it 'registers an offense even for a long modifier statement' do
+      expect_offense(<<-RUBY.strip_indent)
+        while foo
+        ^^^^^ Favor modifier `while` usage when having a single-line body.
+          "This string would make the line longer than eighty characters if combined with the statement." 
+        end
       RUBY
     end
   end

@@ -238,7 +238,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
             func({
                    @abc => 0,
                    @xyz => 1,
-                 },)
+                 })
             func(
               {
                 abc: 0,
@@ -452,6 +452,38 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
     expect(IO.read('example.rb')).to eq(corrected)
   end
 
+  describe 'caching' do
+    let(:cache) do
+      instance_double(RuboCop::ResultCache, 'valid?' => true,
+                                            'load' => cached_offenses)
+    end
+    let(:source) { %(puts "Hi"\n) }
+
+    before do
+      allow(RuboCop::ResultCache).to receive(:new) { cache }
+      create_file('example.rb', source)
+    end
+
+    context 'with no offenses in the cache' do
+      let(:cached_offenses) { [] }
+
+      it "doesn't correct offenses" do
+        expect(cli.run(['--auto-correct'])).to eq(0)
+        expect(IO.read('example.rb')).to eq(source)
+      end
+    end
+
+    context 'with an offense in the cache' do
+      let(:cached_offenses) { ['Style/StringLiterals: ...'] }
+
+      it 'corrects offenses' do
+        allow(cache).to receive(:save)
+        expect(cli.run(['--auto-correct'])).to eq(0)
+        expect(IO.read('example.rb')).to eq("puts 'Hi'\n")
+      end
+    end
+  end
+
   %i[line_count_based semantic braces_for_chaining].each do |style|
     context "when BlockDelimiters has #{style} style" do
       it 'corrects SpaceBeforeBlockBraces, SpaceInsideBlockBraces offenses' do
@@ -506,18 +538,18 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
 
   it 'corrects InitialIndentation offenses' do
     source = <<-RUBY.strip_indent
-        # comment 1
+      # comment 1
 
-        # comment 2
-        def func
-          begin
-            foo
-            bar
-          rescue StandardError
-            baz
-          end
+      # comment 2
+      def func
+        begin
+          foo
+          bar
+        rescue StandardError
+          baz
         end
-      RUBY
+      end
+    RUBY
     create_file('example.rb', source)
     create_file('.rubocop.yml', <<-YAML.strip_indent)
       Layout/DefEndAlignment:
@@ -616,8 +648,8 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       def func
         foo
         bar
-        rescue StandardError
-          baz
+      rescue StandardError
+        baz
         end
 
       def func
@@ -765,10 +797,10 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
     corrected =
       <<-RUBY.strip_indent
         expect(subject[:address]).to eq(
-          street1:     '1 Market',
-          street2:     '#200',
-          city:        'Some Town',
-          state:       'CA',
+          street1: '1 Market',
+          street2: '#200',
+          city: 'Some Town',
+          state: 'CA',
           postal_code: '99999-1111'
         )
       RUBY
@@ -954,12 +986,18 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       #{e}:1:1: C: Style/Documentation: Missing top-level class documentation comment.
       #{e}:2:1: C: [Corrected] Layout/AccessModifierIndentation: Indent access modifiers like `private`.
       #{e}:2:1: C: [Corrected] Layout/EmptyLinesAroundAccessModifier: Keep a blank line after `private`.
+      #{e}:2:1: C: [Corrected] Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.
+      #{e}:2:1: C: [Corrected] Layout/IndentationWidth: Use 2 (not 4) spaces for indentation.
       #{e}:2:3: W: Lint/UselessAccessModifier: Useless `private` access modifier.
+      #{e}:2:5: C: [Corrected] Layout/AccessModifierIndentation: Indent access modifiers like `private`.
       #{e}:3:7: C: [Corrected] Style/MutableConstant: Freeze mutable objects assigned to constants.
       #{e}:3:7: C: [Corrected] Style/WordArray: Use `%w` or `%W` for an array of words.
       #{e}:3:8: C: [Corrected] Style/StringLiterals: Prefer single-quoted strings when you don't need string interpolation or special symbols.
       #{e}:3:15: C: [Corrected] Style/StringLiterals: Prefer single-quoted strings when you don't need string interpolation or special symbols.
       #{e}:3:21: C: [Corrected] Style/TrailingCommaInArrayLiteral: Avoid comma after the last item of an array.
+      #{e}:4:1: C: [Corrected] Layout/IndentationWidth: Use 2 (not 4) spaces for indentation.
+      #{e}:4:3: C: [Corrected] Layout/IndentationConsistency: Inconsistent indentation detected.
+      #{e}:4:5: C: [Corrected] Layout/IndentationConsistency: Inconsistent indentation detected.
       #{e}:4:7: C: [Corrected] Style/WordArray: Use `%w` or `%W` for an array of words.
     RESULT
   end
@@ -1241,7 +1279,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
     RUBY
     create_file('.rubocop.yml', <<-YAML.strip_indent)
       AllCops:
-        TargetRubyVersion: 2.1
+        TargetRubyVersion: 2.2
     YAML
     create_file('example.rb', src)
     expect(cli.run(%w[-a -f simple])).to eq(1)

@@ -12,6 +12,10 @@ module RuboCop
                               map reduce reject reject! reverse_each select
                               select! times upto].freeze
 
+      # http://phrogz.net/programmingruby/language.html#table_18.4
+      OPERATOR_METHODS = %i[| ^ & <=> == === =~ > >= < <= << >> + - * /
+                            % ** ~ +@ -@ !@ ~@ [] []= ! != !~ `].freeze
+
       # Checks whether the method name matches the argument.
       #
       # @param [Symbol, String] name the method name to check for
@@ -24,7 +28,7 @@ module RuboCop
       #
       # @return [Boolean] whether the method is an operator
       def operator_method?
-        RuboCop::Cop::Util::OPERATOR_METHODS.include?(method_name)
+        OPERATOR_METHODS.include?(method_name)
       end
 
       # Checks whether the method is a comparison method.
@@ -83,6 +87,27 @@ module RuboCop
       # @return [Boolean] whether the receiver of this node is a `const` node
       def const_receiver?
         receiver && receiver.const_type?
+      end
+
+      # Checks whether this is a negation method, i.e. `!` or keyword `not`.
+      #
+      # @return [Boolean] whether this method is a negation method
+      def negation_method?
+        receiver && method_name == :!
+      end
+
+      # Checks whether this is a prefix not method, e.g. `not foo`.
+      #
+      # @return [Boolean] whether this method is a prefix not
+      def prefix_not?
+        negation_method? && loc.selector.is?('not')
+      end
+
+      # Checks whether this is a prefix bang method, e.g. `!foo`.
+      #
+      # @return [Boolean] whether this method is a prefix bang
+      def prefix_bang?
+        negation_method? && loc.selector.is?('!')
       end
     end
   end

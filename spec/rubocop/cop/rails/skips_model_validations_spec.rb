@@ -40,8 +40,7 @@ RSpec.describe RuboCop::Cop::Rails::SkipsModelValidations, :config do
   context 'with methods that require at least an argument' do
     methods_with_arguments.each do |method_name|
       it "doesn't register an offense for `#{method_name}`" do
-        inspect_source("User.#{method_name}")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses("User.#{method_name}")
       end
     end
   end
@@ -68,8 +67,7 @@ RSpec.describe RuboCop::Cop::Rails::SkipsModelValidations, :config do
 
     whitelist.each do |method_name|
       it "accepts `#{method_name}`" do
-        inspect_source("User.#{method_name}")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses("User.#{method_name}")
       end
     end
 
@@ -78,6 +76,44 @@ RSpec.describe RuboCop::Cop::Rails::SkipsModelValidations, :config do
         user.update_attribute(:website, 'example.com')
              ^^^^^^^^^^^^^^^^ Avoid using `update_attribute` because it skips validations.
       RUBY
+    end
+
+    context 'when using safe navigation operator', :ruby23 do
+      it 'registers an offense for `update_attribute`' do
+        expect_offense(<<-RUBY.strip_indent)
+        user&.update_attribute(:website, 'example.com')
+              ^^^^^^^^^^^^^^^^ Avoid using `update_attribute` because it skips validations.
+        RUBY
+      end
+    end
+  end
+
+  context 'with whitelist' do
+    let(:cop_config) do
+      {
+        'Blacklist' => %w[toggle! touch],
+        'Whitelist' => %w[touch]
+      }
+    end
+
+    it 'registers an offense for method not in whitelist' do
+      expect_offense(<<-RUBY.strip_indent)
+        user.toggle!(:active)
+             ^^^^^^^ Avoid using `toggle!` because it skips validations.
+      RUBY
+    end
+
+    context 'when using safe navigation operator', :ruby23 do
+      it 'registers an offense for method not in whitelist' do
+        expect_offense(<<-RUBY.strip_indent)
+        user&.toggle!(:active)
+              ^^^^^^^ Avoid using `toggle!` because it skips validations.
+        RUBY
+      end
+    end
+
+    it 'accepts method in whitelist, superseding the blacklist' do
+      expect_no_offenses('User.touch(:attr)')
     end
   end
 end

@@ -31,17 +31,14 @@ RSpec.describe RuboCop::Cop::Metrics::BlockLength, :config do
   end
 
   it 'rejects a block with more than 5 lines' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       something do
+      ^^^^^^^^^^^^ Block has too many lines. [3/2]
         a = 1
         a = 2
         a = 3
       end
     RUBY
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.offenses.map(&:line).sort).to eq([1])
-    expect(cop.config_to_allow_offenses).to eq('Max' => 3)
-    expect(cop.messages.first).to eq('Block has too many lines. [3/2]')
   end
 
   it 'reports the correct beginning and end lines' do
@@ -98,20 +95,22 @@ RSpec.describe RuboCop::Cop::Metrics::BlockLength, :config do
   end
 
   it 'rejects brace blocks too' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       something {
+      ^^^^^^^^^^^ Block has too many lines. [3/2]
         a = 1
         a = 2
         a = 3
       }
     RUBY
-    expect(cop.offenses.size).to eq(1)
   end
 
   it 'properly counts nested blocks' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_offense(<<-RUBY.strip_indent)
       something do
+      ^^^^^^^^^^^^ Block has too many lines. [6/2]
         something do
+        ^^^^^^^^^^^^ Block has too many lines. [4/2]
           a = 2
           a = 3
           a = 4
@@ -119,8 +118,6 @@ RSpec.describe RuboCop::Cop::Metrics::BlockLength, :config do
         end
       end
     RUBY
-    expect(cop.offenses.size).to eq(2)
-    expect(cop.offenses.map(&:line).sort).to eq([1, 2])
   end
 
   it 'does not count commented lines by default' do
@@ -134,19 +131,48 @@ RSpec.describe RuboCop::Cop::Metrics::BlockLength, :config do
     RUBY
   end
 
+  context 'when defining a class' do
+    it 'does not register an offense' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        Class.new do
+          a = 1
+          a = 2
+          a = 3
+          a = 4
+          a = 5
+          a = 6
+        end
+      RUBY
+    end
+  end
+
+  context 'when defining a module' do
+    it 'does not register an offense' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        Module.new do
+          a = 1
+          a = 2
+          a = 3
+          a = 4
+          a = 5
+          a = 6
+        end
+      RUBY
+    end
+  end
+
   context 'when CountComments is enabled' do
     before { cop_config['CountComments'] = true }
 
     it 'also counts commented lines' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         something do
+        ^^^^^^^^^^^^ Block has too many lines. [3/2]
           a = 1
           #a = 2
           a = 3
         end
       RUBY
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.offenses.map(&:line).sort).to eq([1])
     end
   end
 

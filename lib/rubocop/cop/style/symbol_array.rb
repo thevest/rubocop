@@ -31,7 +31,6 @@ module RuboCop
         include ArrayMinSize
         include ArraySyntax
         include ConfigurableEnforcedStyle
-        include PercentLiteral
         include PercentArray
 
         PERCENT_MSG = 'Use `%i` or `%I` for an array of symbols.'.freeze
@@ -53,7 +52,9 @@ module RuboCop
 
         def autocorrect(node)
           if style == :percent
-            correct_percent(node, 'i')
+            PercentLiteralCorrector
+              .new(@config, @preferred_delimiters)
+              .correct(node, 'i')
           else
             correct_bracketed(node)
           end
@@ -69,7 +70,15 @@ module RuboCop
         end
 
         def correct_bracketed(node)
-          syms = node.children.map { |c| to_symbol_literal(c.value.to_s) }
+          syms = node.children.map do |c|
+            if c.dsym_type?
+              string_literal = to_string_literal(c.source)
+
+              ':' + trim_string_interporation_escape_character(string_literal)
+            else
+              to_symbol_literal(c.value.to_s)
+            end
+          end
 
           lambda do |corrector|
             corrector.replace(node.source_range, "[#{syms.join(', ')}]")

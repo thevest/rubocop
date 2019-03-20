@@ -13,7 +13,7 @@ You can also load [custom cops](extensions.md#custom-cops).
 ### Style
 
 Style cops check for stylistic consistency of your code. Many of the them are
-based on the [Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide).
+based on the [Ruby Style Guide](https://github.com/rubocop-hq/ruby-style-guide).
 
 ### Layout
 
@@ -79,11 +79,11 @@ Rails:
 
 ### Bundler
 
-Bundler cops check for style or bad practices in Bundler files, e.g. `Gemfile`.
+Bundler cops check for style and bad practices in Bundler files, e.g. `Gemfile`.
 
 ### Gemspec
 
-Gemspec cops check for style or bad practices in gemspec files, e.g. `rubocop.gemspec`.
+Gemspec cops check for style and bad practices in gemspec files, e.g. `rubocop.gemspec`.
 
 ### Available cops
 
@@ -93,6 +93,7 @@ In the following section you find all available cops:
 #### Department [Bundler](cops_bundler.md)
 
 * [Bundler/DuplicatedGem](cops_bundler.md#bundlerduplicatedgem)
+* [Bundler/GemComment](cops_bundler.md#bundlergemcomment)
 * [Bundler/InsecureProtocolSource](cops_bundler.md#bundlerinsecureprotocolsource)
 * [Bundler/OrderedGems](cops_bundler.md#bundlerorderedgems)
 
@@ -112,6 +113,7 @@ In the following section you find all available cops:
 * [Layout/BlockEndNewline](cops_layout.md#layoutblockendnewline)
 * [Layout/CaseIndentation](cops_layout.md#layoutcaseindentation)
 * [Layout/ClassStructure](cops_layout.md#layoutclassstructure)
+* [Layout/ClosingHeredocIndentation](cops_layout.md#layoutclosingheredocindentation)
 * [Layout/ClosingParenthesisIndentation](cops_layout.md#layoutclosingparenthesisindentation)
 * [Layout/CommentIndentation](cops_layout.md#layoutcommentindentation)
 * [Layout/ConditionPosition](cops_layout.md#layoutconditionposition)
@@ -119,6 +121,7 @@ In the following section you find all available cops:
 * [Layout/DotPosition](cops_layout.md#layoutdotposition)
 * [Layout/ElseAlignment](cops_layout.md#layoutelsealignment)
 * [Layout/EmptyComment](cops_layout.md#layoutemptycomment)
+* [Layout/EmptyLineAfterGuardClause](cops_layout.md#layoutemptylineafterguardclause)
 * [Layout/EmptyLineAfterMagicComment](cops_layout.md#layoutemptylineaftermagiccomment)
 * [Layout/EmptyLineBetweenDefs](cops_layout.md#layoutemptylinebetweendefs)
 * [Layout/EmptyLines](cops_layout.md#layoutemptylines)
@@ -145,6 +148,7 @@ In the following section you find all available cops:
 * [Layout/IndentationConsistency](cops_layout.md#layoutindentationconsistency)
 * [Layout/IndentationWidth](cops_layout.md#layoutindentationwidth)
 * [Layout/InitialIndentation](cops_layout.md#layoutinitialindentation)
+* [Layout/LeadingBlankLines](cops_layout.md#layoutleadingblanklines)
 * [Layout/LeadingCommentSpace](cops_layout.md#layoutleadingcommentspace)
 * [Layout/MultilineArrayBraceLayout](cops_layout.md#layoutmultilinearraybracelayout)
 * [Layout/MultilineAssignmentLayout](cops_layout.md#layoutmultilineassignmentlayout)
@@ -194,6 +198,7 @@ In the following section you find all available cops:
 * [Lint/CircularArgumentReference](cops_lint.md#lintcircularargumentreference)
 * [Lint/Debugger](cops_lint.md#lintdebugger)
 * [Lint/DeprecatedClassMethods](cops_lint.md#lintdeprecatedclassmethods)
+* [Lint/DisjunctiveAssignmentInConstructor](cops_lint.md#lintdisjunctiveassignmentinconstructor)
 * [Lint/DuplicateCaseCondition](cops_lint.md#lintduplicatecasecondition)
 * [Lint/DuplicateMethods](cops_lint.md#lintduplicatemethods)
 * [Lint/DuplicatedKey](cops_lint.md#lintduplicatedkey)
@@ -205,6 +210,8 @@ In the following section you find all available cops:
 * [Lint/EmptyWhen](cops_lint.md#lintemptywhen)
 * [Lint/EndInMethod](cops_lint.md#lintendinmethod)
 * [Lint/EnsureReturn](cops_lint.md#lintensurereturn)
+* [Lint/ErbNewArguments](cops_lint.md#linterbnewarguments)
+* [Lint/FlipFlop](cops_lint.md#lintflipflop)
 * [Lint/FloatOutOfRange](cops_lint.md#lintfloatoutofrange)
 * [Lint/FormatParameterMismatch](cops_lint.md#lintformatparametermismatch)
 * [Lint/HandleExceptions](cops_lint.md#linthandleexceptions)
@@ -236,12 +243,14 @@ In the following section you find all available cops:
 * [Lint/ReturnInVoidContext](cops_lint.md#lintreturninvoidcontext)
 * [Lint/SafeNavigationChain](cops_lint.md#lintsafenavigationchain)
 * [Lint/SafeNavigationConsistency](cops_lint.md#lintsafenavigationconsistency)
+* [Lint/SafeNavigationWithEmpty](cops_lint.md#lintsafenavigationwithempty)
 * [Lint/ScriptPermission](cops_lint.md#lintscriptpermission)
 * [Lint/ShadowedArgument](cops_lint.md#lintshadowedargument)
 * [Lint/ShadowedException](cops_lint.md#lintshadowedexception)
 * [Lint/ShadowingOuterLocalVariable](cops_lint.md#lintshadowingouterlocalvariable)
 * [Lint/StringConversionInInterpolation](cops_lint.md#lintstringconversionininterpolation)
 * [Lint/Syntax](cops_lint.md#lintsyntax)
+* [Lint/ToJSON](cops_lint.md#linttojson)
 * [Lint/UnderscorePrefixedVariableName](cops_lint.md#lintunderscoreprefixedvariablename)
 * [Lint/UnifiedInteger](cops_lint.md#lintunifiedinteger)
 * [Lint/UnneededCopDisableDirective](cops_lint.md#lintunneededcopdisabledirective)
@@ -296,6 +305,7 @@ In the following section you find all available cops:
 * [Performance/Caller](cops_performance.md#performancecaller)
 * [Performance/CaseWhenSplat](cops_performance.md#performancecasewhensplat)
 * [Performance/Casecmp](cops_performance.md#performancecasecmp)
+* [Performance/ChainArrayAllocation](cops_performance.md#performancechainarrayallocation)
 * [Performance/CompareWithBlock](cops_performance.md#performancecomparewithblock)
 * [Performance/Count](cops_performance.md#performancecount)
 * [Performance/Detect](cops_performance.md#performancedetect)
@@ -303,7 +313,9 @@ In the following section you find all available cops:
 * [Performance/EndWith](cops_performance.md#performanceendwith)
 * [Performance/FixedSize](cops_performance.md#performancefixedsize)
 * [Performance/FlatMap](cops_performance.md#performanceflatmap)
+* [Performance/InefficientHashSearch](cops_performance.md#performanceinefficienthashsearch)
 * [Performance/LstripRstrip](cops_performance.md#performancelstriprstrip)
+* [Performance/OpenStruct](cops_performance.md#performanceopenstruct)
 * [Performance/RangeInclude](cops_performance.md#performancerangeinclude)
 * [Performance/RedundantBlockCall](cops_performance.md#performanceredundantblockcall)
 * [Performance/RedundantMatch](cops_performance.md#performanceredundantmatch)
@@ -327,7 +339,10 @@ In the following section you find all available cops:
 * [Rails/ActiveSupportAliases](cops_rails.md#railsactivesupportaliases)
 * [Rails/ApplicationJob](cops_rails.md#railsapplicationjob)
 * [Rails/ApplicationRecord](cops_rails.md#railsapplicationrecord)
+* [Rails/AssertNot](cops_rails.md#railsassertnot)
+* [Rails/BelongsTo](cops_rails.md#railsbelongsto)
 * [Rails/Blank](cops_rails.md#railsblank)
+* [Rails/BulkChangeTable](cops_rails.md#railsbulkchangetable)
 * [Rails/CreateTableWithTimestamps](cops_rails.md#railscreatetablewithtimestamps)
 * [Rails/Date](cops_rails.md#railsdate)
 * [Rails/Delegate](cops_rails.md#railsdelegate)
@@ -343,8 +358,10 @@ In the following section you find all available cops:
 * [Rails/HasManyOrHasOneDependent](cops_rails.md#railshasmanyorhasonedependent)
 * [Rails/HttpPositionalArguments](cops_rails.md#railshttppositionalarguments)
 * [Rails/HttpStatus](cops_rails.md#railshttpstatus)
+* [Rails/IgnoredSkipActionFilterOption](cops_rails.md#railsignoredskipactionfilteroption)
 * [Rails/InverseOf](cops_rails.md#railsinverseof)
 * [Rails/LexicallyScopedActionFilter](cops_rails.md#railslexicallyscopedactionfilter)
+* [Rails/LinkToBlank](cops_rails.md#railslinktoblank)
 * [Rails/NotNullColumn](cops_rails.md#railsnotnullcolumn)
 * [Rails/Output](cops_rails.md#railsoutput)
 * [Rails/OutputSafety](cops_rails.md#railsoutputsafety)
@@ -353,6 +370,8 @@ In the following section you find all available cops:
 * [Rails/Present](cops_rails.md#railspresent)
 * [Rails/ReadWriteAttribute](cops_rails.md#railsreadwriteattribute)
 * [Rails/RedundantReceiverInWithOptions](cops_rails.md#railsredundantreceiverinwithoptions)
+* [Rails/ReflectionClassName](cops_rails.md#railsreflectionclassname)
+* [Rails/RefuteMethods](cops_rails.md#railsrefutemethods)
 * [Rails/RelativeDateConstant](cops_rails.md#railsrelativedateconstant)
 * [Rails/RequestReferer](cops_rails.md#railsrequestreferer)
 * [Rails/ReversibleMigration](cops_rails.md#railsreversiblemigration)
@@ -375,6 +394,7 @@ In the following section you find all available cops:
 
 #### Department [Style](cops_style.md)
 
+* [Style/AccessModifierDeclarations](cops_style.md#styleaccessmodifierdeclarations)
 * [Style/Alias](cops_style.md#stylealias)
 * [Style/AndOr](cops_style.md#styleandor)
 * [Style/ArrayJoin](cops_style.md#stylearrayjoin)
@@ -399,6 +419,7 @@ In the following section you find all available cops:
 * [Style/CommentAnnotation](cops_style.md#stylecommentannotation)
 * [Style/CommentedKeyword](cops_style.md#stylecommentedkeyword)
 * [Style/ConditionalAssignment](cops_style.md#styleconditionalassignment)
+* [Style/ConstantVisibility](cops_style.md#styleconstantvisibility)
 * [Style/Copyright](cops_style.md#stylecopyright)
 * [Style/DateTime](cops_style.md#styledatetime)
 * [Style/DefWithParentheses](cops_style.md#styledefwithparentheses)
@@ -412,7 +433,6 @@ In the following section you find all available cops:
 * [Style/EmptyCaseCondition](cops_style.md#styleemptycasecondition)
 * [Style/EmptyElse](cops_style.md#styleemptyelse)
 * [Style/EmptyLambdaParameter](cops_style.md#styleemptylambdaparameter)
-* [Style/EmptyLineAfterGuardClause](cops_style.md#styleemptylineafterguardclause)
 * [Style/EmptyLiteral](cops_style.md#styleemptyliteral)
 * [Style/EmptyMethod](cops_style.md#styleemptymethod)
 * [Style/Encoding](cops_style.md#styleencoding)
@@ -420,7 +440,6 @@ In the following section you find all available cops:
 * [Style/EvalWithLocation](cops_style.md#styleevalwithlocation)
 * [Style/EvenOdd](cops_style.md#styleevenodd)
 * [Style/ExpandPathArguments](cops_style.md#styleexpandpatharguments)
-* [Style/FlipFlop](cops_style.md#styleflipflop)
 * [Style/For](cops_style.md#stylefor)
 * [Style/FormatString](cops_style.md#styleformatstring)
 * [Style/FormatStringToken](cops_style.md#styleformatstringtoken)
@@ -437,6 +456,7 @@ In the following section you find all available cops:
 * [Style/InfiniteLoop](cops_style.md#styleinfiniteloop)
 * [Style/InlineComment](cops_style.md#styleinlinecomment)
 * [Style/InverseMethods](cops_style.md#styleinversemethods)
+* [Style/IpAddresses](cops_style.md#styleipaddresses)
 * [Style/Lambda](cops_style.md#stylelambda)
 * [Style/LambdaCall](cops_style.md#stylelambdacall)
 * [Style/LineEndConcatenation](cops_style.md#stylelineendconcatenation)
@@ -444,9 +464,10 @@ In the following section you find all available cops:
 * [Style/MethodCallWithoutArgsParentheses](cops_style.md#stylemethodcallwithoutargsparentheses)
 * [Style/MethodCalledOnDoEndBlock](cops_style.md#stylemethodcalledondoendblock)
 * [Style/MethodDefParentheses](cops_style.md#stylemethoddefparentheses)
-* [Style/MethodMissing](cops_style.md#stylemethodmissing)
+* [Style/MethodMissingSuper](cops_style.md#stylemethodmissingsuper)
 * [Style/MinMax](cops_style.md#styleminmax)
 * [Style/MissingElse](cops_style.md#stylemissingelse)
+* [Style/MissingRespondToMissing](cops_style.md#stylemissingrespondtomissing)
 * [Style/MixinGrouping](cops_style.md#stylemixingrouping)
 * [Style/MixinUsage](cops_style.md#stylemixinusage)
 * [Style/ModuleFunction](cops_style.md#stylemodulefunction)
@@ -454,6 +475,7 @@ In the following section you find all available cops:
 * [Style/MultilineIfModifier](cops_style.md#stylemultilineifmodifier)
 * [Style/MultilineIfThen](cops_style.md#stylemultilineifthen)
 * [Style/MultilineMemoization](cops_style.md#stylemultilinememoization)
+* [Style/MultilineMethodSignature](cops_style.md#stylemultilinemethodsignature)
 * [Style/MultilineTernaryOperator](cops_style.md#stylemultilineternaryoperator)
 * [Style/MultipleComparison](cops_style.md#stylemultiplecomparison)
 * [Style/MutableConstant](cops_style.md#stylemutableconstant)
@@ -523,6 +545,7 @@ In the following section you find all available cops:
 * [Style/TrivialAccessors](cops_style.md#styletrivialaccessors)
 * [Style/UnlessElse](cops_style.md#styleunlesselse)
 * [Style/UnneededCapitalW](cops_style.md#styleunneededcapitalw)
+* [Style/UnneededCondition](cops_style.md#styleunneededcondition)
 * [Style/UnneededInterpolation](cops_style.md#styleunneededinterpolation)
 * [Style/UnneededPercentQ](cops_style.md#styleunneededpercentq)
 * [Style/UnpackFirst](cops_style.md#styleunpackfirst)

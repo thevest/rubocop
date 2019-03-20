@@ -39,6 +39,30 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
     end
   end
 
+  describe 'when PercentLiteralDelimiters only has a default' do
+    let(:cop_config) { { 'EnforcedStyle' => 'percent_x' } }
+    let(:percent_literal_delimiters_config) do
+      { 'PreferredDelimiters' => { 'default' => '()' } }
+    end
+
+    it 'respects the configuration when auto-correcting' do
+      new_source = autocorrect_source('`ls`')
+      expect(new_source).to eq('%x(ls)')
+    end
+  end
+
+  describe 'when PercentLiteralDelimiters is configured and a default exists' do
+    let(:cop_config) { { 'EnforcedStyle' => 'percent_x' } }
+    let(:percent_literal_delimiters_config) do
+      { 'PreferredDelimiters' => { '%x' => '[]', 'default' => '()' } }
+    end
+
+    it 'ignores the default when auto-correcting and' do
+      new_source = autocorrect_source('`ls`')
+      expect(new_source).to eq('%x[ls]')
+    end
+  end
+
   describe 'heredoc commands' do
     let(:cop_config) { { 'EnforcedStyle' => 'backticks' } }
 
@@ -97,10 +121,12 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
     describe 'a multi-line ` string with backticks' do
       let(:source) do
-        ['foo = `',
-         '  echo \`ls\`',
-         '  echo \`ls -l\`',
-         '`']
+        <<-RUBY.strip_indent
+          foo = `
+            echo \`ls\`
+            echo \`ls -l\`
+          `
+        RUBY
       end
 
       it 'registers an offense' do
@@ -115,7 +141,7 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
       it 'cannot auto-correct' do
         new_source = autocorrect_source(source)
-        expect(new_source).to eq(source.join("\n"))
+        expect(new_source).to eq(source)
       end
 
       describe 'when configured to allow inner backticks' do
@@ -174,10 +200,12 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
     describe 'a multi-line %x string without backticks' do
       let(:source) do
-        ['foo = %x(',
-         '  ls',
-         '  ls -l',
-         ')']
+        <<-RUBY.strip_indent
+          foo = %x(
+            ls
+            ls -l
+          )
+        RUBY
       end
 
       it 'registers an offense' do
@@ -192,16 +220,23 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
       it 'auto-corrects' do
         new_source = autocorrect_source(source)
-        expect(new_source).to eq("foo = `\n  ls\n  ls -l\n`")
+        expect(new_source).to eq(<<-RUBY.strip_indent)
+          foo = `
+            ls
+            ls -l
+          `
+        RUBY
       end
     end
 
     describe 'a multi-line %x string with backticks' do
       let(:source) do
-        ['foo = %x(',
-         '  echo `ls`',
-         '  echo `ls -l`',
-         ')']
+        <<-RUBY.strip_indent
+          foo = %x(
+            echo `ls`
+            echo `ls -l`
+          )
+        RUBY
       end
 
       it 'is accepted' do
@@ -228,7 +263,7 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
         it 'cannot auto-correct' do
           new_source = autocorrect_source(source)
-          expect(new_source).to eq(source.join("\n"))
+          expect(new_source).to eq(source)
         end
       end
     end
@@ -271,10 +306,12 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
     describe 'a multi-line ` string without backticks' do
       let(:source) do
-        ['foo = `',
-         '  ls',
-         '  ls -l',
-         '`']
+        <<-RUBY.strip_indent
+          foo = `
+            ls
+            ls -l
+          `
+        RUBY
       end
 
       it 'registers an offense' do
@@ -289,16 +326,23 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
       it 'auto-corrects' do
         new_source = autocorrect_source(source)
-        expect(new_source).to eq("foo = %x(\n  ls\n  ls -l\n)")
+        expect(new_source).to eq(<<-RUBY.strip_indent)
+          foo = %x(
+            ls
+            ls -l
+          )
+        RUBY
       end
     end
 
     describe 'a multi-line ` string with backticks' do
       let(:source) do
-        ['foo = `',
-         '  echo \`ls\`',
-         '  echo \`ls -l\`',
-         '`']
+        <<-'RUBY'.strip_indent
+          foo = `
+            echo \`ls\`
+            echo \`ls -l\`
+          `
+        RUBY
       end
 
       it 'registers an offense' do
@@ -313,7 +357,7 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
       it 'cannot auto-correct' do
         new_source = autocorrect_source(source)
-        expect(new_source).to eq(source.join("\n"))
+        expect(new_source).to eq(source)
       end
     end
 
@@ -387,10 +431,12 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
     describe 'a multi-line ` string without backticks' do
       let(:source) do
-        ['foo = `',
-         '  ls',
-         '  ls -l',
-         '`']
+        <<-'RUBY'.strip_indent
+          foo = `
+            ls
+            ls -l
+          `
+        RUBY
       end
 
       it 'registers an offense' do
@@ -405,16 +451,23 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
       it 'auto-corrects' do
         new_source = autocorrect_source(source)
-        expect(new_source).to eq("foo = %x(\n  ls\n  ls -l\n)")
+        expect(new_source).to eq(<<-RUBY.strip_indent)
+          foo = %x(
+            ls
+            ls -l
+          )
+        RUBY
       end
     end
 
     describe 'a multi-line ` string with backticks' do
       let(:source) do
-        ['foo = `',
-         '  echo \`ls\`',
-         '  echo \`ls -l\`',
-         '`']
+        <<-'RUBY'.strip_indent
+          foo = `
+            echo \`ls\`
+            echo \`ls -l\`
+          `
+        RUBY
       end
 
       it 'registers an offense' do
@@ -429,7 +482,7 @@ RSpec.describe RuboCop::Cop::Style::CommandLiteral, :config do
 
       it 'cannot auto-correct' do
         new_source = autocorrect_source(source)
-        expect(new_source).to eq(source.join("\n"))
+        expect(new_source).to eq(source)
       end
     end
 

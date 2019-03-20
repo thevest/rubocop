@@ -7,11 +7,10 @@ RSpec.describe RuboCop::Cop::Style::SymbolProc, :config do
 
   it 'registers an offense for a block with parameterless method call on ' \
      'param' do
-    inspect_source('coll.map { |e| e.upcase }')
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.messages)
-      .to eq(['Pass `&:upcase` as an argument to `map` instead of a block.'])
-    expect(cop.highlights).to eq(['{ |e| e.upcase }'])
+    expect_offense(<<-RUBY.strip_indent)
+      coll.map { |e| e.upcase }
+               ^^^^^^^^^^^^^^^^ Pass `&:upcase` as an argument to `map` instead of a block.
+    RUBY
   end
 
   it 'registers an offense for a block when method in body is unary -/=' do
@@ -65,6 +64,10 @@ RSpec.describe RuboCop::Cop::Style::SymbolProc, :config do
     expect_no_offenses('something { |*x| x.first }')
   end
 
+  it 'accepts block with adding a comma after the sole argument' do
+    expect_no_offenses('something { |x,| x.first }')
+  end
+
   context 'when the method has arguments' do
     let(:source) { 'method(one, 2) { |x| x.test }' }
 
@@ -82,18 +85,18 @@ RSpec.describe RuboCop::Cop::Style::SymbolProc, :config do
   end
 
   it 'autocorrects alias with symbols as proc' do
-    corrected = autocorrect_source(['coll.map { |s| s.upcase }'])
+    corrected = autocorrect_source('coll.map { |s| s.upcase }')
     expect(corrected).to eq 'coll.map(&:upcase)'
   end
 
   it 'autocorrects multiple aliases with symbols as proc' do
-    corrected = autocorrect_source(['coll.map { |s| s.upcase }' \
-                                         '.map { |s| s.downcase }'])
+    corrected = autocorrect_source('coll.map { |s| s.upcase }' \
+                                   '.map { |s| s.downcase }')
     expect(corrected).to eq 'coll.map(&:upcase).map(&:downcase)'
   end
 
   it 'auto-corrects correctly when there are no arguments in parentheses' do
-    corrected = autocorrect_source(['coll.map(   ) { |s| s.upcase }'])
+    corrected = autocorrect_source('coll.map(   ) { |s| s.upcase }')
     expect(corrected).to eq 'coll.map(&:upcase)'
   end
 

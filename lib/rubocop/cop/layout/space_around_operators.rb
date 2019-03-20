@@ -23,6 +23,7 @@ module RuboCop
         include RangeHelp
 
         IRREGULAR_METHODS = %i[[] ! []=].freeze
+        EXCESSIVE_SPACE = '  '.freeze
 
         def self.autocorrect_incompatible_with
           [Style::SelfAssignment]
@@ -71,6 +72,7 @@ module RuboCop
           _, _, right, = *node
 
           return unless right
+
           check_operator(node.loc.operator, right.source_range)
         end
 
@@ -138,12 +140,12 @@ module RuboCop
         end
 
         def excess_leading_space?(operator, with_space)
-          with_space.source =~ /^  / &&
+          with_space.source.start_with?(EXCESSIVE_SPACE) &&
             (!allow_for_alignment? || !aligned_with_operator?(operator))
         end
 
         def excess_trailing_space?(right_operand, with_space)
-          with_space.source =~ /  $/ &&
+          with_space.source.end_with?(EXCESSIVE_SPACE) &&
             (!allow_for_alignment? || !aligned_with_something?(right_operand))
         end
 

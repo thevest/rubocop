@@ -6,7 +6,7 @@ module RuboCop
   # @abstract parent of three different magic comment handlers
   class MagicComment
     # @see https://git.io/vMC1C IRB's pattern for matching magic comment tokens
-    TOKEN = /[[:alnum:]\-_]+/
+    TOKEN = /[[:alnum:]\-_]+/.freeze
 
     # Detect magic comment format and pass it to the appropriate wrapper.
     #
@@ -129,18 +129,18 @@ module RuboCop
     # @see https://www.gnu.org/software/emacs/manual/html_node/emacs/Specify-Coding.html
     # @see https://git.io/vMCXh Emacs handling in Ruby's parse.y
     class EmacsComment < EditorComment
-      FORMAT    = /\-\*\-(.+)\-\*\-/
+      FORMAT    = /\-\*\-(.+)\-\*\-/.freeze
       SEPARATOR = ';'.freeze
       OPERATOR  = ':'.freeze
 
       def encoding
-        match('encoding')
+        match('(?:en)?coding')
       end
 
       private
 
       def extract_frozen_string_literal
-        match('frozen_string_literal')
+        match('frozen[_-]string[_-]literal')
       end
     end
 
@@ -153,7 +153,7 @@ module RuboCop
     #
     #   comment.encoding # => 'ascii-8bit'
     class VimComment < EditorComment
-      FORMAT    = /#\s*vim:\s*(.+)/
+      FORMAT    = /#\s*vim:\s*(.+)/.freeze
       SEPARATOR = ', '.freeze
       OPERATOR  = '='.freeze
 
@@ -190,7 +190,7 @@ module RuboCop
     class SimpleComment < MagicComment
       # Match `encoding` or `coding`
       def encoding
-        extract(/\#* \b(?:en)?coding: (#{TOKEN})/i)
+        extract(/\A\s*\#.*\b(?:en)?coding: (#{TOKEN})/i)
       end
 
       private
@@ -203,7 +203,7 @@ module RuboCop
       # Case-insensitive and dashes/underscores are acceptable.
       # @see https://git.io/vM7Mg
       def extract_frozen_string_literal
-        extract(/\A#\s*frozen[_-]string[_-]literal:\s*(#{TOKEN})\s*\z/i)
+        extract(/\A\s*#\s*frozen[_-]string[_-]literal:\s*(#{TOKEN})\s*\z/i)
       end
     end
   end

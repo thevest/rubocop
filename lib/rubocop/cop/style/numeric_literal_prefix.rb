@@ -3,21 +3,44 @@
 module RuboCop
   module Cop
     module Style
-      # This cop checks for octal, hex, binary and decimal literals using
+      # This cop checks for octal, hex, binary, and decimal literals using
       # uppercase prefixes and corrects them to lowercase prefix
       # or no prefix (in case of decimals).
-      # eg. for octal use `0o` instead of `0` or `0O`.
       #
-      # Can be configured to use `0` only for octal literals using
-      # `EnforcedOctalStyle` => `zero_only`
+      # @example EnforcedOctalStyle: zero_with_o (default)
+      #   # bad - missing octal prefix
+      #   num = 01234
+      #
+      #   # bad - uppercase prefix
+      #   num = 0O1234
+      #   num = 0X12AB
+      #   num = 0B10101
+      #
+      #   # bad - redundant decimal prefix
+      #   num = 0D1234
+      #   num = 0d1234
+      #
+      #   # good
+      #   num = 0o1234
+      #   num = 0x12AB
+      #   num = 0b10101
+      #   num = 1234
+      #
+      # @example EnforcedOctalStyle: zero_only
+      #   # bad
+      #   num = 0o1234
+      #   num = 0O1234
+      #
+      #   # good
+      #   num = 01234
       class NumericLiteralPrefix < Cop
         include IntegerNode
 
-        OCTAL_ZERO_ONLY_REGEX = /^0[Oo][0-7]+$/
-        OCTAL_REGEX = /^0O?[0-7]+$/
-        HEX_REGEX = /^0X[0-9A-F]+$/
-        BINARY_REGEX = /^0B[01]+$/
-        DECIMAL_REGEX = /^0[dD][0-9]+$/
+        OCTAL_ZERO_ONLY_REGEX = /^0[Oo][0-7]+$/.freeze
+        OCTAL_REGEX = /^0O?[0-7]+$/.freeze
+        HEX_REGEX = /^0X[0-9A-F]+$/.freeze
+        BINARY_REGEX = /^0B[01]+$/.freeze
+        DECIMAL_REGEX = /^0[dD][0-9]+$/.freeze
 
         OCTAL_ZERO_ONLY_MSG = 'Use 0 for octal literals.'.freeze
         OCTAL_MSG = 'Use 0o for octal literals.'.freeze

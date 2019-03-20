@@ -5,7 +5,8 @@ module RuboCop
     module Style
       # Checks for if and unless statements that would fit on one line
       # if written as a modifier if/unless. The maximum line length is
-      # configured in the `Metrics/LineLength` cop.
+      # configured in the `Metrics/LineLength` cop. The tab size is configured
+      # in the `IndentationWidth` of the `Layout/Tab` cop.
       #
       # @example
       #   # bad
@@ -32,6 +33,7 @@ module RuboCop
 
         def on_if(node)
           return unless eligible_node?(node)
+          return if named_capture_in_condition?(node)
 
           add_offense(node, location: :keyword,
                             message: format(MSG, keyword: node.keyword))
@@ -44,6 +46,10 @@ module RuboCop
         end
 
         private
+
+        def named_capture_in_condition?(node)
+          node.condition.match_with_lvasgn_type?
+        end
 
         def eligible_node?(node)
           !non_eligible_if?(node) && !node.chained? &&
@@ -61,17 +67,7 @@ module RuboCop
           return false if node.parent.nil?
           return true if ASSIGNMENT_TYPES.include?(node.parent.type)
 
-          if node.parent.send_type?
-            _receiver, _name, *args = *node.parent
-            return !method_uses_parens?(node.parent, args.first)
-          end
-
-          false
-        end
-
-        def method_uses_parens?(node, limit)
-          source = node.source_range.source_line[0...limit.loc.column]
-          source =~ /\s*\(\s*$/
+          node.parent.send_type? && !node.parent.parenthesized?
         end
 
         def to_modifier_form(node)

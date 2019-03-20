@@ -70,7 +70,7 @@ RSpec.describe RuboCop::Cop::Lint::PercentStringArray do
   end
 
   context 'with invalid byte sequence in UTF-8' do
-    it 'add an offences if tokens contain quotes' do
+    it 'add an offense if tokens contain quotes' do
       expect_offense(<<-RUBY)
         %W("a\\255\\255")
         ^^^^^^^^^^^^^^^ Within `%w`/`%W`, quotes and ',' are unnecessary and may be unwanted in the resulting strings.
@@ -79,6 +79,25 @@ RSpec.describe RuboCop::Cop::Lint::PercentStringArray do
 
     it 'accepts if tokens contain invalid byte sequence only' do
       expect_no_offenses('%W(\255)')
+    end
+  end
+
+  context 'with binary encoded source' do
+    it 'adds an offense if tokens contain quotes' do
+      expect_offense(<<-RUBY.b.strip_indent)
+        # encoding: BINARY
+
+        %W[\xC0 "foo"]
+        ^^^^^^^^^^^ Within `%w`/`%W`, quotes and ',' are unnecessary and may be unwanted in the resulting strings.
+      RUBY
+    end
+
+    it 'accepts if tokens contain no quotes' do
+      expect_no_offenses(<<-RUBY.b.strip_indent)
+        # encoding: BINARY
+
+        %W[\xC0 \xC1]
+      RUBY
     end
   end
 end

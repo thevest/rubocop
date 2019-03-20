@@ -27,28 +27,23 @@ RSpec.describe RuboCop::PathUtil do
     include FileHelper
 
     before do
-      create_file('file', '')
-      create_file('dir/file', '')
-      create_file('dir/files', '')
-      create_file('dir/dir/file', '')
-      create_file('dir/sub/file', '')
-      create_file('dir/.hidden/file', '')
-      create_file('dir/.hidden_file', '')
-      $stderr = StringIO.new
+      create_empty_file('file')
+      create_empty_file('dir/file')
+      create_empty_file('dir/files')
+      create_empty_file('dir/dir/file')
+      create_empty_file('dir/sub/file')
+      create_empty_file('dir/.hidden/file')
+      create_empty_file('dir/.hidden_file')
     end
-
-    after { $stderr = STDERR }
 
     it 'does not match dir/** for file in hidden dir' do
       expect(described_class.match_path?('dir/**', 'dir/.hidden/file'))
         .to be(false)
-      expect($stderr.string).to eq('')
     end
 
-    it 'does not match dir/** for hidden file' do
+    it 'matches dir/** for hidden file' do
       expect(described_class.match_path?('dir/**', 'dir/.hidden_file'))
-        .to be(false)
-      expect($stderr.string).to eq('')
+        .to be(true)
     end
 
     it 'does not match file in a subdirectory' do
@@ -62,13 +57,11 @@ RSpec.describe RuboCop::PathUtil do
       expect(described_class.match_path?(
                "#{Dir.pwd}/dir/file",
                "#{Dir.pwd}/dir/dir/file"
-      )).to be(false)
+             )).to be(false)
     end
 
     it 'matches glob expressions' do
       expect(described_class.match_path?('dir/*', 'dir/file')).to be(true)
-      expect(described_class.match_path?('dir/*/*',
-                                         'dir/sub/file')).to be(true)
       expect(described_class.match_path?('dir/**/*',
                                          'dir/sub/file')).to be(true)
       expect(described_class.match_path?('dir/**/*', 'dir/file')).to be(true)
@@ -80,11 +73,17 @@ RSpec.describe RuboCop::PathUtil do
       expect(described_class.match_path?('**/*',
                                          'dir/.hidden/file')).to be(false)
       expect(described_class.match_path?('**/*',
-                                         'dir/.hidden_file')).to be(false)
+                                         'dir/.hidden_file')).to be(true)
       expect(described_class.match_path?('**/.*/*', 'dir/.hidden/file'))
         .to be(true)
       expect(described_class.match_path?('**/.*',
                                          'dir/.hidden_file')).to be(true)
+
+      expect(described_class.match_path?('c{at,ub}s', 'cats')).to be(true)
+      expect(described_class.match_path?('c{at,ub}s', 'cubs')).to be(true)
+      expect(described_class.match_path?('c{at,ub}s', 'gorillas')).to be(false)
+      expect(described_class.match_path?('**/*.{rb,txt}', 'dir/foo.txt'))
+        .to be(true)
     end
 
     it 'matches regexps' do

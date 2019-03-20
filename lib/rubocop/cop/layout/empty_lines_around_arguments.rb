@@ -3,7 +3,7 @@
 module RuboCop
   module Cop
     module Layout
-      # This cops checks if empty lines exist around the arguments
+      # This cop checks if empty lines exist around the arguments
       # of a method invocation.
       #
       # @example
@@ -45,8 +45,10 @@ module RuboCop
 
         def on_send(node)
           return if node.single_line? || node.arguments.empty?
+
           extra_lines(node) { |range| add_offense(node, location: range) }
         end
+        alias on_csend on_send
 
         def autocorrect(node)
           lambda do |corrector|

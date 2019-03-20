@@ -92,7 +92,7 @@ RSpec.describe RuboCop::Config do
       it 'prints a warning message' do
         configuration # ConfigLoader.load_file will validate config
         expect($stderr.string).to match(
-          %r{unrecognized parameter Metrics/LineLength:Min}
+          %r{Metrics/LineLength does not support Min parameter.}
         )
       end
     end
@@ -108,6 +108,9 @@ RSpec.describe RuboCop::Config do
             Include:
               - lib/file.xyz
             Severity: warning
+            inherit_mode:
+              merge:
+                - Exclude
             StyleGuide: https://example.com/some-style.html
         YAML
       end
@@ -395,6 +398,7 @@ RSpec.describe RuboCop::Config do
 
   describe '#file_to_exclude?' do
     before { $stderr = StringIO.new }
+
     after { $stderr = STDERR }
 
     let(:hash) do
@@ -430,6 +434,38 @@ RSpec.describe RuboCop::Config do
 
         expect(configuration.file_to_exclude?('baz.rb')).to be_falsey
       end
+    end
+  end
+
+  describe '#allowed_camel_case_file?' do
+    subject { configuration.allowed_camel_case_file?(file_path) }
+
+    let(:hash) do
+      {
+        'AllCops' => {
+          'Include' => ['**/Gemfile']
+        }
+      }
+    end
+
+    context 'when the passed path matches allowed camel case patterns ' \
+            'to include' do
+      let(:file_path) { '/home/foo/project/Gemfile' }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when the passed path does not match allowed camel case patterns ' \
+            'to include' do
+      let(:file_path) { '/home/foo/project/testCase' }
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the passed path is a gemspec' do
+      let(:file_path) { '/home/foo/project/my-project.gemspec' }
+
+      it { is_expected.to be true }
     end
   end
 
@@ -527,6 +563,7 @@ RSpec.describe RuboCop::Config do
       let(:hash) { { 'AllCops' => { 'Includes' => [] } } }
 
       before { $stderr = StringIO.new }
+
       after { $stderr = STDERR }
 
       it 'prints a warning message for the loaded path' do
@@ -802,7 +839,7 @@ RSpec.describe RuboCop::Config do
 
   describe '#target_ruby_version', :isolated_environment do
     context 'when TargetRubyVersion is set' do
-      let(:ruby_version) { 2.1 }
+      let(:ruby_version) { 2.2 }
 
       let(:hash) do
         {

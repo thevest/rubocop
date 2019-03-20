@@ -26,13 +26,13 @@ $ rubocop --out result.txt
 # and at the end the offense count summary will be outputted.
 $ rubocop --format progress --format offenses
 
-# Progress format to $stdout, and JSON format to the file rubocop.json.
+# Progress format to $stdout and JSON format to the file rubocop.json.
 $ rubocop --format progress --format json --out rubocop.json
 #         ~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~
 #                 |               |_______________|
 #              $stdout
 
-# Progress format to result.txt, and simple format to $stdout.
+# Progress format to result.txt and simple format to $stdout.
 $ rubocop --out result.txt --format simple
 #         ~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~
 #                  |                 |
@@ -46,7 +46,7 @@ You can also load [custom formatters](extensions.md#custom-formatters).
 The default `progress` formatter outputs a character for each inspected file,
 and at the end it displays all detected offenses in the `clang` format.
 A `.` represents a clean file, and each of the capital letters means
-the severest offense (convention, warning, error or fatal) found in a file.
+the severest offense (convention, warning, error, or fatal) found in a file.
 
 ```sh
 $ rubocop
@@ -269,7 +269,7 @@ $ rubocop --format html -o rubocop.html
 
  **Machine-parsable**
 
-Useful for CI environments, it will format report following the [Test Anything Protocol](http://testanything.org).
+Useful for CI environments, it will format report following the [Test Anything Protocol](https://testanything.org).
 
 ```sh
 $ rubocop --format tap
@@ -279,11 +279,11 @@ not ok 1 - lib/rubocop.rb
 # This is line 2.
 #   ^
 ok 2 - spec/spec_helper.rb
-not ok 3 - bin/rubocop
-# bin/rubocop:5:2: E: bar
+not ok 3 - exe/rubocop
+# exe/rubocop:5:2: E: bar
 # This is line 5.
 #  ^
-# bin/rubocop:6:1: C: foo
+# exe/rubocop:6:1: C: foo
 # This is line 6.
 # ^
 

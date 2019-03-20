@@ -20,16 +20,29 @@ RSpec.describe RuboCop::Cop::Layout::MultilineHashBraceLayout, :config do
     expect_no_offenses('{}')
   end
 
-  include_examples 'multiline literal brace layout' do
+  it_behaves_like 'multiline literal brace layout' do
     let(:open) { '{' }
     let(:close) { '}' }
     let(:a) { 'a: 1' }
     let(:b) { 'b: 2' }
     let(:multi_prefix) { 'b: ' }
-    let(:multi) { ['[', '1', ']'] }
+    let(:multi) do
+      <<-RUBY.strip_indent.chomp
+        [
+        1
+        ]
+      RUBY
+    end
   end
 
-  include_examples 'multiline literal brace layout trailing comma' do
+  it_behaves_like 'multiline literal brace layout method argument' do
+    let(:open) { '{' }
+    let(:close) { '}' }
+    let(:a) { 'a: 1' }
+    let(:b) { 'b: 2' }
+  end
+
+  it_behaves_like 'multiline literal brace layout trailing comma' do
     let(:open) { '{' }
     let(:close) { '}' }
     let(:a) { 'a: 1' }

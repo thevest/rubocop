@@ -2,9 +2,9 @@
 
 ## Layout/AccessModifierIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Modifiers should be indented as deep as method definitions, or as deep
 as the class/module keyword, depending on configuration.
@@ -51,13 +51,13 @@ IndentationWidth | `<none>` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#indent-public-private-protected](https://github.com/bbatsov/ruby-style-guide#indent-public-private-protected)
+* [https://github.com/rubocop-hq/ruby-style-guide#indent-public-private-protected](https://github.com/rubocop-hq/ruby-style-guide#indent-public-private-protected)
 
 ## Layout/AlignArray
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Here we check if the elements of a multi-line array literal are
 aligned.
@@ -82,19 +82,19 @@ a = ['run',
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#align-multiline-arrays](https://github.com/bbatsov/ruby-style-guide#align-multiline-arrays)
+* [https://github.com/rubocop-hq/ruby-style-guide#align-multiline-arrays](https://github.com/rubocop-hq/ruby-style-guide#align-multiline-arrays)
 
 ## Layout/AlignHash
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Check that the keys, separators, and values of a multi-line hash
 literal are aligned according to configuration. The configuration
 options are:
 
-  - key (left align keys)
+  - key (left align keys, one space before hash rockets and values)
   - separator (align hash rockets and colons, right align keys)
   - table (left align keys, hash rockets, and values)
 
@@ -115,6 +115,10 @@ can also be configured. The options are:
 {
   :foo => bar,
    :ba => baz
+}
+{
+  :foo => bar,
+  :ba  => baz
 }
 
 # good
@@ -164,6 +168,10 @@ can also be configured. The options are:
 {
   foo: bar,
    ba: baz
+}
+{
+  foo: bar,
+  ba:  baz
 }
 
 # good
@@ -285,9 +293,9 @@ EnforcedLastArgumentHashStyle | `always_inspect` | `always_inspect`, `always_ign
 
 ## Layout/AlignParameters
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Here we check if the parameters on a multi-line method call or
 definition are aligned.
@@ -330,13 +338,13 @@ IndentationWidth | `<none>` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-double-indent](https://github.com/bbatsov/ruby-style-guide#no-double-indent)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-double-indent](https://github.com/rubocop-hq/ruby-style-guide#no-double-indent)
 
 ## Layout/BlockAlignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks whether the end keywords are aligned properly for do
 end blocks.
@@ -414,9 +422,9 @@ EnforcedStyleAlignWith | `either` | `either`, `start_of_block`, `start_of_line`
 
 ## Layout/BlockEndNewline
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks whether the end statement of a do..end block
 is on its own line.
@@ -445,9 +453,9 @@ blah { |i|
 
 ## Layout/CaseIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks how the *when*s of a *case* expression
 are indented in relation to its *case* or *end* keyword.
@@ -531,48 +539,56 @@ IndentationWidth | `<none>` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#indent-when-to-case](https://github.com/bbatsov/ruby-style-guide#indent-when-to-case)
+* [https://github.com/rubocop-hq/ruby-style-guide#indent-when-to-case](https://github.com/rubocop-hq/ruby-style-guide#indent-when-to-case)
 
 ## Layout/ClassStructure
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.52 | -
 
 Checks if the code style follows the ExpectedOrder configuration:
 
 `Categories` allows us to map macro names into a category.
 
 Consider an example of code style that covers the following order:
+- Module inclusion (include, prepend, extend)
 - Constants
 - Associations (has_one, has_many)
-- Attributes (attr_accessor, attr_writer, attr_reader)
+- Public attribute macros (attr_accessor, attr_writer, attr_reader)
+- Other macros (validates, validate)
+- Public class methods
 - Initializer
-- Instance methods
-- Protected methods
-- Private methods
+- Public instance methods
+- Protected attribute macros (attr_accessor, attr_writer, attr_reader)
+- Protected instance methods
+- Private attribute macros (attr_accessor, attr_writer, attr_reader)
+- Private instance methods
 
 You can configure the following order:
 
 ```yaml
  Layout/ClassStructure:
-   Categories:
-     module_inclusion:
-       - include
-       - prepend
-       - extend
    ExpectedOrder:
-       - module_inclusion
-       - constants
-       - public_class_methods
-       - initializer
-       - public_methods
-       - protected_methods
-       - private_methods
-
+     - module_inclusion
+     - constants
+     - association
+     - public_attribute_macros
+     - public_delegate
+     - macros
+     - public_class_methods
+     - initializer
+     - public_methods
+     - protected_attribute_macros
+     - protected_methods
+     - private_attribute_macros
+     - private_delegate
+     - private_methods
 ```
+
 Instead of putting all literals in the expected order, is also
-possible to group categories of macros.
+possible to group categories of macros. Visibility levels are handled
+automatically.
 
 ```yaml
  Layout/ClassStructure:
@@ -580,10 +596,17 @@ possible to group categories of macros.
      association:
        - has_many
        - has_one
-     attribute:
+     attribute_macros:
        - attr_accessor
        - attr_reader
        - attr_writer
+     macros:
+       - validates
+       - validate
+     module_inclusion:
+       - include
+       - prepend
+       - extend
 ```
 
 ### Examples
@@ -611,11 +634,14 @@ class Person
   # constants are next
   SOME_CONSTANT = 20
 
-  # afterwards we have attribute macros
+  # afterwards we have public attribute macros
   attr_reader :name
 
   # followed by other macros (if any)
   validates :name
+
+  # then we have public delegate macros
+  delegate :to_s, to: :name
 
   # public class methods are next in line
   def self.some_method
@@ -629,13 +655,21 @@ class Person
   def some_method
   end
 
-  # protected and private methods are grouped near the end
+  # protected attribute macros and methods go next
   protected
+
+  attr_reader :protected_name
 
   def some_protected_method
   end
 
+  # private attribute macros, delegate macros and methods
+  # are grouped near the end
   private
+
+  attr_reader :private_name
+
+  delegate :some_private_delegate, to: :name
 
   def some_private_method
   end
@@ -651,47 +685,137 @@ ExpectedOrder | `module_inclusion`, `constants`, `public_class_methods`, `initia
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#consistent-classes](https://github.com/bbatsov/ruby-style-guide#consistent-classes)
+* [https://github.com/rubocop-hq/ruby-style-guide#consistent-classes](https://github.com/rubocop-hq/ruby-style-guide#consistent-classes)
+
+## Layout/ClosingHeredocIndentation
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.57 | -
+
+Checks the indentation of here document closings.
+
+### Examples
+
+```ruby
+# bad
+class Foo
+  def bar
+    <<~SQL
+      'Hi'
+  SQL
+  end
+end
+
+# good
+class Foo
+  def bar
+    <<~SQL
+      'Hi'
+    SQL
+  end
+end
+
+# bad
+
+# heredoc contents is before closing heredoc.
+foo arg,
+    <<~EOS
+  Hi
+    EOS
+
+# good
+foo arg,
+    <<~EOS
+  Hi
+EOS
+
+# good
+foo arg,
+    <<~EOS
+      Hi
+    EOS
+```
 
 ## Layout/ClosingParenthesisIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks the indentation of hanging closing parentheses in
+This cop checks the indentation of hanging closing parentheses in
 method calls, method definitions, and grouped expressions. A hanging
 closing parenthesis means `)` preceded by a line break.
 
 ### Examples
 
 ```ruby
-# good: when x is on its own line, indent this way
-func(
-  x,
-  y
+# bad
+some_method(
+  a,
+  b
+  )
+
+some_method(
+  a, b
+  )
+
+some_method(a, b, c
+  )
+
+some_method(a,
+            b,
+            c
+  )
+
+some_method(a,
+  x: 1,
+  y: 2
+  )
+
+# Scenario 1: When First Parameter Is On Its Own Line
+
+# good: when first param is on a new line, right paren is *always*
+#       outdented by IndentationWidth
+some_method(
+  a,
+  b
 )
 
-# good: when x follows opening parenthesis, align parentheses
-a = b * (x +
-         y
-        )
+# good
+some_method(
+  a, b
+)
 
-# bad
-def func(
-  x,
-  y
-  )
-end
+# Scenario 2: When First Parameter Is On The Same Line
+
+# good: when all other params are also on the same line, outdent
+#       right paren by IndentationWidth
+some_method(a, b, c
+           )
+
+# good: when all other params are on multiple lines, but are lined
+#       up, align right paren with left paren
+some_method(a,
+            b,
+            c
+           )
+
+# good: when other params are not lined up on multiple lines, outdent
+#       right paren by IndentationWidth
+some_method(a,
+  x: 1,
+  y: 2
+)
 ```
 
 ## Layout/CommentIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks the indentation of comments.
+This cop checks the indentation of comments.
 
 ### Examples
 
@@ -725,9 +849,9 @@ end
 
 ## Layout/ConditionPosition
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.53 | -
 
 This cop checks for conditions that are not on the same line as
 if/while/until.
@@ -752,13 +876,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#same-line-condition](https://github.com/bbatsov/ruby-style-guide#same-line-condition)
+* [https://github.com/rubocop-hq/ruby-style-guide#same-line-condition](https://github.com/rubocop-hq/ruby-style-guide#same-line-condition)
 
 ## Layout/DefEndAlignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks whether the end keywords of method definitions are
 aligned properly.
@@ -808,9 +932,9 @@ Severity | `warning` | String
 
 ## Layout/DotPosition
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks the . position in multi-line method calls.
 
@@ -821,7 +945,7 @@ This cop checks the . position in multi-line method calls.
 ```ruby
 # bad
 something.
-  mehod
+  method
 
 # good
 something
@@ -836,7 +960,7 @@ something
 
 # good
 something.
-  mehod
+  method
 ```
 
 ### Configurable attributes
@@ -847,15 +971,15 @@ EnforcedStyle | `leading` | `leading`, `trailing`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#consistent-multi-line-chains](https://github.com/bbatsov/ruby-style-guide#consistent-multi-line-chains)
+* [https://github.com/rubocop-hq/ruby-style-guide#consistent-multi-line-chains](https://github.com/rubocop-hq/ruby-style-guide#consistent-multi-line-chains)
 
 ## Layout/ElseAlignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks the alignment of else keywords. Normally they should
+This cop checks the alignment of else keywords. Normally they should
 be aligned with an if/unless/while/until/begin/def keyword, but there
 are special cases when they should follow the same rules as the
 alignment of end.
@@ -887,9 +1011,9 @@ end
 
 ## Layout/EmptyComment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks empty comment.
 
@@ -966,11 +1090,52 @@ Name | Default value | Configurable values
 AllowBorderComment | `true` | Boolean
 AllowMarginComment | `true` | Boolean
 
+## Layout/EmptyLineAfterGuardClause
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.56 | 0.59
+
+This cop enforces empty line after guard clause
+
+### Examples
+
+```ruby
+# bad
+def foo
+  return if need_return?
+  bar
+end
+
+# good
+def foo
+  return if need_return?
+
+  bar
+end
+
+# good
+def foo
+  return if something?
+  return if something_different?
+
+  bar
+end
+
+# also good
+def foo
+  if something?
+    do_something
+    return if need_return?
+  end
+end
+```
+
 ## Layout/EmptyLineAfterMagicComment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for a newline after the final magic comment.
 
@@ -995,23 +1160,23 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#separate-magic-comments-from-code](https://github.com/bbatsov/ruby-style-guide#separate-magic-comments-from-code)
+* [https://github.com/rubocop-hq/ruby-style-guide#separate-magic-comments-from-code](https://github.com/rubocop-hq/ruby-style-guide#separate-magic-comments-from-code)
 
 ## Layout/EmptyLineBetweenDefs
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks whether method definitions are
 separated by one empty line.
 
-`NumberOfEmptyLines` can be and integer (e.g. 1 by default) or
-an array (e.g. [1, 2]) to specificy a minimum and a maximum of
-empty lines.
+`NumberOfEmptyLines` can be an integer (default is 1) or
+an array (e.g. [1, 2]) to specify a minimum and maximum
+number of empty lines permitted.
 
-`AllowAdjacentOneLineDefs` can be used to configure is adjacent
-one line methods definitions are an offense
+`AllowAdjacentOneLineDefs` configures whether adjacent
+one-line method definitions are considered an offense.
 
 ### Examples
 
@@ -1040,15 +1205,15 @@ NumberOfEmptyLines | `1` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-between-methods](https://github.com/bbatsov/ruby-style-guide#empty-lines-between-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-between-methods](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-between-methods)
 
 ## Layout/EmptyLines
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks for two or more consecutive blank lines.
+This cop checks for two or more consecutive blank lines.
 
 ### Examples
 
@@ -1067,13 +1232,13 @@ some_method
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#two-or-more-empty-lines](https://github.com/bbatsov/ruby-style-guide#two-or-more-empty-lines)
+* [https://github.com/rubocop-hq/ruby-style-guide#two-or-more-empty-lines](https://github.com/rubocop-hq/ruby-style-guide#two-or-more-empty-lines)
 
 ## Layout/EmptyLinesAroundAccessModifier
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Access modifiers should be surrounded by blank lines.
 
@@ -1099,15 +1264,15 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-around-access-modifier](https://github.com/bbatsov/ruby-style-guide#empty-lines-around-access-modifier)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-access-modifier](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-access-modifier)
 
 ## Layout/EmptyLinesAroundArguments
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
-This cops checks if empty lines exist around the arguments
+This cop checks if empty lines exist around the arguments
 of a method invocation.
 
 ### Examples
@@ -1147,11 +1312,11 @@ some_method(
 
 ## Layout/EmptyLinesAroundBeginBody
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks if empty lines exist around the bodies of begin-end
+This cop checks if empty lines exist around the bodies of begin-end
 blocks.
 
 ### Examples
@@ -1174,15 +1339,15 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies](https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies)
 
 ## Layout/EmptyLinesAroundBlockBody
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks if empty lines around the bodies of blocks match
+This cop checks if empty lines around the bodies of blocks match
 the configuration.
 
 ### Examples
@@ -1216,15 +1381,15 @@ EnforcedStyle | `no_empty_lines` | `empty_lines`, `no_empty_lines`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies](https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies)
 
 ## Layout/EmptyLinesAroundClassBody
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | 0.53
 
-This cops checks if empty lines around the bodies of classes match
+This cop checks if empty lines around the bodies of classes match
 the configuration.
 
 ### Examples
@@ -1309,15 +1474,15 @@ EnforcedStyle | `no_empty_lines` | `empty_lines`, `empty_lines_except_namespace`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies](https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies)
 
 ## Layout/EmptyLinesAroundExceptionHandlingKeywords
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks if empty lines exist around the bodies of `begin`
+This cop checks if empty lines exist around the bodies of `begin`
 sections. This cop doesn't check empty lines at `begin` body
 beginning/end and around method definition body.
 `Style/EmptyLinesAroundBeginBody` or `Style/EmptyLinesAroundMethodBody`
@@ -1377,15 +1542,15 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies](https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies)
 
 ## Layout/EmptyLinesAroundMethodBody
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks if empty lines exist around the bodies of methods.
+This cop checks if empty lines exist around the bodies of methods.
 
 ### Examples
 
@@ -1407,15 +1572,15 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies](https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies)
 
 ## Layout/EmptyLinesAroundModuleBody
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks if empty lines around the bodies of modules match
+This cop checks if empty lines around the bodies of modules match
 the configuration.
 
 ### Examples
@@ -1476,13 +1641,13 @@ EnforcedStyle | `no_empty_lines` | `empty_lines`, `empty_lines_except_namespace`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies](https://github.com/bbatsov/ruby-style-guide#empty-lines-around-bodies)
+* [https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies](https://github.com/rubocop-hq/ruby-style-guide#empty-lines-around-bodies)
 
 ## Layout/EndAlignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks whether the end keywords are aligned properly.
 
@@ -1568,9 +1733,9 @@ Severity | `warning` | String
 
 ## Layout/EndOfLine
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.49 | -
 
 This cop checks for Windows-style line endings in the source code.
 
@@ -1623,13 +1788,13 @@ EnforcedStyle | `native` | `native`, `lf`, `crlf`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#crlf](https://github.com/bbatsov/ruby-style-guide#crlf)
+* [https://github.com/rubocop-hq/ruby-style-guide#crlf](https://github.com/rubocop-hq/ruby-style-guide#crlf)
 
 ## Layout/ExtraSpacing
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks for extra/unnecessary whitespace.
 
@@ -1640,12 +1805,23 @@ This cop checks for extra/unnecessary whitespace.
 name      = "RuboCop"
 # Some comment and an empty line
 
-website  += "/bbatsov/rubocop" unless cond
+website  += "/rubocop-hq/rubocop" unless cond
 puts        "rubocop"          if     debug
 
 # bad for any configuration
 set_app("RuboCop")
-website  = "https://github.com/bbatsov/rubocop"
+website  = "https://github.com/rubocop-hq/rubocop"
+
+# good only if AllowBeforeTrailingComments is true
+object.method(arg)  # this is a comment
+
+# good even if AllowBeforeTrailingComments is false or not set
+object.method(arg) # this is a comment
+
+# good with either AllowBeforeTrailingComments or AllowForAlignment
+object.method(arg)         # this is a comment
+another_object.method(arg) # this is another comment
+some_object.method(arg)    # this is some comment
 ```
 
 ### Configurable attributes
@@ -1653,13 +1829,14 @@ website  = "https://github.com/bbatsov/rubocop"
 Name | Default value | Configurable values
 --- | --- | ---
 AllowForAlignment | `true` | Boolean
+AllowBeforeTrailingComments | `false` | Boolean
 ForceEqualSignAlignment | `false` | Boolean
 
 ## Layout/FirstArrayElementLineBreak
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.49 | -
 
 This cop checks for a line break before the first element in a
 multi-line array.
@@ -1679,9 +1856,9 @@ multi-line array.
 
 ## Layout/FirstHashElementLineBreak
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.49 | -
 
 This cop checks for a line break before the first element in a
 multi-line hash.
@@ -1701,9 +1878,9 @@ multi-line hash.
 
 ## Layout/FirstMethodArgumentLineBreak
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.49 | -
 
 This cop checks for a line break before the first argument in a
 multi-line method call.
@@ -1727,9 +1904,9 @@ method foo, bar,
 
 ## Layout/FirstMethodParameterLineBreak
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.49 | -
 
 This cop checks for a line break before the first parameter in a
 multi-line method parameter definition.
@@ -1759,13 +1936,13 @@ end
 
 ## Layout/FirstParameterIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | 0.56
 
 This cop checks the indentation of the first parameter in a method call.
-Parameters after the first one are checked by Style/AlignParameters, not
-by this cop.
+Parameters after the first one are checked by Layout/AlignParameters,
+not by this cop.
 
 ### Examples
 
@@ -1775,24 +1952,151 @@ some_method(
 first_param,
 second_param)
 
+foo = some_method(
+first_param,
+second_param)
+
+foo = some_method(nested_call(
+nested_first_param),
+second_param)
+
+foo = some_method(
+nested_call(
+nested_first_param),
+second_param)
+
+some_method nested_call(
+nested_first_param),
+second_param
+```
+#### EnforcedStyle: consistent
+
+```ruby
+# The first parameter should always be indented one step more than the
+# preceding line.
+
 # good
 some_method(
   first_param,
 second_param)
+
+foo = some_method(
+  first_param,
+second_param)
+
+foo = some_method(nested_call(
+  nested_first_param),
+second_param)
+
+foo = some_method(
+  nested_call(
+    nested_first_param),
+second_param)
+
+some_method nested_call(
+  nested_first_param),
+second_param
+```
+#### EnforcedStyle: consistent_relative_to_receiver
+
+```ruby
+# The first parameter should always be indented one level relative to
+# the parent that is receiving the parameter
+
+# good
+some_method(
+  first_param,
+second_param)
+
+foo = some_method(
+        first_param,
+second_param)
+
+foo = some_method(nested_call(
+                    nested_first_param),
+second_param)
+
+foo = some_method(
+        nested_call(
+          nested_first_param),
+second_param)
+
+some_method nested_call(
+              nested_first_param),
+second_params
+```
+#### EnforcedStyle: special_for_inner_method_call
+
+```ruby
+# The first parameter should normally be indented one step more than
+# the preceding line, but if it's a parameter for a method call that
+# is itself a parameter in a method call, then the inner parameter
+# should be indented relative to the inner method.
+
+# good
+some_method(
+  first_param,
+second_param)
+
+foo = some_method(
+  first_param,
+second_param)
+
+foo = some_method(nested_call(
+                    nested_first_param),
+second_param)
+
+foo = some_method(
+  nested_call(
+    nested_first_param),
+second_param)
+
+some_method nested_call(
+              nested_first_param),
+second_param
+```
+#### EnforcedStyle: special_for_inner_method_call_in_parentheses (default)
+
+```ruby
+# Same as `special_for_inner_method_call` except that the special rule
+# only applies if the outer method call encloses its arguments in
+# parentheses.
+
+# good
+some_method(
+  first_param,
+second_param)
+
+foo = some_method(
+  first_param,
+second_param)
+
+foo = some_method(nested_call(
+                    nested_first_param),
+second_param)
+
+foo = some_method(
+  nested_call(
+    nested_first_param),
+second_param)
+
+some_method nested_call(
+  nested_first_param),
+second_param
 ```
 
 ### Configurable attributes
 
 Name | Default value | Configurable values
 --- | --- | ---
-EnforcedStyle | `special_for_inner_method_call_in_parentheses` | `consistent`, `special_for_inner_method_call`, `special_for_inner_method_call_in_parentheses`
+EnforcedStyle | `special_for_inner_method_call_in_parentheses` | `consistent`, `consistent_relative_to_receiver`, `special_for_inner_method_call`, `special_for_inner_method_call_in_parentheses`
 IndentationWidth | `<none>` | Integer
 
 ## Layout/IndentArray
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks the indentation of the first element in an array literal
 where the opening bracket and the first element are on separate lines.
@@ -1889,9 +2193,9 @@ IndentationWidth | `<none>` | Integer
 
 ## Layout/IndentAssignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks the indentation of the first line of the
 right-hand-side of a multi-line assignment.
@@ -1923,11 +2227,11 @@ IndentationWidth | `<none>` | Integer
 
 ## Layout/IndentHash
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks the indentation of the first key in a hash literal
+This cop checks the indentation of the first key in a hash literal
 where the opening brace and the first key are on separate lines. The
 other keys' indentations are handled by the AlignHash cop.
 
@@ -1975,7 +2279,7 @@ but_in_a_method_call({
 ```ruby
 # The `consistent` style enforces that the first key in a hash
 # literal where the opening brace and the first key are on
-# seprate lines is indented the same as a hash literal which is not
+# separate lines is indented the same as a hash literal which is not
 # defined inside a method call.
 
 # bad
@@ -2020,16 +2324,16 @@ IndentationWidth | `<none>` | Integer
 
 ## Layout/IndentHeredoc
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks the indentation of the here document bodies. The bodies
+This cop checks the indentation of the here document bodies. The bodies
 are indented one step.
 In Ruby 2.3 or newer, squiggly heredocs (`<<~`) should be used. If you
 use the older rubies, you should introduce some library to your project
 (e.g. ActiveSupport, Powerpack or Unindent).
-Note: When `Metrics/LineLength`'s `AllowHeredoc` is false(not default),
+Note: When `Metrics/LineLength`'s `AllowHeredoc` is false (not default),
       this cop does not add any offenses for long here documents to
       avoid `Metrics/LineLength`'s offenses.
 
@@ -2110,15 +2414,15 @@ EnforcedStyle | `auto_detection` | `auto_detection`, `squiggly`, `active_support
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#squiggly-heredocs](https://github.com/bbatsov/ruby-style-guide#squiggly-heredocs)
+* [https://github.com/rubocop-hq/ruby-style-guide#squiggly-heredocs](https://github.com/rubocop-hq/ruby-style-guide#squiggly-heredocs)
 
 ## Layout/IndentationConsistency
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks for inconsistent indentation.
+This cop checks for inconsistent indentation.
 
 The difference between `rails` and `normal` is that the `rails` style
 prescribes that in classes and modules the `protected` and `private`
@@ -2248,15 +2552,15 @@ EnforcedStyle | `normal` | `normal`, `rails`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-indentation](https://github.com/bbatsov/ruby-style-guide#spaces-indentation)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-indentation](https://github.com/rubocop-hq/ruby-style-guide#spaces-indentation)
 
 ## Layout/IndentationWidth
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks for indentation that doesn't use the specified number
+This cop checks for indentation that doesn't use the specified number
 of spaces.
 
 See also the IndentationConsistency cop which is the companion to this
@@ -2310,15 +2614,15 @@ IgnoredPatterns | `[]` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-indentation](https://github.com/bbatsov/ruby-style-guide#spaces-indentation)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-indentation](https://github.com/rubocop-hq/ruby-style-guide#spaces-indentation)
 
 ## Layout/InitialIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cops checks for indentation of the first non-blank non-comment
+This cop checks for indentation of the first non-blank non-comment
 line in a file.
 
 ### Examples
@@ -2335,11 +2639,44 @@ class A
 end
 ```
 
+## Layout/LeadingBlankLines
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.57 | -
+
+This cop checks for unnecessary leading blank lines at the beginning
+of a file.
+
+### Examples
+
+```ruby
+# bad
+# (start of file)
+
+class Foo
+end
+
+# bad
+# (start of file)
+
+# a comment
+
+# good
+# (start of file)
+class Foo
+end
+
+# good
+# (start of file)
+# a comment
+```
+
 ## Layout/LeadingCommentSpace
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks whether comments have a leading space after the
 `#` denoting the start of the comment. The leading space is not
@@ -2359,16 +2696,16 @@ or rackup options.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#hash-space](https://github.com/bbatsov/ruby-style-guide#hash-space)
+* [https://github.com/rubocop-hq/ruby-style-guide#hash-space](https://github.com/rubocop-hq/ruby-style-guide#hash-space)
 
 ## Layout/MultilineArrayBraceLayout
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks that the closing brace in an array literal is either
-on the same line as the last array element, or a new line.
+on the same line as the last array element or on a new line.
 
 When using the `symmetrical` (default) style:
 
@@ -2470,9 +2807,9 @@ EnforcedStyle | `symmetrical` | `symmetrical`, `new_line`, `same_line`
 
 ## Layout/MultilineAssignmentLayout
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.49 | -
 
 This cop checks whether the multiline assignments have a newline
 after the assignment operator.
@@ -2518,13 +2855,13 @@ EnforcedStyle | `new_line` | `same_line`, `new_line`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#indent-conditional-assignment](https://github.com/bbatsov/ruby-style-guide#indent-conditional-assignment)
+* [https://github.com/rubocop-hq/ruby-style-guide#indent-conditional-assignment](https://github.com/rubocop-hq/ruby-style-guide#indent-conditional-assignment)
 
 ## Layout/MultilineBlockLayout
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks whether the multiline do end blocks have a newline
 after the start of the block. Additionally, it checks whether the block
@@ -2564,9 +2901,9 @@ blah { |i|
 
 ## Layout/MultilineHashBraceLayout
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks that the closing brace in a hash literal is either
 on the same line as the last hash element, or a new line.
@@ -2670,9 +3007,9 @@ EnforcedStyle | `symmetrical` | `symmetrical`, `new_line`, `same_line`
 
 ## Layout/MultilineMethodCallBraceLayout
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks that the closing brace in a method call is either
 on the same line as the last method argument, or a new line.
@@ -2777,9 +3114,9 @@ EnforcedStyle | `symmetrical` | `symmetrical`, `new_line`, `same_line`
 
 ## Layout/MultilineMethodCallIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks the indentation of the method name part in method calls
 that span more than one line.
@@ -2843,9 +3180,9 @@ IndentationWidth | `<none>` | Integer
 
 ## Layout/MultilineMethodDefinitionBraceLayout
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks that the closing brace in a method definition is either
 on the same line as the last method parameter, or a new line.
@@ -2962,9 +3299,9 @@ EnforcedStyle | `symmetrical` | `symmetrical`, `new_line`, `same_line`
 
 ## Layout/MultilineOperationIndentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks the indentation of the right hand side operand in
 binary operations that span more than one line.
@@ -3011,9 +3348,9 @@ IndentationWidth | `<none>` | Integer
 
 ## Layout/RescueEnsureAlignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks whether the rescue and ensure keywords are aligned
 properly.
@@ -3038,9 +3375,9 @@ end
 
 ## Layout/SpaceAfterColon
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for colon (:) not followed by some kind of space.
 N.B. this cop does not handle spaces after a ternary operator, which are
@@ -3058,13 +3395,13 @@ def f(a:, b: 2); {a: 3}; end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-operators](https://github.com/bbatsov/ruby-style-guide#spaces-operators)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-operators](https://github.com/rubocop-hq/ruby-style-guide#spaces-operators)
 
 ## Layout/SpaceAfterComma
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for comma (,) not followed by some kind of space.
 
@@ -3082,13 +3419,13 @@ Checks for comma (,) not followed by some kind of space.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-operators](https://github.com/bbatsov/ruby-style-guide#spaces-operators)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-operators](https://github.com/rubocop-hq/ruby-style-guide#spaces-operators)
 
 ## Layout/SpaceAfterMethodName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for space between a method name and a left parenthesis in defs.
 
@@ -3106,13 +3443,13 @@ def method=(y) end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#parens-no-spaces](https://github.com/bbatsov/ruby-style-guide#parens-no-spaces)
+* [https://github.com/rubocop-hq/ruby-style-guide#parens-no-spaces](https://github.com/rubocop-hq/ruby-style-guide#parens-no-spaces)
 
 ## Layout/SpaceAfterNot
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks for space after `!`.
 
@@ -3128,13 +3465,13 @@ This cop checks for space after `!`.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-space-bang](https://github.com/bbatsov/ruby-style-guide#no-space-bang)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-space-bang](https://github.com/rubocop-hq/ruby-style-guide#no-space-bang)
 
 ## Layout/SpaceAfterSemicolon
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for semicolon (;) not followed by some kind of space.
 
@@ -3150,13 +3487,13 @@ x = 1; y = 2
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-operators](https://github.com/bbatsov/ruby-style-guide#spaces-operators)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-operators](https://github.com/rubocop-hq/ruby-style-guide#spaces-operators)
 
 ## Layout/SpaceAroundBlockParameters
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks the spacing inside and after block parameters pipes.
 
@@ -3193,9 +3530,9 @@ EnforcedStyleInsidePipes | `no_space` | `space`, `no_space`
 
 ## Layout/SpaceAroundEqualsInParameterDefault
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks that the equals signs in parameter default assignments
 have or don't have surrounding space depending on configuration.
@@ -3237,13 +3574,13 @@ EnforcedStyle | `space` | `space`, `no_space`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-around-equals](https://github.com/bbatsov/ruby-style-guide#spaces-around-equals)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-around-equals](https://github.com/rubocop-hq/ruby-style-guide#spaces-around-equals)
 
 ## Layout/SpaceAroundKeyword
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks the spacing around the keywords.
 
@@ -3271,9 +3608,9 @@ something = 123 if test
 
 ## Layout/SpaceAroundOperators
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks that operators have space around them, except for **
 which should not have surrounding space.
@@ -3302,13 +3639,13 @@ AllowForAlignment | `true` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-operators](https://github.com/bbatsov/ruby-style-guide#spaces-operators)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-operators](https://github.com/rubocop-hq/ruby-style-guide#spaces-operators)
 
 ## Layout/SpaceBeforeBlockBraces
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | 0.52.1
 
 Checks that block braces have or don't have a space before the opening
 brace depending on configuration.
@@ -3351,9 +3688,9 @@ EnforcedStyleForEmptyBraces | `space` | `space`, `no_space`
 
 ## Layout/SpaceBeforeComma
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for comma (,) preceded by space.
 
@@ -3373,9 +3710,9 @@ each { |a, b| }
 
 ## Layout/SpaceBeforeComment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks for missing space between a token and a comment on the
 same line.
@@ -3392,9 +3729,9 @@ same line.
 
 ## Layout/SpaceBeforeFirstArg
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks that exactly one space is used between a method name and the
 first argument for method calls without parentheses.
@@ -3425,9 +3762,9 @@ AllowForAlignment | `true` | Boolean
 
 ## Layout/SpaceBeforeSemicolon
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for semicolon (;) preceded by space.
 
@@ -3443,12 +3780,12 @@ x = 1; y = 2
 
 ## Layout/SpaceInLambdaLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
-This cop checks for spaces between -> and opening parameter
-brace in lambda literals.
+This cop checks for spaces between `->` and opening parameter
+parenthesis (`(`) in lambda literals.
 
 ### Examples
 
@@ -3479,9 +3816,9 @@ EnforcedStyle | `require_no_space` | `require_no_space`, `require_space`
 
 ## Layout/SpaceInsideArrayLiteralBrackets
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 Checks that brackets used for array literals have or don't have
 surrounding space depending on configuration.
@@ -3521,9 +3858,15 @@ array = [a, b, c, d]
 
 # bad
 array = [ a, [ b, c ] ]
+array = [
+  [ a ],
+  [ b, c ]
+]
 
 # good
 array = [ a, [ b, c ]]
+array = [[ a ],
+  [ b, c ]]
 ```
 #### EnforcedStyleForEmptyBrackets: no_space (default)
 
@@ -3563,9 +3906,9 @@ EnforcedStyleForEmptyBrackets | `no_space` | `space`, `no_space`
 
 ## Layout/SpaceInsideArrayPercentLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for unnecessary additional spaces inside array percent literals
 (i.e. %i/%w).
@@ -3581,9 +3924,9 @@ Checks for unnecessary additional spaces inside array percent literals
 
 ## Layout/SpaceInsideBlockBraces
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks that block braces have or don't have surrounding space inside
 them on configuration. For blocks taking parameters, it checks that the
@@ -3681,9 +4024,9 @@ SpaceBeforeBlockParameters | `true` | Boolean
 
 ## Layout/SpaceInsideHashLiteralBraces
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks that braces used for hash literals have or don't have
 surrounding space depending on configuration.
@@ -3723,9 +4066,11 @@ h = {a: 1, b: 2}
 
 # bad
 h = { a: { b: 2 } }
+foo = { { a: 1 } => { b: { c: 2 } } }
 
 # good
 h = { a: { b: 2 }}
+foo = {{ a: 1 } => { b: { c: 2 }}}
 ```
 #### EnforcedStyleForEmptyBraces: no_space (default)
 
@@ -3765,13 +4110,13 @@ EnforcedStyleForEmptyBraces | `no_space` | `space`, `no_space`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-operators](https://github.com/bbatsov/ruby-style-guide#spaces-operators)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-operators](https://github.com/rubocop-hq/ruby-style-guide#spaces-operators)
 
 ## Layout/SpaceInsideParens
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | 0.55
 
 Checks for spaces inside ordinary round parentheses.
 
@@ -3816,13 +4161,13 @@ EnforcedStyle | `no_space` | `space`, `no_space`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-braces](https://github.com/bbatsov/ruby-style-guide#spaces-braces)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-braces](https://github.com/rubocop-hq/ruby-style-guide#spaces-braces)
 
 ## Layout/SpaceInsidePercentLiteralDelimiters
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for unnecessary additional spaces inside the delimiters of
 %i/%w/%x literals.
@@ -3842,9 +4187,9 @@ Checks for unnecessary additional spaces inside the delimiters of
 
 ## Layout/SpaceInsideRangeLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 Checks for spaces inside range literals.
 
@@ -3866,13 +4211,13 @@ Checks for spaces inside range literals.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-space-inside-range-literals](https://github.com/bbatsov/ruby-style-guide#no-space-inside-range-literals)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-space-inside-range-literals](https://github.com/rubocop-hq/ruby-style-guide#no-space-inside-range-literals)
 
 ## Layout/SpaceInsideReferenceBrackets
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | 0.53
 
 Checks that reference brackets have or don't have
 surrounding space depending on configuration.
@@ -3943,9 +4288,9 @@ EnforcedStyleForEmptyBrackets | `no_space` | `space`, `no_space`
 
 ## Layout/SpaceInsideStringInterpolation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop checks for whitespace within string interpolations.
 
@@ -3978,13 +4323,13 @@ EnforcedStyle | `no_space` | `space`, `no_space`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#string-interpolation](https://github.com/bbatsov/ruby-style-guide#string-interpolation)
+* [https://github.com/rubocop-hq/ruby-style-guide#string-interpolation](https://github.com/rubocop-hq/ruby-style-guide#string-interpolation)
 
 ## Layout/Tab
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | 0.51
 
 This cop checks for tabs inside the source code.
 
@@ -4012,13 +4357,13 @@ IndentationWidth | `<none>` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#spaces-indentation](https://github.com/bbatsov/ruby-style-guide#spaces-indentation)
+* [https://github.com/rubocop-hq/ruby-style-guide#spaces-indentation](https://github.com/rubocop-hq/ruby-style-guide#spaces-indentation)
 
 ## Layout/TrailingBlankLines
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | -
 
 This cop looks for trailing blank lines and a final newline in the
 source code.
@@ -4069,13 +4414,13 @@ EnforcedStyle | `final_newline` | `final_newline`, `final_blank_line`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#newline-eof](https://github.com/bbatsov/ruby-style-guide#newline-eof)
+* [https://github.com/rubocop-hq/ruby-style-guide#newline-eof](https://github.com/rubocop-hq/ruby-style-guide#newline-eof)
 
 ## Layout/TrailingWhitespace
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | 0.55
 
 This cop looks for trailing whitespace in the source code.
 
@@ -4099,4 +4444,4 @@ AllowInHeredoc | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-trailing-whitespace](https://github.com/bbatsov/ruby-style-guide#no-trailing-whitespace)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-trailing-whitespace](https://github.com/rubocop-hq/ruby-style-guide#no-trailing-whitespace)

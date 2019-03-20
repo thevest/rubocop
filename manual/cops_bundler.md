@@ -2,9 +2,9 @@
 
 ## Bundler/DuplicatedGem
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.46 | -
 
 A Gem's requirements should be listed only once in a Gemfile.
 
@@ -39,13 +39,41 @@ Name | Default value | Configurable values
 --- | --- | ---
 Include | `**/*.gemfile`, `**/Gemfile`, `**/gems.rb` | Array
 
+## Bundler/GemComment
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.59 | -
+
+Add a comment describing each gem in your Gemfile.
+
+### Examples
+
+```ruby
+# bad
+
+gem 'foo'
+
+# good
+
+# Helpers for the foo things.
+gem 'foo'
+```
+
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+Include | `**/*.gemfile`, `**/Gemfile`, `**/gems.rb` | Array
+Whitelist | `[]` | Array
+
 ## Bundler/InsecureProtocolSource
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.50 | -
 
-The symbol argument `:gemcutter`, `:rubygems` and `:rubyforge`
+The symbol argument `:gemcutter`, `:rubygems`, and `:rubyforge`
 are deprecated. So please change your source to URL string that
 'https://rubygems.org' if possible, or 'http://rubygems.org' if not.
 
@@ -79,9 +107,9 @@ Include | `**/*.gemfile`, `**/Gemfile`, `**/gems.rb` | Array
 
 ## Bundler/OrderedGems
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.46 | 0.47
 
 Gems should be alphabetically sorted within groups.
 
@@ -112,5 +140,5 @@ gem 'rspec'
 
 Name | Default value | Configurable values
 --- | --- | ---
-Include | `**/*.gemfile`, `**/Gemfile`, `**/gems.rb` | Array
 TreatCommentsAsGroupSeparators | `true` | Boolean
+Include | `**/*.gemfile`, `**/Gemfile`, `**/gems.rb` | Array

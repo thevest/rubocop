@@ -53,6 +53,11 @@ RSpec.describe RuboCop::Cop::Style::EmptyMethod, :config do
                       'def foo(bar, baz); end'
 
       it_behaves_like 'code with offense',
+                      ['def foo bar, baz',
+                       'end'].join("\n"),
+                      'def foo bar, baz; end'
+
+      it_behaves_like 'code with offense',
                       ['def foo',
                        '',
                        'end'].join("\n"),
@@ -64,17 +69,21 @@ RSpec.describe RuboCop::Cop::Style::EmptyMethod, :config do
 
     context 'with a non-empty instance method definition' do
       it_behaves_like 'code without offense',
-                      ['def foo',
-                       '  bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def foo
+                          bar
+                        end
+                      RUBY
 
       it_behaves_like 'code without offense',
                       'def foo; bar; end'
 
       it_behaves_like 'code without offense',
-                      ['def foo',
-                       '  # bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def foo
+                          # bar
+                        end
+                      RUBY
     end
 
     context 'with an empty class method definition' do
@@ -100,17 +109,21 @@ RSpec.describe RuboCop::Cop::Style::EmptyMethod, :config do
 
     context 'with a non-empty class method definition' do
       it_behaves_like 'code without offense',
-                      ['def self.foo',
-                       '  bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def self.foo
+                          bar
+                        end
+                      RUBY
 
       it_behaves_like 'code without offense',
                       'def self.foo; bar; end'
 
       it_behaves_like 'code without offense',
-                      ['def self.foo',
-                       '  # bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def self.foo
+                          # bar
+                        end
+                      RUBY
     end
   end
 
@@ -139,17 +152,21 @@ RSpec.describe RuboCop::Cop::Style::EmptyMethod, :config do
 
     context 'with a non-empty instance method definition' do
       it_behaves_like 'code without offense',
-                      ['def foo',
-                       '  bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def foo
+                          bar
+                        end
+                      RUBY
 
       it_behaves_like 'code without offense',
                       'def foo; bar; end'
 
       it_behaves_like 'code without offense',
-                      ['def foo',
-                       '  # bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def foo
+                          # bar
+                        end
+                      RUBY
     end
 
     context 'with an empty class method definition' do
@@ -170,17 +187,21 @@ RSpec.describe RuboCop::Cop::Style::EmptyMethod, :config do
 
     context 'with a non-empty class method definition' do
       it_behaves_like 'code without offense',
-                      ['def self.foo',
-                       '  bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def self.foo
+                          bar
+                        end
+                      RUBY
 
       it_behaves_like 'code without offense',
                       'def self.foo; bar; end'
 
       it_behaves_like 'code without offense',
-                      ['def self.foo',
-                       '  # bar',
-                       'end']
+                      <<-RUBY.strip_indent
+                        def self.foo
+                          # bar
+                        end
+                      RUBY
     end
 
     context 'when method is nested in class scope' do

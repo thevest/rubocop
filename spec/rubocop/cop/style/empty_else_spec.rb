@@ -66,15 +66,19 @@ RSpec.describe RuboCop::Cop::Style::EmptyElse do
 
         context 'not using semicolons' do
           let(:source) do
-            ['if a',
-             '  foo',
-             'else',
-             'end'].join("\n")
+            <<-RUBY.strip_indent
+              if a
+                foo
+              else
+              end
+            RUBY
           end
           let(:corrected_source) do
-            ['if a',
-             '  foo',
-             'end'].join("\n")
+            <<-RUBY.strip_indent
+              if a
+                foo
+              end
+            RUBY
           end
 
           it_behaves_like 'offense registration'
@@ -120,6 +124,7 @@ RSpec.describe RuboCop::Cop::Style::EmptyElse do
         it_behaves_like 'auto-correct', 'if'
         it_behaves_like 'offense registration'
       end
+
       context 'with an empty comment' do
         let(:source) { <<-RUBY.strip_indent }
           if cond
@@ -217,21 +222,25 @@ RSpec.describe RuboCop::Cop::Style::EmptyElse do
       context 'with an else-clause containing only the literal nil' do
         context 'when standalone' do
           let(:source) do
-            ['if a',
-             '  foo',
-             'elsif b',
-             '  bar',
-             'else',
-             '  nil',
-             'end'].join("\n")
+            <<-RUBY.strip_indent
+              if a
+                foo
+              elsif b
+                bar
+              else
+                nil
+              end
+            RUBY
           end
 
           let(:corrected_source) do
-            ['if a',
-             '  foo',
-             'elsif b',
-             '  bar',
-             'end'].join("\n")
+            <<-RUBY.strip_indent
+              if a
+                foo
+              elsif b
+                bar
+              end
+            RUBY
           end
 
           it_behaves_like 'offense registration'
@@ -498,31 +507,35 @@ RSpec.describe RuboCop::Cop::Style::EmptyElse do
     end
 
     let(:source) do
-      ['def foo',
-       '  if @params',
-       '    case @params[:x]',
-       '    when :a',
-       '      :b',
-       '    else',
-       '      nil',
-       '    end',
-       '  else',
-       '    :c',
-       '  end',
-       'end'].join("\n")
+      <<-RUBY.strip_indent
+        def foo
+          if @params
+            case @params[:x]
+            when :a
+              :b
+            else
+              nil
+            end
+          else
+            :c
+          end
+        end
+      RUBY
     end
 
     let(:corrected_source) do
-      ['def foo',
-       '  if @params',
-       '    case @params[:x]',
-       '    when :a',
-       '      :b',
-       '    end',
-       '  else',
-       '    :c',
-       '  end',
-       'end'].join("\n")
+      <<-RUBY.strip_indent
+        def foo
+          if @params
+            case @params[:x]
+            when :a
+              :b
+            end
+          else
+            :c
+          end
+        end
+      RUBY
     end
 
     it_behaves_like 'offense registration'

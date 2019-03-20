@@ -6,7 +6,7 @@ RSpec.describe RuboCop::Formatter::TapFormatter do
   let(:output) { StringIO.new }
 
   let(:files) do
-    %w[lib/rubocop.rb spec/spec_helper.rb bin/rubocop].map do |path|
+    %w[lib/rubocop.rb spec/spec_helper.rb exe/rubocop].map do |path|
       File.expand_path(path)
     end
   end
@@ -27,7 +27,25 @@ RSpec.describe RuboCop::Formatter::TapFormatter do
     end
 
     context 'when any offenses are detected' do
-      let(:offenses) { [double('offense').as_null_object] }
+      let(:offenses) do
+        source_buffer = Parser::Source::Buffer.new('test', 1)
+        source = Array.new(9) do |index|
+          "This is line #{index + 1}."
+        end
+        source_buffer.source = source.join("\n")
+        line_length = source[0].length + 1
+
+        [
+          RuboCop::Cop::Offense.new(
+            :convention,
+            Parser::Source::Range.new(source_buffer,
+                                      line_length + 2,
+                                      line_length + 3),
+            'foo',
+            'Cop'
+          )
+        ]
+      end
 
       it 'prints "not ok"' do
         expect(output.string).to include('not ok 1')
@@ -100,11 +118,11 @@ RSpec.describe RuboCop::Formatter::TapFormatter do
           # This is line 2.
           #   ^
           ok 2 - spec/spec_helper.rb
-          not ok 3 - bin/rubocop
-          # bin/rubocop:5:2: E: bar
+          not ok 3 - exe/rubocop
+          # exe/rubocop:5:2: E: bar
           # This is line 5.
           #  ^
-          # bin/rubocop:6:1: C: foo
+          # exe/rubocop:6:1: C: foo
           # This is line 6.
           # ^
         OUTPUT

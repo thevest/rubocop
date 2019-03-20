@@ -7,13 +7,13 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
     it 'registers an offense assigning any variable type to ternary' do
       inspect_source("#{variable} = foo? ? 1 : 2")
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'allows assigning any variable type inside ternary' do
-      inspect_source("foo? ? #{variable} = 1 : #{variable} = 2")
-
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        foo? ? #{variable} = 1 : #{variable} = 2
+      RUBY
     end
 
     it 'registers an offense assigning any variable type to if else' do
@@ -26,7 +26,7 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'registers an offense assigning any variable type to if elsif else' do
@@ -41,7 +41,7 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'registers an offense assigning any variable type to if else' \
@@ -55,45 +55,36 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'allows assigning any variable type inside if else' \
       'with multiple assignment' do
-      source = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         if foo
           #{variable}, #{variable} = something
         else
           #{variable}, #{variable} = something_else
         end
       RUBY
-      inspect_source(source)
-
-      expect(cop.messages.empty?).to be(true)
     end
 
     it 'allows assigning any variable type inside if else' do
-      source = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         if foo
           #{variable} = 1
         else
           #{variable} = 2
         end
       RUBY
-      inspect_source(source)
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'allows assignment to if without else' do
-      source = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         #{variable} = if foo
                         1
                       end
       RUBY
-      inspect_source(source)
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'registers an offense assigning any variable type to unless else' do
@@ -106,20 +97,17 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'allows assigning any variable type inside unless else' do
-      source = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         unless foo
           #{variable} = 1
         else
           #{variable} = 2
         end
       RUBY
-      inspect_source(source)
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'registers an offense for assigning any variable type to case when' do
@@ -133,11 +121,11 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'allows assigning any variable type inside case when' do
-      source = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         case foo
         when "a"
           #{variable} = 1
@@ -145,22 +133,16 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
           #{variable} = 2
         end
       RUBY
-      inspect_source(source)
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'does not crash for rescue assignment' do
-      source = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         begin
           foo
         rescue => #{variable}
           bar
         end
       RUBY
-      inspect_source(source)
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     context 'auto-correct' do
@@ -243,7 +225,7 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
     it 'registers an offense for any assignment to ternary' do
       inspect_source("bar #{assignment} (foo? ? 1 : 2)")
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'registers an offense any assignment to if else' do
@@ -256,18 +238,15 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'allows any assignment to if without else' do
-      source = <<-RUBY.strip_indent
+      expect_no_offenses(<<-RUBY.strip_indent)
         bar #{assignment} if foo
                         1
                       end
       RUBY
-      inspect_source(source)
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'registers an offense for any assignment to unless else' do
@@ -280,7 +259,7 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     it 'registers an offense any assignment to case when' do
@@ -294,7 +273,7 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
       RUBY
       inspect_source(source)
 
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect(cop.messages).to eq(['Assign variables inside of conditionals'])
     end
 
     context 'auto-correct' do
@@ -726,45 +705,40 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
 
     it 'registers an offense for assignment using a method that ends with ' \
        'an equal sign' do
-      inspect_source('self.attributes = foo? ? 1 : 2')
-
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
+      expect_offense(<<-RUBY.strip_indent)
+        self.attributes = foo? ? 1 : 2
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Assign variables inside of conditionals
+      RUBY
     end
 
     it 'registers an offense for assignment using []=' do
-      source = <<-RUBY.strip_indent
+      expect_offense(<<-RUBY.strip_indent)
         foo[:a] = if bar?
+        ^^^^^^^^^^^^^^^^^ Assign variables inside of conditionals
                     1
                   else
                     2
                   end
       RUBY
-      inspect_source(source)
-
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
     end
 
     it 'registers an offense for assignment to an if then else' do
-      source = <<-RUBY.strip_indent
+      expect_offense(<<-RUBY.strip_indent)
         bar = if foo then 1
+        ^^^^^^^^^^^^^^^^^^^ Assign variables inside of conditionals
               else 2
               end
       RUBY
-      inspect_source(source)
-
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
     end
 
     it 'registers an offense for assignment to case when then else' do
-      source = <<-RUBY.strip_indent
+      expect_offense(<<-RUBY.strip_indent)
         baz = case foo
+        ^^^^^^^^^^^^^^ Assign variables inside of conditionals
               when bar then 1
               else 2
               end
       RUBY
-      inspect_source(source)
-
-      expect(cop.messages).to eq([described_class::ASSIGN_TO_CONDITION_MSG])
     end
 
     context 'for loop' do
@@ -886,19 +860,19 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
     it_behaves_like('all variable types', 'foo.bar')
 
     it_behaves_like('multiline all variable types', 'bar',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all variable types', 'BAR',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all variable types', 'FOO::BAR',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all variable types', '@bar',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all variable types', '@@bar',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all variable types', '$BAR',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all variable types', 'foo.bar',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
 
     it_behaves_like('all assignment types', '=')
     it_behaves_like('all assignment types', '==')
@@ -923,47 +897,47 @@ RSpec.describe RuboCop::Cop::Style::ConditionalAssignment do
     it_behaves_like('all assignment types', '<<')
 
     it_behaves_like('multiline all assignment types', '=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '==',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '===',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '+=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '-=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '*=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '**=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '/=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '%=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '^=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '&=',
                     [described_class::ASSIGN_TO_CONDITION_MSG])
     it_behaves_like('multiline all assignment types', '|=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '<=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '>=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '<<=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '>>=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '||=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '&&=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '+=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '-=',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
     it_behaves_like('multiline all assignment types', '<<',
-                    [described_class::ASSIGN_TO_CONDITION_MSG])
+                    ['Assign variables inside of conditionals'])
 
     it_behaves_like('single line condition auto-correct')
 

@@ -12,10 +12,10 @@ module RuboCop
       #   # good
       #   object.some_method
       class MethodCallWithoutArgsParentheses < Cop
+        include IgnoredMethods
+
         MSG = 'Do not use parentheses for method calls with ' \
               'no arguments.'.freeze
-
-        ASGN_NODES = %i[lvasgn masgn] + SHORTHAND_ASGN_NODES
 
         def on_send(node)
           return if ineligible_node?(node)
@@ -23,7 +23,7 @@ module RuboCop
           return if ignored_method?(node.method_name)
           return if same_name_assignment?(node)
 
-          add_offense(node, location: :begin)
+          add_offense(node, location: node.loc.begin.join(node.loc.end))
         end
 
         def autocorrect(node)
@@ -36,11 +36,7 @@ module RuboCop
         private
 
         def ineligible_node?(node)
-          node.camel_case_method? || node.implicit_call? || node.keyword_not?
-        end
-
-        def ignored_method?(method)
-          cop_config['IgnoredMethods'].to_a.map(&:to_sym).include?(method)
+          node.camel_case_method? || node.implicit_call? || node.prefix_not?
         end
 
         def same_name_assignment?(node)
@@ -54,14 +50,13 @@ module RuboCop
         end
 
         def any_assignment?(node)
-          node.each_ancestor(*ASGN_NODES).any? do |asgn_node|
+          node.each_ancestor(*AST::Node::ASSIGNMENTS).any? do |asgn_node|
             # `obj.method = value` parses as (send ... :method= ...), and will
             # not be returned as an `asgn_node` here, however,
             # `obj.method ||= value` parses as (or-asgn (send ...) ...)
             # which IS an `asgn_node`. Similarly, `obj.method += value` parses
             # as (op-asgn (send ...) ...), which is also an `asgn_node`.
-            if asgn_node.or_asgn_type? || asgn_node.and_asgn_type? ||
-               asgn_node.op_asgn_type?
+            if asgn_node.shorthand_asgn?
               asgn_node, _value = *asgn_node
               next if asgn_node.send_type?
             end
@@ -74,7 +69,7 @@ module RuboCop
           mlhs_node, _mrhs_node = *node
           var_nodes = *mlhs_node
 
-          var_nodes.map { |n| n.to_a.first }.include?(variable_name)
+          var_nodes.any? { |n| n.to_a.first == variable_name }
         end
       end
     end

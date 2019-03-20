@@ -82,47 +82,58 @@ RSpec.describe RuboCop::Cop::Performance::Casecmp do
 
     it "formats the error message correctly for str.#{selector} ==" do
       inspect_source("str.#{selector} == 'string'")
-      expect(cop.highlights).to eq(["#{selector} =="])
-      expect(cop.messages).to eq(["Use `casecmp` instead of `#{selector} ==`."])
+      expect(cop.highlights).to eq(["str.#{selector} == 'string'"])
+      expect(cop.messages).to eq(
+        [
+          "Use `str.casecmp('string').zero?` instead of " \
+          "`str.#{selector} == 'string'`."
+        ]
+      )
     end
 
     it "formats the error message correctly for == str.#{selector}" do
       inspect_source("'string' == str.#{selector}")
-      expect(cop.highlights).to eq(["== str.#{selector}"])
-      expect(cop.messages).to eq(["Use `casecmp` instead of `== #{selector}`."])
+      expect(cop.highlights).to eq(["'string' == str.#{selector}"])
+      expect(cop.messages).to eq(
+        [
+          "Use `str.casecmp('string').zero?` instead of " \
+          "`'string' == str.#{selector}`."
+        ]
+      )
     end
 
     it 'formats the error message correctly for ' \
        "obj.#{selector} == str.#{selector}" do
       inspect_source("obj.#{selector} == str.#{selector}")
       expect(cop.highlights).to eq(["obj.#{selector} == str.#{selector}"])
-      expect(cop.messages).to eq(["Use `casecmp` instead of `#{selector} ==`."])
+      expect(cop.messages).to eq(
+        [
+          'Use `obj.casecmp(str).zero?` instead of ' \
+          "`obj.#{selector} == str.#{selector}`."
+        ]
+      )
     end
 
     it "doesn't report an offense for variable == str.#{selector}" do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         var = "a"
         var == str.#{selector}
       RUBY
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it "doesn't report an offense for str.#{selector} == variable" do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         var = "a"
         str.#{selector} == var
       RUBY
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it "doesn't report an offense for obj.method == str.#{selector}" do
-      inspect_source("obj.method == str.#{selector}")
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses("obj.method == str.#{selector}")
     end
 
     it "doesn't report an offense for str.#{selector} == obj.method" do
-      inspect_source("str.#{selector} == obj.method")
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses("str.#{selector} == obj.method")
     end
   end
 

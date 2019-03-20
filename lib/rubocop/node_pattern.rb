@@ -37,8 +37,7 @@ module RuboCop
   #     '(send !const ...)' # ! negates the next part of the pattern
   #     '$(send const ...)' # arbitrary matching can be performed on a capture
   #     '(send _recv _msg)' # wildcards can be named (for readability)
-  #     '(send ... :new)'   # you can specifically match against the last child
-  #                         # (this only works for the very last)
+  #     '(send ... :new)'   # you can match against the last children
   #     '(send $...)'       # capture all the children as an array
   #     '(send $... int)'   # capture all children but the last as an array
   #     '(send _x :+ _x)'   # unification is performed on named wildcards
@@ -74,7 +73,7 @@ module RuboCop
   # You can nest arbitrarily deep:
   #
   #     # matches node parsed from 'Const = Class.new' or 'Const = Module.new':
-  #     '(casgn nil? const (send (const nil? {:Class :Module}) :new)))'
+  #     '(casgn nil? :Const (send (const nil? {:Class :Module}) :new))'
   #     # matches a node parsed from an 'if', with a '==' comparison,
   #     # and no 'else' branch:
   #     '(if (send _ :== _) _ nil?)'
@@ -96,29 +95,34 @@ module RuboCop
     # @private
     # Builds Ruby code which implements a pattern
     class Compiler
-      SYMBOL       = %r{:(?:[\w+@*/?!<>=~|%^-]+|\[\]=?)}
-      IDENTIFIER   = /[a-zA-Z_-]/
-      META         = /\(|\)|\{|\}|\[|\]|\$\.\.\.|\$|!|\^|\.\.\./
-      NUMBER       = /-?\d+(?:\.\d+)?/
-      STRING       = /".+?"/
-      METHOD_NAME  = /\#?#{IDENTIFIER}+[\!\?]?\(?/
-      PARAM_NUMBER = /%\d*/
+      SYMBOL       = %r{:(?:[\w+@*/?!<>=~|%^-]+|\[\]=?)}.freeze
+      IDENTIFIER   = /[a-zA-Z_-]/.freeze
+      META         = /\(|\)|\{|\}|\[|\]|\$\.\.\.|\$|!|\^|\.\.\./.freeze
+      NUMBER       = /-?\d+(?:\.\d+)?/.freeze
+      STRING       = /".+?"/.freeze
+      METHOD_NAME  = /\#?#{IDENTIFIER}+[\!\?]?\(?/.freeze
+      PARAM_NUMBER = /%\d*/.freeze
 
-      SEPARATORS = /[\s]+/
+      SEPARATORS = /[\s]+/.freeze
       TOKENS     = Regexp.union(META, PARAM_NUMBER, NUMBER,
                                 METHOD_NAME, SYMBOL, STRING)
 
-      TOKEN = /\G(?:#{SEPARATORS}|#{TOKENS}|.)/
+      TOKEN = /\G(?:#{SEPARATORS}|#{TOKENS}|.)/.freeze
 
-      NODE      = /\A#{IDENTIFIER}+\Z/
-      PREDICATE = /\A#{IDENTIFIER}+\?\(?\Z/
-      WILDCARD  = /\A_#{IDENTIFIER}*\Z/
-      FUNCALL   = /\A\##{METHOD_NAME}/
-      LITERAL   = /\A(?:#{SYMBOL}|#{NUMBER}|#{STRING})\Z/
-      PARAM     = /\A#{PARAM_NUMBER}\Z/
-      CLOSING   = /\A(?:\)|\}|\])\Z/
+      NODE      = /\A#{IDENTIFIER}+\Z/.freeze
+      PREDICATE = /\A#{IDENTIFIER}+\?\(?\Z/.freeze
+      WILDCARD  = /\A_#{IDENTIFIER}*\Z/.freeze
+      FUNCALL   = /\A\##{METHOD_NAME}/.freeze
+      LITERAL   = /\A(?:#{SYMBOL}|#{NUMBER}|#{STRING})\Z/.freeze
+      PARAM     = /\A#{PARAM_NUMBER}\Z/.freeze
+      CLOSING   = /\A(?:\)|\}|\])\Z/.freeze
+
+      REST      = '...'.freeze
+      CAPTURED_REST = '$...'.freeze
 
       attr_reader :match_code
+
+      SEQ_HEAD_INDEX = -1
 
       def initialize(str, node_var = 'node0')
         @string   = str
@@ -133,8 +137,7 @@ module RuboCop
       end
 
       def run(node_var)
-        tokens =
-          @string.scan(TOKEN).reject { |token| token =~ /\A#{SEPARATORS}\Z/ }
+        tokens = Compiler.tokens(@string)
 
         @match_code = compile_expr(tokens, node_var, false)
 
@@ -180,83 +183,76 @@ module RuboCop
         # temp variable as 'cur_node'
         with_temp_node(cur_node) do |init, temp_node|
           terms = compile_seq_terms(tokens, temp_node)
+          terms.unshift(compile_guard_clause(temp_node))
 
-          join_terms(init, terms, ' && ')
+          join_terms(init, terms, " &&\n")
         end
       end
 
+      def compile_guard_clause(cur_node)
+        "#{cur_node}.is_a?(RuboCop::AST::Node)"
+      end
+
       def compile_seq_terms(tokens, cur_node)
-        ret, size =
+        ret =
           compile_seq_terms_with_size(tokens, cur_node) do |token, terms, index|
-            case token
-            when '...'.freeze
-              return compile_ellipsis(tokens, cur_node, terms, index)
-            when '$...'.freeze
-              return compile_capt_ellip(tokens, cur_node, terms, index)
+            capture = next_capture if token == CAPTURED_REST
+            if capture || token == REST
+              index = 0 if index == SEQ_HEAD_INDEX # Consider ($...) as (_ $...)
+              return compile_ellipsis(tokens, cur_node, terms, index, capture)
             end
           end
-
-        ret << "(#{cur_node}.children.size == #{size})"
+        ret << "(#{cur_node}.children.size == #{ret.size - 1})"
       end
 
       def compile_seq_terms_with_size(tokens, cur_node)
-        index = nil
+        index = SEQ_HEAD_INDEX
         terms = []
         until tokens.first == ')'
-          yield tokens.first, terms, index || 0
-          term, index = compile_expr_with_index(tokens, cur_node, index)
+          yield tokens.first, terms, index
+          term = compile_expr_with_index(tokens, cur_node, index)
+          index += 1
           terms << term
         end
 
         tokens.shift # drop concluding )
-        [terms, index]
-      end
-
-      def compile_expr_with_index(tokens, cur_node, index)
-        if index.nil?
-          # in 'sequence head' position; some expressions are compiled
-          # differently at 'sequence head' (notably 'node type' expressions)
-          # grep for seq_head to see where it makes a difference
-          [compile_expr(tokens, cur_node, true), 0]
-        else
-          child_node = "#{cur_node}.children[#{index}]"
-          [compile_expr(tokens, child_node, false), index + 1]
-        end
-      end
-
-      def compile_ellipsis(tokens, cur_node, terms, index)
-        if (term = compile_seq_tail(tokens, "#{cur_node}.children.last"))
-          terms << "(#{cur_node}.children.size > #{index})"
-          terms << term
-        elsif index > 0
-          terms << "(#{cur_node}.children.size >= #{index})"
-        end
         terms
       end
 
-      def compile_capt_ellip(tokens, cur_node, terms, index)
-        capture = next_capture
-        if (term = compile_seq_tail(tokens, "#{cur_node}.children.last"))
-          terms << "(#{cur_node}.children.size > #{index})"
-          terms << term
-          terms << "(#{capture} = #{cur_node}.children[#{index}..-2])"
+      def compile_expr_with_index(tokens, cur_node, index)
+        if index == SEQ_HEAD_INDEX
+          # in 'sequence head' position; some expressions are compiled
+          # differently at 'sequence head' (notably 'node type' expressions)
+          # grep for seq_head to see where it makes a difference
+          compile_expr(tokens, cur_node, true)
         else
-          terms << "(#{cur_node}.children.size >= #{index})" if index > 0
-          terms << "(#{capture} = #{cur_node}.children[#{index}..-1])"
+          child_node = "#{cur_node}.children[#{index}]"
+          compile_expr(tokens, child_node, false)
+        end
+      end
+
+      def compile_ellipsis(tokens, cur_node, terms, index, capture = nil)
+        tokens.shift # drop ellipsis
+        tail = compile_seq_tail(tokens, cur_node)
+        terms << "(#{cur_node}.children.size >= #{index + tail.size})"
+        terms.concat tail
+        if capture
+          range = index..-tail.size - 1
+          terms << "(#{capture} = #{cur_node}.children[#{range}])"
         end
         terms
       end
 
       def compile_seq_tail(tokens, cur_node)
-        tokens.shift
-        if tokens.first == ')'
-          tokens.shift
-          nil
-        else
-          expr = compile_expr(tokens, cur_node, false)
-          fail_due_to('missing )') unless tokens.shift == ')'
-          expr
+        child_node = "#{cur_node}.children[%<revindex>i]"
+        terms = []
+        until tokens.first == ')'
+          terms << compile_expr(tokens, child_node, false)
         end
+        tokens.shift # drop ')'
+        # E.g. for terms.size == 3, we want to replace the three [%<revindex>i]
+        # with [-3], [-2] and [-1]
+        terms.map.with_index { |term, i| format term, revindex: i - terms.size }
       end
 
       def compile_union(tokens, cur_node, seq_head)
@@ -444,12 +440,6 @@ module RuboCop
         params.empty? ? '' : ",#{params}"
       end
 
-      def emit_guard_clause
-        <<-RUBY
-          return unless node.is_a?(RuboCop::AST::Node)
-        RUBY
-      end
-
       def emit_method_code
         <<-RUBY
           return unless #{@match_code}
@@ -475,6 +465,10 @@ module RuboCop
       def next_temp_value
         @temps += 1
       end
+
+      def self.tokens(pattern)
+        pattern.scan(TOKEN).reject { |token| token =~ /\A#{SEPARATORS}\Z/ }
+      end
     end
     private_constant :Compiler
 
@@ -491,7 +485,6 @@ module RuboCop
         compiler = Compiler.new(pattern_str, 'node')
         src = "def #{method_name}(node = self" \
               "#{compiler.emit_trailing_params});" \
-              "#{compiler.emit_guard_clause}" \
               "#{compiler.emit_method_code};end"
 
         location = caller_locations(1, 1).first
@@ -552,11 +545,39 @@ module RuboCop
       end
     end
 
+    attr_reader :pattern
+
     def initialize(str)
+      @pattern = str
       compiler = Compiler.new(str)
       src = "def match(node0#{compiler.emit_trailing_params});" \
             "#{compiler.emit_method_code}end"
-      instance_eval(src)
+      instance_eval(src, __FILE__, __LINE__ + 1)
+    end
+
+    def match(*args)
+      # If we're here, it's because the singleton method has not been defined,
+      # either because we've been dup'ed or serialized through YAML
+      initialize(pattern)
+      match(*args)
+    end
+
+    def marshal_load(pattern)
+      initialize pattern
+    end
+
+    def marshal_dump
+      pattern
+    end
+
+    def ==(other)
+      other.is_a?(NodePattern) &&
+        Compiler.tokens(other.pattern) == Compiler.tokens(pattern)
+    end
+    alias eql? ==
+
+    def to_s
+      "#<#{self.class} #{pattern}>"
     end
   end
 end

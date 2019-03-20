@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe RuboCop::Cop::Generator do
-  subject(:generator) { described_class.new(cop_identifier, output: stdout) }
+  subject(:generator) do
+    described_class.new(cop_identifier, 'your_id', output: stdout)
+  end
 
   let(:stdout) { StringIO.new }
   let(:cop_identifier) { 'Style/FakeCop' }
@@ -11,6 +13,8 @@ RSpec.describe RuboCop::Cop::Generator do
   end
 
   describe '#write_source' do
+    include_context 'cli spec behavior'
+
     it 'generates a helpful source file with the name filled in' do
       generated_source = <<-RUBY.strip_indent
         # frozen_string_literal: true
@@ -57,7 +61,7 @@ RSpec.describe RuboCop::Cop::Generator do
                 # TODO: Implement the cop in here.
                 #
                 # In many cases, you can use a node matcher for matching node pattern.
-                # See https://github.com/bbatsov/rubocop/blob/master/lib/rubocop/node_pattern.rb
+                # See https://github.com/rubocop-hq/rubocop/blob/master/lib/rubocop/node_pattern.rb
                 #
                 # For example
                 MSG = 'Use `#good_method` instead of `#bad_method`.'.freeze
@@ -87,9 +91,9 @@ RSpec.describe RuboCop::Cop::Generator do
     end
 
     it 'refuses to overwrite existing files' do
-      new_cop = described_class.new('Layout/Tab')
+      new_cop = described_class.new('Layout/Tab', 'your_id')
 
-      expect(new_cop).to receive(:exit!)
+      allow(new_cop).to receive(:exit!)
       expect { new_cop.write_source }
         .to output(
           "rake new_cop: lib/rubocop/cop/layout/tab.rb already exists!\n"
@@ -98,6 +102,8 @@ RSpec.describe RuboCop::Cop::Generator do
   end
 
   describe '#write_spec' do
+    include_context 'cli spec behavior'
+
     it 'generates a helpful starting spec file with the class filled in' do
       generated_source = <<-SPEC.strip_indent
         # frozen_string_literal: true
@@ -133,9 +139,9 @@ RSpec.describe RuboCop::Cop::Generator do
     end
 
     it 'refuses to overwrite existing files' do
-      new_cop = described_class.new('Layout/Tab')
+      new_cop = described_class.new('Layout/Tab', 'your_id')
 
-      expect(new_cop).to receive(:exit!)
+      allow(new_cop).to receive(:exit!)
       expect { new_cop.write_spec }
         .to output(
           "rake new_cop: spec/rubocop/cop/layout/tab_spec.rb already exists!\n"
@@ -149,7 +155,7 @@ RSpec.describe RuboCop::Cop::Generator do
         Do 3 steps:
           1. Add an entry to the "New features" section in CHANGELOG.md,
              e.g. "Add new `Style/FakeCop` cop. ([@your_id][])"
-          2. Modify the description of Style/FakeCop in config/enabled.yml
+          2. Modify the description of Style/FakeCop in config/default.yml
           3. Implement your new cop in the generated file!
       TODO
     end
@@ -157,7 +163,7 @@ RSpec.describe RuboCop::Cop::Generator do
 
   describe '.new' do
     it 'does not accept an unqualified cop' do
-      expect { described_class.new('FakeCop') }
+      expect { described_class.new('FakeCop', 'your_id') }
         .to raise_error(ArgumentError)
         .with_message('Specify a cop name with Department/Name style')
     end
@@ -186,14 +192,21 @@ RSpec.describe RuboCop::Cop::Generator do
       YAML
     end
 
-    it 'inserts the cop in alphabetical' do
-      expect(File).to receive(:write).with(path, <<-YAML.strip_indent)
+    it 'inserts the cop in alphabetical order' do
+      stub_const('RuboCop::Version::STRING', '0.58.2')
+
+      allow(File).to receive(:write)
+
+      generator.inject_config(config_file_path: path)
+
+      expect(File).to have_received(:write).with(path, <<-YAML.strip_indent)
         Style/Alias:
           Enabled: true
 
         Style/FakeCop:
           Description: 'TODO: Write a description of the cop.'
           Enabled: true
+          VersionAdded: '0.59'
 
         Style/Lambda:
           Enabled: true
@@ -201,10 +214,9 @@ RSpec.describe RuboCop::Cop::Generator do
         Style/SpecialGlobalVars:
           Enabled: true
       YAML
-      generator.inject_config(config_file_path: path)
       expect(stdout.string).to eq(<<-MESSAGE.strip_indent)
         [modify] A configuration for the cop is added into #{path}.
-                 If you want to disable the cop by default, move the added config to config/disabled.yml
+                 If you want to disable the cop by default, set `Enabled` option to false.
       MESSAGE
     end
   end

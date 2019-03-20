@@ -3,7 +3,7 @@
 module RuboCop
   module Cop
     # Common functionality for checking the closing brace of a literal is
-    # either on the same line as the last contained elements, or a new line.
+    # either on the same line as the last contained elements or a new line.
     module MultilineLiteralBraceLayout
       include ConfigurableEnforcedStyle
 
@@ -24,11 +24,13 @@ module RuboCop
       #    b # comment
       #   ].some_method
       def new_line_needed_before_closing_brace?(node)
-        return unless node.chained?
-
         last_element_line =
           last_element_range_with_trailing_comma(node).last_line
-        processed_source.comments.any? { |c| c.loc.line == last_element_line }
+
+        last_element_commented =
+          processed_source.comments.any? { |c| c.loc.line == last_element_line }
+
+        last_element_commented && (node.chained? || node.argument?)
       end
 
       def check(node)

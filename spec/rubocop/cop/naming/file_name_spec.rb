@@ -18,7 +18,7 @@ RSpec.describe RuboCop::Cop::Naming::FileName do
     }
   end
 
-  let(:includes) { [] }
+  let(:includes) { ['**/*.rb'] }
   let(:source) { 'print 1' }
   let(:processed_source) { parse_source(source) }
 
@@ -78,6 +78,14 @@ RSpec.describe RuboCop::Cop::Naming::FileName do
 
   context 'with snake_case names which use ? and !' do
     let(:filename) { 'some/dir/file?!.rb' }
+
+    it 'does not report an offense' do
+      expect(cop.offenses.empty?).to be(true)
+    end
+  end
+
+  context 'with snake_case names which use +' do
+    let(:filename) { 'some/dir/some_file.xlsx+mobile.axlsx' }
 
     it 'does not report an offense' do
       expect(cop.offenses.empty?).to be(true)
@@ -355,6 +363,14 @@ RSpec.describe RuboCop::Cop::Naming::FileName do
     RUBY
 
     it 'does not register an offense' do
+      expect(cop.offenses.empty?).to be(true)
+    end
+  end
+
+  context 'with dotfiles' do
+    let(:filename) { '.pryrc' }
+
+    it 'does not report an offense' do
       expect(cop.offenses.empty?).to be(true)
     end
   end

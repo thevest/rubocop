@@ -33,10 +33,11 @@ module RuboCop
       #
       #   # bad
       #   h = { a: { b: 2 } }
+      #   foo = { { a: 1 } => { b: { c: 2 } } }
       #
       #   # good
       #   h = { a: { b: 2 }}
-      #
+      #   foo = {{ a: 1 } => { b: { c: 2 }}}
       #
       # @example EnforcedStyleForEmptyBraces: no_space (default)
       #   # The `no_space` EnforcedStyleForEmptyBraces style enforces that
@@ -88,7 +89,7 @@ module RuboCop
             # brace plus space (rather than just inserting a space), then any
             # removal of the same brace will give us a clobbering error. This
             # in turn will make RuboCop fall back on cop-by-cop
-            # auto-correction.  Problem solved.
+            # auto-correction. Problem solved.
             case range.source
             when /\s/ then corrector.remove(range)
             when '{' then corrector.replace(range, '{ ')

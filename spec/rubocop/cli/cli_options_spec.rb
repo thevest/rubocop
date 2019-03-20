@@ -24,6 +24,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
           create_file('.rubocop.yml', ['AllCops:',
                                        '  UseCache: false'])
         end
+
         it 'fails with an error message' do
           cli.run %w[-P]
           expect($stderr.string)
@@ -88,6 +89,8 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
               Exclude:
                 - Gemfile
               Include:
+                - "**/*.rb"
+                - "**/*.rabl"
                 - "**/*.rabl2"
           YAML
         end
@@ -199,7 +202,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
           end
         RUBY
         create_file('redirect.rb', '$stderr = STDOUT')
-        rubocop = "#{RuboCop::ConfigLoader::RUBOCOP_HOME}/bin/rubocop"
+        rubocop = "#{RuboCop::ConfigLoader::RUBOCOP_HOME}/exe/rubocop"
         # Since we define a new cop class, we have to do this in a separate
         # process. Otherwise, the extra cop will affect other specs.
         output =
@@ -492,9 +495,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       home = File.dirname(File.dirname(File.dirname(File.dirname(__FILE__))))
       expect($stdout.string.lines.grep(/configuration/).map(&:chomp))
         .to eq(["For #{abs('')}:" \
-                " configuration from #{home}/config/default.yml",
-                "Inheriting configuration from #{home}/config/enabled.yml",
-                "Inheriting configuration from #{home}/config/disabled.yml"])
+                " configuration from #{home}/config/default.yml"])
     end
 
     it 'shows cop names' do
@@ -592,7 +593,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       create_file('example1.rb', 'puts 0 ')
       file = abs('example1.rb')
       url =
-        'https://github.com/bbatsov/ruby-style-guide#no-trailing-whitespace'
+        'https://github.com/rubocop-hq/ruby-style-guide#no-trailing-whitespace'
 
       expect(cli.run(['--format',
                       'emacs',
@@ -623,9 +624,9 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
     it 'shows style guide and reference entries' do
       create_file('example1.rb', '$foo = 1')
       file = abs('example1.rb')
-      style_guide_link = 'https://github.com/bbatsov/ruby-style-guide' \
+      style_guide_link = 'https://github.com/rubocop-hq/ruby-style-guide' \
                          '#instance-vars'
-      reference_link = 'http://www.zenspider.com/Languages/Ruby/QuickRef.html'
+      reference_link = 'https://www.zenspider.com/ruby/quickref.html'
 
       expect(cli.run(['--format',
                       'emacs',
@@ -641,7 +642,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
   end
 
   describe '--show-cops' do
-    shared_examples(:prints_config) do
+    shared_examples('prints config') do
       it 'prints the current configuration' do
         out = stdout.lines.to_a
         printed_config = YAML.load(out.join) # rubocop:disable Security/YAMLLoad
@@ -725,7 +726,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
         end
       end
 
-      include_examples :prints_config
+      include_examples 'prints config'
     end
 
     context 'with one cop given' do
@@ -738,17 +739,19 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
            '  Description: No hard tabs.',
            /^  StyleGuide: ('|")#spaces-indentation('|")$/,
            '  Enabled: true',
+           /^  VersionAdded: '[0-9\.]+'$/,
+           /^  VersionChanged: '[0-9\.]+'$/,
            '  IndentationWidth:'].join("\n")
         )
       end
 
-      include_examples :prints_config
+      include_examples 'prints config'
     end
 
     context 'with two cops given' do
       let(:arguments) { ['Layout/Tab,Metrics/LineLength'] }
 
-      include_examples :prints_config
+      include_examples 'prints config'
     end
 
     context 'with one of the cops misspelled' do
@@ -1074,34 +1077,100 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       RUBY
     end
 
-    def expect_offense_detected(num)
+    def expect_offense_detected
       expect($stderr.string).to eq('')
       expect($stdout.string)
-        .to include("1 file inspected, #{num} offense detected")
+        .to include('1 file inspected, 1 offense detected')
+      expect($stdout.string).to include 'Layout/IndentationWidth'
     end
 
     it 'fails when option is less than the severity level' do
       expect(cli.run(['--fail-level', 'refactor', target_file])).to eq(1)
       expect(cli.run(['--fail-level', 'autocorrect', target_file])).to eq(1)
-      expect_offense_detected(1)
+      expect_offense_detected
     end
 
     it 'fails when option is equal to the severity level' do
       expect(cli.run(['--fail-level', 'convention', target_file])).to eq(1)
-      expect_offense_detected(1)
+      expect_offense_detected
     end
 
     it 'succeeds when option is greater than the severity level' do
       expect(cli.run(['--fail-level', 'warning', target_file])).to eq(0)
-      expect_offense_detected(1)
+      expect_offense_detected
+    end
+
+    context 'with --display-only-fail-level-offenses' do
+      it 'outputs offense message when fail-level is less than the severity' do
+        expect(cli.run(['--fail-level', 'refactor',
+                        '--display-only-fail-level-offenses',
+                        target_file])).to eq(1)
+        expect(cli.run(['--fail-level', 'autocorrect',
+                        '--display-only-fail-level-offenses',
+                        target_file])).to eq(1)
+        expect_offense_detected
+      end
+
+      it 'outputs offense message when fail-level is equal to the severity' do
+        expect(cli.run(['--fail-level', 'convention',
+                        '--display-only-fail-level-offenses',
+                        target_file])).to eq(1)
+        expect_offense_detected
+      end
+
+      it "doesn't output offense message when less than the fail-level" do
+        expect(cli.run(['--fail-level', 'warning',
+                        '--display-only-fail-level-offenses',
+                        target_file])).to eq 0
+        expect($stderr.string).to eq('')
+        expect($stdout.string)
+          .to include('1 file inspected, no offenses detected')
+        expect($stdout.string).not_to include 'Layout/IndentationWidth'
+      end
+
+      context 'with disabled line' do
+        it "doesn't consider a unprinted offense to be an unneeded disable" do
+          create_file(target_file, <<-RUBY.strip_indent)
+            def f
+             x # rubocop:disable Layout/IndentationWidth
+            end
+          RUBY
+
+          expect(cli.run(['--fail-level', 'warning',
+                          '--display-only-fail-level-offenses',
+                          target_file])).to eq 0
+          expect($stderr.string).to eq('')
+          expect($stdout.string)
+            .to include('1 file inspected, no offenses detected')
+          expect($stdout.string).not_to include 'Layout/IndentationWidth'
+          expect($stdout.string)
+            .not_to include 'Lint/UnneededCopDisableDirective'
+        end
+
+        it "still checks unprinted offense if they're an unneeded disable" do
+          create_file(target_file, <<-RUBY.strip_indent)
+            def f
+              x # rubocop:disable Layout/IndentationWidth
+            end
+          RUBY
+
+          expect(cli.run(['--fail-level', 'warning',
+                          '--display-only-fail-level-offenses',
+                          target_file])).to eq 1
+          expect($stderr.string).to eq('')
+          expect($stdout.string)
+            .to include('1 file inspected, 1 offense detected')
+          expect($stdout.string).to include 'Lint/UnneededCopDisableDirective'
+        end
+      end
     end
 
     context 'with --auto-correct' do
-      def expect_auto_corrected(num)
-        expect_offense_detected(num)
+      def expect_auto_corrected
+        expect_offense_detected
         expect($stdout.string.lines.to_a.last)
-          .to eq("1 file inspected, #{num} offense detected, " \
-                 "#{num} offense corrected\n")
+          .to eq('1 file inspected, 1 offense detected, ' \
+                 "1 offense corrected\n")
       end
 
       it 'fails when option is autocorrect and all offenses are ' \
@@ -1109,21 +1178,21 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
         expect(cli.run(['--auto-correct', '--format', 'simple',
                         '--fail-level', 'autocorrect',
                         target_file])).to eq(1)
-        expect_auto_corrected(1)
+        expect_auto_corrected
       end
 
       it 'fails when option is A and all offenses are autocorrected' do
         expect(cli.run(['--auto-correct', '--format', 'simple',
                         '--fail-level', 'A',
                         target_file])).to eq(1)
-        expect_auto_corrected(1)
+        expect_auto_corrected
       end
 
       it 'succeeds when option is not given and all offenses are ' \
          'autocorrected' do
         expect(cli.run(['--auto-correct', '--format', 'simple',
                         target_file])).to eq(0)
-        expect_auto_corrected(1)
+        expect_auto_corrected
       end
 
       it 'succeeds when option is refactor and all offenses are ' \
@@ -1131,7 +1200,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
         expect(cli.run(['--auto-correct', '--format', 'simple',
                         '--fail-level', 'refactor',
                         target_file])).to eq(0)
-        expect_auto_corrected(1)
+        expect_auto_corrected
       end
     end
   end
@@ -1233,7 +1302,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
                   'fake2.rb']
         expect(cli.run(argv)).to eq(2)
         expect($stderr.string).to include(
-          '-s/--stdin requires exactly one path.'
+          '-s/--stdin requires exactly one path'
         )
       ensure
         $stdin = STDIN
@@ -1292,6 +1361,18 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       ensure
         $stdin = STDIN
       end
+    end
+  end
+
+  describe 'option is invalid' do
+    it 'suggests to use the --help flag' do
+      invalid_option = '--invalid-option'
+
+      expect(cli.run([invalid_option])).to eq(2)
+      expect($stderr.string).to eq(<<-RESULT.strip_indent)
+        invalid option: #{invalid_option}
+        For usage information, use --help
+      RESULT
     end
   end
 end

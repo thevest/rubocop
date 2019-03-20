@@ -45,7 +45,9 @@ RSpec.describe RuboCop::Token do
     let(:parser_token) { [type, [text, range]] }
     let(:type) { :kDEF }
     let(:text) { 'def' }
-    let(:range) { double('range', line: 42, column: 30) }
+    let(:range) do
+      instance_double(Parser::Source::Range, line: 42, column: 30)
+    end
 
     it "sets parser token's type to rubocop token's type" do
       expect(token.type).to eq(type)
@@ -132,6 +134,10 @@ RSpec.describe RuboCop::Token do
     it 'returns nil when there is not a space before token' do
       expect(semicolon_token.space_before?).to be nil
       expect(zero_token.space_before?).to be nil
+    end
+
+    it 'returns nil when it is on the first line' do
+      expect(processed_source.tokens[0].space_before?).to be nil
     end
   end
 

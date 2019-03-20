@@ -31,8 +31,8 @@ overrides the setting.
 ### Cache Path
 
 By default, the cache is stored in either
-`$XDG_CACHE_HOME/rubocop_cache` if `$XDG_CACHE_HOME` is set, or in
-`$HOME/.cache/rubocop_cache/` if it's not.  The configuration parameter
+`$XDG_CACHE_HOME/$UID/rubocop_cache` if `$XDG_CACHE_HOME` is set or in
+`$HOME/.cache/rubocop_cache/` if it's not. The configuration parameter
 `AllCops: CacheRootDirectory` can be used to set the root to a
 different path. One reason to use this option could be that there's a
 network disk where users on different machines want to have a common

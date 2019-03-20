@@ -65,7 +65,14 @@ RSpec.describe RuboCop::Cop::Rails::CreateTableWithTimestamps do
     RUBY
   end
 
-  it 'does not register an offense when including created_at in block' do
+  it 'does not register an offense when including timestamps' \
+     'with options and `to_proc` syntax' do
+    expect_no_offenses <<-RUBY
+      create_table :users, id: :string, limit: 42, &:timestamps
+    RUBY
+  end
+
+  it 'does not register an offense when including :created_at in block' do
     expect_no_offenses <<-RUBY
       create_table :users do |t|
         t.string :name
@@ -76,13 +83,35 @@ RSpec.describe RuboCop::Cop::Rails::CreateTableWithTimestamps do
     RUBY
   end
 
-  it 'does not register an offense when including updated_at in block' do
+  it "does not register an offense when including 'created_at' in block" do
+    expect_no_offenses <<-RUBY
+      create_table :users do |t|
+        t.string :name
+        t.string :email
+
+        t.datetime 'created_at', default: -> { 'CURRENT_TIMESTAMP' }
+      end
+    RUBY
+  end
+
+  it 'does not register an offense when including :updated_at in block' do
     expect_no_offenses <<-RUBY
       create_table :users do |t|
         t.string :name
         t.string :email
 
         t.datetime :updated_at, default: -> { 'CURRENT_TIMESTAMP' }
+      end
+    RUBY
+  end
+
+  it "does not register an offense when including 'updated_at' in block" do
+    expect_no_offenses <<-RUBY
+      create_table :users do |t|
+        t.string :name
+        t.string :email
+
+        t.datetime 'updated_at', default: -> { 'CURRENT_TIMESTAMP' }
       end
     RUBY
   end

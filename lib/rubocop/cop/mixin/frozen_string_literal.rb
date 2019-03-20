@@ -21,11 +21,18 @@ module RuboCop
       def frozen_string_literals_enabled?
         ruby_version = processed_source.ruby_version
         return false unless ruby_version
-        # TODO: Whether frozen string literals will be the default in Ruby 3.0
-        # or not is still unclear as of February 2018.
-        # It may be necessary to change this code in the future.
+        # TODO: Ruby officially abandon making frozen string literals default
+        # for Ruby 3.0.
+        # https://bugs.ruby-lang.org/issues/11473#note-53
+        # Whether frozen string literals will be the default after Ruby 3.0
+        # or not is still unclear as of January 2019.
+        # It may be necessary to add this code in the future.
+        #
+        #   return true if ruby_version >= 3.1
+        #
+        # And the above `ruby_version >= 3.1` is undecided whether it will be
+        # Ruby 3.1, 3.2, 4.0 or others.
         # See https://bugs.ruby-lang.org/issues/8976#note-41 for details.
-        return true if ruby_version >= 3.0
         return false unless ruby_version >= 2.3
 
         leading_comment_lines.any? do |line|
@@ -34,7 +41,13 @@ module RuboCop
       end
 
       def leading_comment_lines
-        processed_source[0..2].compact
+        comments = processed_source.comments
+
+        comments.each_with_object([]) do |comment, leading_comments|
+          next if comment.loc.line > 3
+
+          leading_comments << comment.text
+        end
       end
     end
   end

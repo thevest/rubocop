@@ -14,6 +14,7 @@ module RuboCop
 
         def correct(processed_source, node, column_delta)
           return unless node
+
           @processed_source = processed_source
           expr = node.respond_to?(:loc) ? node.loc.expression : node
           return if block_comment_within?(expr)
@@ -57,7 +58,7 @@ module RuboCop
           return [] unless node.is_a?(Parser::AST::Node)
 
           node.each_node(:dstr)
-              .select { |n| n.loc.respond_to?(:heredoc_body) }
+              .select(&:heredoc?)
               .map { |n| n.loc.heredoc_body.join(n.loc.heredoc_end) }
         end
 
@@ -68,7 +69,8 @@ module RuboCop
         end
 
         def calculate_range(expr, line_begin_pos, column_delta)
-          starts_with_space = expr.source_buffer.source[line_begin_pos] =~ / /
+          starts_with_space =
+            expr.source_buffer.source[line_begin_pos].start_with?(' ')
           pos_to_remove = if column_delta > 0 || starts_with_space
                             line_begin_pos
                           else

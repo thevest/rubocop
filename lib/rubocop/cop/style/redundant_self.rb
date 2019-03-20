@@ -43,6 +43,7 @@ module RuboCop
       #   end
       class RedundantSelf < Cop
         MSG = 'Redundant `self` detected.'.freeze
+        KERNEL_METHODS = Kernel.methods(false)
 
         def self.autocorrect_incompatible_with
           [ColonMethodCall]
@@ -117,11 +118,12 @@ module RuboCop
 
         def allowed_send_node?(node)
           @allowed_send_nodes.include?(node) ||
-            @local_variables_scopes[node].include?(node.method_name)
+            @local_variables_scopes[node].include?(node.method_name) ||
+            KERNEL_METHODS.include?(node.method_name)
         end
 
         def regular_method_call?(node)
-          !(operator?(node.method_name) ||
+          !(node.operator_method? ||
             keyword?(node.method_name) ||
             node.camel_case_method? ||
             node.setter_method? ||

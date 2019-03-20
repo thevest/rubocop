@@ -70,7 +70,7 @@ RSpec.describe RuboCop::Cop::Lint::UnusedMethodArgument, :config do
       end
     end
 
-    context 'when a required keyword argument is unused', ruby: 2.1 do
+    context 'when a required keyword argument is unused' do
       it 'registers an offense but does not suggest underscore-prefix' do
         expect_offense(<<-RUBY.strip_indent)
           def self.some_method(foo, bar:)
@@ -174,7 +174,7 @@ RSpec.describe RuboCop::Cop::Lint::UnusedMethodArgument, :config do
             def some_method(foo)
               super
             end
-           RUBY
+          RUBY
         end
       end
     end

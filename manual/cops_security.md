@@ -2,9 +2,9 @@
 
 ## Security/Eval
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.47 | -
 
 This cop checks for the use of `Kernel#eval` and `Binding#eval`.
 
@@ -19,9 +19,9 @@ binding.eval(something)
 
 ## Security/JSONLoad
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.43 | 0.44
 
 This cop checks for the use of JSON class methods which have potential
 security issues.
@@ -37,11 +37,11 @@ Other similar issues may apply.
 ### Examples
 
 ```ruby
-# always offense
+# bad
 JSON.load("{}")
 JSON.restore("{}")
 
-# no offense
+# good
 JSON.parse("{}")
 ```
 
@@ -53,13 +53,13 @@ AutoCorrect | `false` | Boolean
 
 ### References
 
-* [http://ruby-doc.org/stdlib-2.3.0/libdoc/json/rdoc/JSON.html#method-i-load](http://ruby-doc.org/stdlib-2.3.0/libdoc/json/rdoc/JSON.html#method-i-load)
+* [https://ruby-doc.org/stdlib-2.3.0/libdoc/json/rdoc/JSON.html#method-i-load](https://ruby-doc.org/stdlib-2.3.0/libdoc/json/rdoc/JSON.html#method-i-load)
 
 ## Security/MarshalLoad
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.47 | -
 
 This cop checks for the use of Marshal class methods which have
 potential security issues leading to remote code execution when
@@ -81,20 +81,21 @@ Marshal.load(Marshal.dump({}))
 
 ### References
 
-* [http://ruby-doc.org/core-2.3.3/Marshal.html#module-Marshal-label-Security+considerations](http://ruby-doc.org/core-2.3.3/Marshal.html#module-Marshal-label-Security+considerations)
+* [https://ruby-doc.org/core-2.3.3/Marshal.html#module-Marshal-label-Security+considerations](https://ruby-doc.org/core-2.3.3/Marshal.html#module-Marshal-label-Security+considerations)
 
 ## Security/Open
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | No | No | 0.53 | -
 
 This cop checks for the use of `Kernel#open`.
+
 `Kernel#open` enables not only file access but also process invocation
-by prefixing a pipe symbol (e.g., `open("| ls")`).  So, it may lead to
+by prefixing a pipe symbol (e.g., `open("| ls")`). So, it may lead to
 a serious security risk by using variable input to the argument of
-`Kernel#open`.  It would be better to use `File.open` or `IO.popen`
-explicitly.
+`Kernel#open`. It would be better to use `File.open`, `IO.popen` or
+`URI#open` explicitly.
 
 ### Examples
 
@@ -105,13 +106,14 @@ open(something)
 # good
 File.open(something)
 IO.popen(something)
+URI.parse(something).open
 ```
 
 ## Security/YAMLLoad
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.47 | -
 
 This cop checks for the use of YAML class methods which have
 potential security issues leading to remote code execution when

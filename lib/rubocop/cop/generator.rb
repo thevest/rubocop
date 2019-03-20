@@ -52,7 +52,7 @@ module RuboCop
                 # TODO: Implement the cop in here.
                 #
                 # In many cases, you can use a node matcher for matching node pattern.
-                # See https://github.com/bbatsov/rubocop/blob/master/lib/rubocop/node_pattern.rb
+                # See https://github.com/rubocop-hq/rubocop/blob/master/lib/rubocop/node_pattern.rb
                 #
                 # For example
                 MSG = 'Use `#good_method` instead of `#bad_method`.'.freeze
@@ -98,8 +98,14 @@ module RuboCop
         end
       SPEC
 
-      def initialize(name, output: $stdout)
+      CONFIGURATION_ADDED_MESSAGE = <<-MESSAGE.strip_indent
+        [modify] A configuration for the cop is added into %<configuration_file_path>s.
+                 If you want to disable the cop by default, set `Enabled` option to false.
+      MESSAGE
+
+      def initialize(name, github_user, output: $stdout)
         @badge = Badge.parse(name)
+        @github_user = github_user
         @output = output
         return if badge.qualified?
 
@@ -121,39 +127,31 @@ module RuboCop
         ).inject
       end
 
-      def inject_config(config_file_path: 'config/enabled.yml')
-        config = File.readlines(config_file_path)
-        content = <<-YAML.strip_indent
-          #{badge}:
-            Description: 'TODO: Write a description of the cop.'
-            Enabled: true
+      def inject_config(config_file_path: 'config/default.yml')
+        injector =
+          ConfigurationInjector.new(configuration_file_path: config_file_path,
+                                    badge: badge,
+                                    version_added: bump_minor_version)
 
-        YAML
-        target_line = config.find.with_index(1) do |line, index|
-          next if line =~ /^[\s#]/
-          break index - 1 if badge.to_s < line
+        injector.inject do
+          output.puts(format(CONFIGURATION_ADDED_MESSAGE,
+                             configuration_file_path: config_file_path))
         end
-        config.insert(target_line, content)
-        File.write(config_file_path, config.join)
-        output.puts <<-MESSAGE.strip_indent
-          [modify] A configuration for the cop is added into #{config_file_path}.
-                   If you want to disable the cop by default, move the added config to config/disabled.yml
-        MESSAGE
       end
 
       def todo
         <<-TODO.strip_indent
           Do 3 steps:
             1. Add an entry to the "New features" section in CHANGELOG.md,
-               e.g. "Add new `#{badge}` cop. ([@your_id][])"
-            2. Modify the description of #{badge} in config/enabled.yml
+               e.g. "Add new `#{badge}` cop. ([@#{github_user}][])"
+            2. Modify the description of #{badge} in config/default.yml
             3. Implement your new cop in the generated file!
         TODO
       end
 
       private
 
-      attr_reader :badge, :output
+      attr_reader :badge, :github_user, :output
 
       def write_unless_file_exists(path, contents)
         if File.exist?(path)
@@ -202,10 +200,17 @@ module RuboCop
 
       def snake_case(camel_case_string)
         return 'rspec' if camel_case_string == 'RSpec'
+
         camel_case_string
           .gsub(/([^A-Z])([A-Z]+)/, '\1_\2')
           .gsub(/([A-Z])([A-Z][^A-Z\d]+)/, '\1_\2')
           .downcase
+      end
+
+      def bump_minor_version
+        versions = RuboCop::Version::STRING.split('.')
+
+        "#{versions[0]}.#{versions[1].succ}"
       end
     end
   end

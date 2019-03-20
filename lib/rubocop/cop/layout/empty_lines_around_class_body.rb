@@ -3,7 +3,7 @@
 module RuboCop
   module Cop
     module Layout
-      # This cops checks if empty lines around the bodies of classes match
+      # This cop checks if empty lines around the bodies of classes match
       # the configuration.
       #
       # @example EnforcedStyle: empty_lines
@@ -70,8 +70,11 @@ module RuboCop
         KIND = 'class'.freeze
 
         def on_class(node)
-          _name, _superclass, body = *node
-          check(node, body)
+          _name, superclass, body = *node
+
+          adjusted_first_line = superclass.first_line if superclass
+
+          check(node, body, adjusted_first_line: adjusted_first_line)
         end
 
         def on_sclass(node)

@@ -4,8 +4,7 @@ module RuboCop
   module Cop
     class VariableForce
       # A Variable represents existence of a local variable.
-      # This holds a variable declaration node,
-      # and some states of the variable.
+      # This holds a variable declaration node and some states of the variable.
       class Variable
         VARIABLE_DECLARATION_TYPES =
           (VARIABLE_ASSIGNMENT_TYPES + ARGUMENT_DECLARATION_TYPES).freeze
@@ -38,6 +37,7 @@ module RuboCop
           !@references.empty?
         end
 
+        # rubocop:disable Metrics/AbcSize
         def reference!(node)
           reference = Reference.new(node, @scope)
           @references << reference
@@ -57,6 +57,7 @@ module RuboCop
             end
           end
         end
+        # rubocop:enable Metrics/AbcSize
 
         def capture_with_block!
           @captured_by_block = true
@@ -67,8 +68,8 @@ module RuboCop
         # For more precise usage check, refer Assignment#used?.
         #
         # Once the variable is captured by a block, we have no idea
-        # when, where and how many times the block would be invoked
-        # and it means we cannot track the usage of the variable.
+        # when, where, and how many times the block would be invoked.
+        # This means we cannot track the usage of the variable.
         # So we consider it's used to suppress false positive offenses.
         def used?
           @captured_by_block || referenced?

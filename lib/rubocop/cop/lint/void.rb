@@ -83,6 +83,7 @@ module RuboCop
         def on_block(node)
           return unless node.body && !node.body.begin_type?
           return unless in_void_context?(node.body)
+
           check_expression(node.body)
         end
 
@@ -95,7 +96,7 @@ module RuboCop
 
         def check_begin(node)
           expressions = *node
-          expressions = expressions.drop_last(1) unless in_void_context?(node)
+          expressions.pop unless in_void_context?(node)
           expressions.each do |expr|
             check_expression(expr)
           end

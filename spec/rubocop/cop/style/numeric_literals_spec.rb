@@ -6,15 +6,17 @@ RSpec.describe RuboCop::Cop::Style::NumericLiterals, :config do
   let(:cop_config) { { 'MinDigits' => 5 } }
 
   it 'registers an offense for a long undelimited integer' do
-    inspect_source('a = 12345')
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.config_to_allow_offenses).to eq('MinDigits' => 6)
+    expect_offense(<<-RUBY.strip_indent)
+      a = 12345
+          ^^^^^ Use underscores(_) as thousands separator and separate every 3 digits with them.
+    RUBY
   end
 
   it 'registers an offense for a float with a long undelimited integer part' do
-    inspect_source('a = 123456.789')
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.config_to_allow_offenses).to eq('MinDigits' => 7)
+    expect_offense(<<-RUBY.strip_indent)
+      a = 123456.789
+          ^^^^^^^^^^ Use underscores(_) as thousands separator and separate every 3 digits with them.
+    RUBY
   end
 
   it 'accepts integers with less than three places at the end' do
@@ -63,29 +65,59 @@ RSpec.describe RuboCop::Cop::Style::NumericLiterals, :config do
     RUBY
   end
 
+  it 'handles numeric literal with exponent' do
+    expect_offense(<<-RUBY.strip_indent)
+      a = 10e10
+      b = 3e12345
+      c = 12.345e3
+      d = 12345e3
+          ^^^^^^^ Use underscores(_) as thousands separator and separate every 3 digits with them.
+    RUBY
+  end
+
   it 'autocorrects a long integer offense' do
-    corrected = autocorrect_source(['a = 123456'])
+    corrected = autocorrect_source('a = 123456')
     expect(corrected).to eq 'a = 123_456'
   end
 
   it 'autocorrects an integer with misplaced underscore' do
-    corrected = autocorrect_source(['a = 123_456_78_90_00'])
+    corrected = autocorrect_source('a = 123_456_78_90_00')
     expect(corrected).to eq 'a = 123_456_789_000'
   end
 
   it 'autocorrects negative numbers' do
-    corrected = autocorrect_source(['a = -123456'])
+    corrected = autocorrect_source('a = -123456')
     expect(corrected).to eq 'a = -123_456'
   end
 
   it 'autocorrects floating-point numbers' do
-    corrected = autocorrect_source(['a = 123456.78'])
+    corrected = autocorrect_source('a = 123456.78')
     expect(corrected).to eq 'a = 123_456.78'
   end
 
   it 'autocorrects negative floating-point numbers' do
-    corrected = autocorrect_source(['a = -123456.78'])
+    corrected = autocorrect_source('a = -123456.78')
     expect(corrected).to eq 'a = -123_456.78'
+  end
+
+  it 'autocorrects numbers with spaces between leading minus and numbers' do
+    corrected = autocorrect_source("a = -\n  12345")
+    expect(corrected).to eq 'a = -12_345'
+  end
+
+  it 'autocorrects numeric literal with exponent' do
+    corrected = autocorrect_source('a = 12345e3')
+    expect(corrected).to eq 'a = 12_345e3'
+  end
+
+  it 'autocorrects numeric literal with exponent and dot' do
+    corrected = autocorrect_source('a = 12345.6e3')
+    expect(corrected).to eq 'a = 12_345.6e3'
+  end
+
+  it 'autocorrects numeric literal with exponent (large E) and dot' do
+    corrected = autocorrect_source('a = 12345.6E3')
+    expect(corrected).to eq 'a = 12_345.6E3'
   end
 
   context 'strict' do
@@ -97,12 +129,10 @@ RSpec.describe RuboCop::Cop::Style::NumericLiterals, :config do
     end
 
     it 'registers an offense for an integer with misplaced underscore' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         a = 123_456_78_90_00
-        b = 81_92
+            ^^^^^^^^^^^^^^^^ Use underscores(_) as thousands separator and separate every 3 digits with them.
       RUBY
-      expect(cop.offenses.size).to eq(2)
-      expect(cop.config_to_allow_offenses).to eq('Enabled' => false)
     end
   end
 end

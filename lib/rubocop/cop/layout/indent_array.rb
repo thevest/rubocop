@@ -96,6 +96,7 @@ module RuboCop
             check(array_node, left_parenthesis)
           end
         end
+        alias on_csend on_send
 
         def autocorrect(node)
           AlignmentCorrector.correct(processed_source, node, @column_delta)
@@ -114,6 +115,7 @@ module RuboCop
           first_elem = array_node.values.first
           if first_elem
             return if first_elem.source_range.line == left_bracket.line
+
             check_first(first_elem, left_bracket, left_parenthesis, 0)
           end
 

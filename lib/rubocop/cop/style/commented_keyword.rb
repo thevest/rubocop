@@ -6,8 +6,8 @@ module RuboCop
       # This cop checks for comments put on the same line as some keywords.
       # These keywords are: `begin`, `class`, `def`, `end`, `module`.
       #
-      # Note that some comments (such as `:nodoc:` and `rubocop:disable`) are
-      # allowed.
+      # Note that some comments (`:nodoc:`, `:yields:, and `rubocop:disable`)
+      # are allowed.
       #
       # @example
       #   # bad
@@ -47,6 +47,7 @@ module RuboCop
             line = processed_source.lines[line_position - 1]
             next if heredoc_lines.any? { |r| r.include?(line_position) }
             next unless offensive?(line)
+
             range = source_range(processed_source.buffer,
                                  line_position,
                                  (location.column)...(location.last_column))
@@ -58,7 +59,7 @@ module RuboCop
         private
 
         KEYWORDS = %w[begin class def end module].freeze
-        ALLOWED_COMMENTS = %w[:nodoc: rubocop:disable].freeze
+        ALLOWED_COMMENTS = %w[:nodoc: :yields: rubocop:disable].freeze
 
         def offensive?(line)
           line = line.lstrip
@@ -74,6 +75,7 @@ module RuboCop
 
         def extract_heredoc_lines(ast)
           return [] unless ast
+
           ast.each_node(:str, :dstr, :xstr).select(&:heredoc?).map do |node|
             body = node.location.heredoc_body
             (body.first_line...body.last_line)

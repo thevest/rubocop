@@ -35,6 +35,10 @@ RSpec.describe RuboCop::MagicComment do
                    encoding: 'utf-8'
 
   include_examples 'magic comment',
+                   '    # coding: utf-8',
+                   encoding: 'utf-8'
+
+  include_examples 'magic comment',
                    '# incoding: utf-8'
 
   include_examples 'magic comment',
@@ -43,6 +47,10 @@ RSpec.describe RuboCop::MagicComment do
 
   include_examples 'magic comment',
                    '# frozen_string_literal: true',
+                   frozen_string_literal: true
+
+  include_examples 'magic comment',
+                   '    # frozen_string_literal: true',
                    frozen_string_literal: true
 
   include_examples 'magic comment',
@@ -63,6 +71,10 @@ RSpec.describe RuboCop::MagicComment do
 
   include_examples 'magic comment',
                    '# fRoZeN-sTrInG_lItErAl: true',
+                   frozen_string_literal: true
+
+  include_examples 'magic comment',
+                   '# -*- frozen-string-literal: true -*-',
                    frozen_string_literal: true
 
   include_examples 'magic comment',
@@ -99,6 +111,13 @@ RSpec.describe RuboCop::MagicComment do
   include_examples(
     'magic comment',
     '# coding: utf-8 -*- encoding: ASCII-8BIT; frozen_string_literal: true -*-',
+    encoding: 'ascii-8bit',
+    frozen_string_literal: true
+  )
+
+  include_examples(
+    'magic comment',
+    '# -*- coding: ASCII-8BIT; frozen_string_literal: true -*-',
     encoding: 'ascii-8bit',
     frozen_string_literal: true
   )

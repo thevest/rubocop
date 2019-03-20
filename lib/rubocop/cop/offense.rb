@@ -24,7 +24,7 @@ module RuboCop
       # @return [Parser::Source::Range]
       #   the location where the violation is detected.
       #
-      # @see http://rubydoc.info/github/whitequark/parser/Parser/Source/Range
+      # @see https://www.rubydoc.info/gems/parser/Parser/Source/Range
       #   Parser::Source::Range
       attr_reader :location
 
@@ -177,7 +177,7 @@ module RuboCop
 
       # @api public
       #
-      # Returns `-1`, `0` or `+1`
+      # Returns `-1`, `0`, or `+1`
       # if this offense is less than, equal to, or greater than `other`.
       #
       # @return [Integer]

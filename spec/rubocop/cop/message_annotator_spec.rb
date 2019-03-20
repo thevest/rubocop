@@ -98,12 +98,12 @@ RSpec.describe RuboCop::Cop::MessageAnnotator do
 
       it 'can accept relative paths if base has a full path' do
         config['AllCops'] = {
-          'StyleGuideBaseURL' => 'http://github.com/bbatsov/ruby-style-guide/'
+          'StyleGuideBaseURL' => 'https://github.com/rubocop-hq/ruby-style-guide/'
         }
         config['Cop/Cop'] = {
           'StyleGuide' => '../rails-style-guide#target_based_url'
         }
-        expect(annotate).to include('http://github.com/bbatsov/rails-style-guide#target_based_url')
+        expect(annotate).to include('https://github.com/rubocop-hq/rails-style-guide#target_based_url')
       end
 
       it 'allows absolute URLs in the cop config' do
@@ -137,6 +137,25 @@ RSpec.describe RuboCop::Cop::MessageAnnotator do
         'Reference' => 'https://example.com/some_style_guide'
       }
       expect(urls).to eq(%w[https://example.com/some_style_guide])
+    end
+
+    it 'returns an empty array if the reference url is blank' do
+      config['Cop/Cop'] = {
+        'Reference' => ''
+      }
+
+      expect(urls.empty?).to be(true)
+    end
+
+    it 'returns multiple reference urls' do
+      config['Cop/Cop'] = {
+        'Reference' => ['https://example.com/some_style_guide',
+                        'https://example.com/some_other_guide',
+                        '']
+      }
+
+      expect(urls).to eq(['https://example.com/some_style_guide',
+                          'https://example.com/some_other_guide'])
     end
 
     it 'returns style guide and reference url when they are specified' do

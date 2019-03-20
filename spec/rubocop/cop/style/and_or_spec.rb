@@ -12,21 +12,22 @@ RSpec.describe RuboCop::Cop::Style::AndOr, :config do
 
     %w[and or].each do |operator|
       it "accepts \"#{operator}\" outside of conditional" do
-        inspect_source("x = a + b #{operator} return x")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses(<<-RUBY.strip_indent)
+          x = a + b #{operator} return x
+        RUBY
       end
 
       {
-        'if'                     => 'if %<condition>s; %<body>s; end',
-        'while'                  => 'while %<condition>s; %<body>s; end',
-        'until'                  => 'until %<condition>s; %<body>s; end',
+        'if' => 'if %<condition>s; %<body>s; end',
+        'while' => 'while %<condition>s; %<body>s; end',
+        'until' => 'until %<condition>s; %<body>s; end',
         'post-conditional while' => 'begin; %<body>s; end while %<condition>s',
         'post-conditional until' => 'begin; %<body>s; end until %<condition>s'
       }.each do |type, snippet_format|
         it "registers an offense for \"#{operator}\" in #{type} conditional" do
           elements = {
             condition: "a #{operator} b",
-            body:      'do_something'
+            body: 'do_something'
           }
           source = format(snippet_format, elements)
 
@@ -37,25 +38,26 @@ RSpec.describe RuboCop::Cop::Style::AndOr, :config do
         it "accepts \"#{operator}\" in #{type} body" do
           elements = {
             condition: 'some_condition',
-            body:      "do_something #{operator} return"
+            body: "do_something #{operator} return"
           }
           source = format(snippet_format, elements)
 
-          inspect_source(source)
-          expect(cop.offenses.empty?).to be(true)
+          expect_no_offenses(source)
         end
       end
     end
 
     %w[&& ||].each do |operator|
       it "accepts #{operator} inside of conditional" do
-        inspect_source("test if a #{operator} b")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses(<<-RUBY.strip_indent)
+          test if a #{operator} b
+        RUBY
       end
 
       it "accepts #{operator} outside of conditional" do
-        inspect_source("x = a #{operator} b")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses(<<-RUBY.strip_indent)
+          x = a #{operator} b
+        RUBY
       end
     end
   end
@@ -376,7 +378,7 @@ RSpec.describe RuboCop::Cop::Style::AndOr, :config do
     end
 
     context 'when left hand side is a comparison method' do
-      # Regression: https://github.com/bbatsov/rubocop/issues/4451
+      # Regression: https://github.com/rubocop-hq/rubocop/issues/4451
       it 'autocorrects "and" with && and adds parens' do
         new_source = autocorrect_source(<<-RUBY.strip_indent)
           foo == bar and baz

@@ -6,7 +6,7 @@ RSpec.describe RuboCop::Formatter::ProgressFormatter do
   let(:output) { StringIO.new }
 
   let(:files) do
-    %w[lib/rubocop.rb spec/spec_helper.rb bin/rubocop].map do |path|
+    %w[lib/rubocop.rb spec/spec_helper.rb exe/rubocop].map do |path|
       File.expand_path(path)
     end
   end
@@ -19,8 +19,11 @@ RSpec.describe RuboCop::Formatter::ProgressFormatter do
 
     shared_examples 'calls #report_file_as_mark' do
       it 'calls #report_as_with_mark' do
-        expect(formatter).to receive(:report_file_as_mark)
+        allow(formatter).to receive(:report_file_as_mark)
+
         formatter.file_finished(files.first, offenses)
+
+        expect(formatter).to have_received(:report_file_as_mark)
       end
     end
 
@@ -31,7 +34,9 @@ RSpec.describe RuboCop::Formatter::ProgressFormatter do
     end
 
     context 'when any offenses are detected' do
-      let(:offenses) { [double('offense').as_null_object] }
+      let(:offenses) do
+        [instance_double(RuboCop::Cop::Offense).as_null_object]
+      end
 
       include_examples 'calls #report_file_as_mark'
     end
@@ -153,10 +158,10 @@ RSpec.describe RuboCop::Formatter::ProgressFormatter do
           lib/rubocop.rb:2:3: C: foo
           This is line 2.
             ^
-          bin/rubocop:5:2: E: bar
+          exe/rubocop:5:2: E: bar
           This is line 5.
            ^
-          bin/rubocop:6:1: C: foo
+          exe/rubocop:6:1: C: foo
           This is line 6.
           ^
         OUTPUT
@@ -178,8 +183,11 @@ RSpec.describe RuboCop::Formatter::ProgressFormatter do
     end
 
     it 'calls #report_summary' do
-      expect(formatter).to receive(:report_summary)
+      allow(formatter).to receive(:report_summary)
+
       formatter.finished(files)
+
+      expect(formatter).to have_received(:report_summary)
     end
   end
 end

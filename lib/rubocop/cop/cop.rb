@@ -152,6 +152,7 @@ module RuboCop
         @corrected_nodes[node] = true
         correction = autocorrect(node)
         return :uncorrected unless correction
+
         @corrections << correction
         :corrected
       end
@@ -204,6 +205,7 @@ module RuboCop
       def file_name_matches_any?(file, parameter, default_result)
         patterns = cop_config[parameter]
         return default_result unless patterns
+
         path = nil
         patterns.any? do |pattern|
           # Try to match the absolute path, as Exclude properties are absolute.
@@ -216,7 +218,8 @@ module RuboCop
       end
 
       def enabled_line?(line_number)
-        return true unless @processed_source
+        return true if @options[:ignore_disable_comments] || !@processed_source
+
         @processed_source.comment_config.cop_enabled_at_line?(self, line_number)
       end
 

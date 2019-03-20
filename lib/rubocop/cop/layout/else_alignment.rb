@@ -3,7 +3,7 @@
 module RuboCop
   module Cop
     module Layout
-      # This cops checks the alignment of else keywords. Normally they should
+      # This cop checks the alignment of else keywords. Normally they should
       # be aligned with an if/unless/while/until/begin/def keyword, but there
       # are special cases when they should follow the same rules as the
       # alignment of end.
@@ -118,8 +118,9 @@ module RuboCop
         def check_alignment(base_range, else_range)
           return unless begins_its_line?(else_range)
 
-          @column_delta = effective_column(base_range) - else_range.column
+          @column_delta = column_offset_between(base_range, else_range)
           return if @column_delta.zero?
+
           message = format(
             MSG,
             else_range: else_range.source,

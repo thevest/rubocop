@@ -43,6 +43,14 @@ module RuboCop
 
         def on_case(case_node)
           return if case_node.condition
+          return if case_node.when_branches.any? do |when_branch|
+            when_branch.each_descendant.any?(&:return_type?)
+          end
+
+          if (else_branch = case_node.else_branch)
+            return if else_branch.return_type? ||
+                      else_branch.each_descendant.any?(&:return_type?)
+          end
 
           add_offense(case_node, location: :keyword)
         end
@@ -63,6 +71,8 @@ module RuboCop
 
           corrector.replace(case_range, 'if')
 
+          keep_first_when_comment(case_node, when_nodes.first, corrector)
+
           when_nodes[1..-1].each do |when_node|
             corrector.replace(when_node.loc.keyword, 'elsif')
           end
@@ -79,6 +89,17 @@ module RuboCop
 
             corrector.replace(range, conditions.map(&:source).join(' || '))
           end
+        end
+
+        def keep_first_when_comment(case_node, first_when_node, corrector)
+          comment = processed_source.comments_before_line(
+            first_when_node.loc.keyword.line
+          ).map(&:text).join("\n")
+
+          line = range_by_whole_lines(case_node.source_range)
+
+          corrector.insert_before(line, "#{comment}\n") if !comment.empty? &&
+                                                           !case_node.parent
         end
       end
     end

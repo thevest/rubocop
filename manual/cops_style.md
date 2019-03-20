@@ -1,10 +1,74 @@
 # Style
 
+## Style/AccessModifierDeclarations
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.57 | -
+
+Access modifiers should be declared to apply to a group of methods
+or inline before each method, depending on configuration.
+
+### Examples
+
+#### EnforcedStyle: group (default)
+
+```ruby
+# bad
+
+class Foo
+
+  private def bar; end
+  private def baz; end
+
+end
+
+# good
+
+class Foo
+
+  private
+
+  def bar; end
+  def baz; end
+
+end
+```
+#### EnforcedStyle: inline
+
+```ruby
+# bad
+
+class Foo
+
+  private
+
+  def bar; end
+  def baz; end
+
+end
+
+# good
+
+class Foo
+
+  private def bar; end
+  private def baz; end
+
+end
+```
+
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+EnforcedStyle | `group` | `inline`, `group`
+
 ## Style/Alias
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.36
 
 This cop enforces the use of either `#alias` or `#alias_method`
 depending on configuration.
@@ -41,16 +105,16 @@ EnforcedStyle | `prefer_alias` | `prefer_alias`, `prefer_alias_method`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#alias-method](https://github.com/bbatsov/ruby-style-guide#alias-method)
+* [https://github.com/rubocop-hq/ruby-style-guide#alias-method](https://github.com/rubocop-hq/ruby-style-guide#alias-method)
 
 ## Style/AndOr
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.25
 
 This cop checks for uses of `and` and `or`, and suggests using `&&` and
-`|| instead`. It can be configured to check only in conditions, or in
+`||` instead. It can be configured to check only in conditions or in
 all contexts.
 
 ### Examples
@@ -98,13 +162,13 @@ EnforcedStyle | `always` | `always`, `conditionals`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-and-or-or](https://github.com/bbatsov/ruby-style-guide#no-and-or-or)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-and-or-or](https://github.com/rubocop-hq/ruby-style-guide#no-and-or-or)
 
 ## Style/ArrayJoin
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.20 | 0.31
 
 This cop checks for uses of "*" as a substitute for *join*.
 
@@ -124,13 +188,13 @@ array literal or the second is a string literal.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#array-join](https://github.com/bbatsov/ruby-style-guide#array-join)
+* [https://github.com/rubocop-hq/ruby-style-guide#array-join](https://github.com/rubocop-hq/ruby-style-guide#array-join)
 
 ## Style/AsciiComments
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | 0.52
 
 This cop checks for non-ascii (non-English) characters
 in comments. You could set an array of allowed non-ascii chars in
@@ -154,13 +218,13 @@ AllowedChars | `[]` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#english-comments](https://github.com/bbatsov/ruby-style-guide#english-comments)
+* [https://github.com/rubocop-hq/ruby-style-guide#english-comments](https://github.com/rubocop-hq/ruby-style-guide#english-comments)
 
 ## Style/Attr
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.12
 
 This cop checks for uses of Module#attr.
 
@@ -178,13 +242,13 @@ attr_reader :one, :two, :three
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#attr](https://github.com/bbatsov/ruby-style-guide#attr)
+* [https://github.com/rubocop-hq/ruby-style-guide#attr](https://github.com/rubocop-hq/ruby-style-guide#attr)
 
 ## Style/AutoResourceCleanup
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.30 | -
 
 This cop checks for cases when you could use a block
 accepting version of a method that does automatic
@@ -204,9 +268,9 @@ end
 
 ## Style/BarePercentLiterals
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.25 | -
 
 This cop checks if usage of %() or %Q() matches configuration.
 
@@ -243,25 +307,32 @@ EnforcedStyle | `bare_percent` | `percent_q`, `bare_percent`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#percent-q-shorthand](https://github.com/bbatsov/ruby-style-guide#percent-q-shorthand)
+* [https://github.com/rubocop-hq/ruby-style-guide#percent-q-shorthand](https://github.com/rubocop-hq/ruby-style-guide#percent-q-shorthand)
 
 ## Style/BeginBlock
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | -
 
 This cop checks for BEGIN blocks.
 
+### Examples
+
+```ruby
+# bad
+BEGIN { test }
+```
+
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-BEGIN-blocks](https://github.com/bbatsov/ruby-style-guide#no-BEGIN-blocks)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-BEGIN-blocks](https://github.com/rubocop-hq/ruby-style-guide#no-BEGIN-blocks)
 
 ## Style/BlockComments
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.23
 
 This cop looks for uses of block comments (=begin...=end).
 
@@ -281,13 +352,13 @@ of comments...
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-block-comments](https://github.com/bbatsov/ruby-style-guide#no-block-comments)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-block-comments](https://github.com/rubocop-hq/ruby-style-guide#no-block-comments)
 
 ## Style/BlockDelimiters
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | 0.35
 
 Check for uses of braces or do/end around single line or
 multi-line blocks.
@@ -351,6 +422,30 @@ foo = map { |x|
 map { |x|
   x
 }.inspect
+
+# The AllowBracesOnProceduralOneLiners option is ignored unless the
+# EnforcedStyle is set to `semantic`. If so:
+
+# If the AllowBracesOnProceduralOneLiners option is unspecified, or
+# set to `false` or any other falsey value, then semantic purity is
+# maintained, so one-line procedural blocks must use do-end, not
+# braces.
+
+# bad
+collection.each { |element| puts element }
+
+# good
+collection.each do |element| puts element end
+
+# If the AllowBracesOnProceduralOneLiners option is set to `true`, or
+# any other truthy value, then one-line procedural blocks may use
+# either style. (There is no setting for requiring braces on them.)
+
+# good
+collection.each { |element| puts element }
+
+# also good
+collection.each do |element| puts element end
 ```
 #### EnforcedStyle: braces_for_chaining
 
@@ -374,16 +469,17 @@ EnforcedStyle | `line_count_based` | `line_count_based`, `semantic`, `braces_for
 ProceduralMethods | `benchmark`, `bm`, `bmbm`, `create`, `each_with_object`, `measure`, `new`, `realtime`, `tap`, `with_object` | Array
 FunctionalMethods | `let`, `let!`, `subject`, `watch` | Array
 IgnoredMethods | `lambda`, `proc`, `it` | Array
+AllowBracesOnProceduralOneLiners | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#single-line-blocks](https://github.com/bbatsov/ruby-style-guide#single-line-blocks)
+* [https://github.com/rubocop-hq/ruby-style-guide#single-line-blocks](https://github.com/rubocop-hq/ruby-style-guide#single-line-blocks)
 
 ## Style/BracesAroundHashParameters
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.14.1 | 0.28
 
 This cop checks for braces around the last parameter in a method call
 if the last parameter is a hash.
@@ -439,9 +535,9 @@ EnforcedStyle | `no_braces` | `braces`, `no_braces`, `context_dependent`
 
 ## Style/CaseEquality
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | -
 
 This cop checks for uses of the case equality operator(===).
 
@@ -461,13 +557,13 @@ some_string =~ /something/
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-case-equality](https://github.com/bbatsov/ruby-style-guide#no-case-equality)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-case-equality](https://github.com/rubocop-hq/ruby-style-guide#no-case-equality)
 
 ## Style/CharacterLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | -
 
 Checks for uses of the character literal ?x.
 
@@ -486,13 +582,13 @@ Checks for uses of the character literal ?x.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-character-literals](https://github.com/bbatsov/ruby-style-guide#no-character-literals)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-character-literals](https://github.com/rubocop-hq/ruby-style-guide#no-character-literals)
 
 ## Style/ClassAndModuleChildren
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.19 | -
 
 This cop checks the style of children definitions at classes and
 modules. Basically there are two different styles:
@@ -529,13 +625,13 @@ EnforcedStyle | `nested` | `nested`, `compact`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#namespace-definition](https://github.com/bbatsov/ruby-style-guide#namespace-definition)
+* [https://github.com/rubocop-hq/ruby-style-guide#namespace-definition](https://github.com/rubocop-hq/ruby-style-guide#namespace-definition)
 
 ## Style/ClassCheck
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.24 | -
 
 This cop enforces consistent use of `Object#is_a?` or `Object#kind_of?`.
 
@@ -572,9 +668,9 @@ EnforcedStyle | `is_a?` | `is_a?`, `kind_of?`
 
 ## Style/ClassMethods
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.20
 
 This cop checks for uses of the class/module name instead of
 self, when defining class/module methods.
@@ -599,13 +695,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#def-self-class-methods](https://github.com/bbatsov/ruby-style-guide#def-self-class-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#def-self-class-methods](https://github.com/rubocop-hq/ruby-style-guide#def-self-class-methods)
 
 ## Style/ClassVars
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.13 | -
 
 This cop checks for uses of class variables. Offenses
 are signaled only on assignment to class variables to
@@ -632,20 +728,20 @@ end
 
 class A
   def test
-    @@test # you can access class variable without offence
+    @@test # you can access class variable without offense
   end
 end
 ```
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-class-vars](https://github.com/bbatsov/ruby-style-guide#no-class-vars)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-class-vars](https://github.com/rubocop-hq/ruby-style-guide#no-class-vars)
 
 ## Style/CollectionMethods
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | No | Yes  | 0.9 | 0.27
 
 This cop enforces the use of consistent method names
 from the Enumerable module.
@@ -653,6 +749,34 @@ from the Enumerable module.
 Unfortunately we cannot actually know if a method is from
 Enumerable or not (static analysis limitation), so this cop
 can yield some false positives.
+
+You can customize the mapping from undesired method to desired method.
+
+e.g. to use `detect` over `find`:
+
+  Style/CollectionMethods:
+    PreferredMethods:
+      find: detect
+
+The default mapping for `PreferredMethods` behaves as follows.
+
+### Examples
+
+```ruby
+# bad
+items.collect
+items.collect!
+items.inject
+items.detect
+items.find_all
+
+# good
+items.map
+items.map!
+items.reduce
+items.find
+items.select
+```
 
 ### Configurable attributes
 
@@ -662,13 +786,13 @@ PreferredMethods | `{"collect"=>"map", "collect!"=>"map!", "inject"=>"reduce", "
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#map-find-select-reduce-size](https://github.com/bbatsov/ruby-style-guide#map-find-select-reduce-size)
+* [https://github.com/rubocop-hq/ruby-style-guide#map-find-select-reduce-size](https://github.com/rubocop-hq/ruby-style-guide#map-find-select-reduce-size)
 
 ## Style/ColonMethodCall
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | -
 
 This cop checks for methods invoked via the :: operator instead
 of the . operator (like FileUtils::rmdir instead of FileUtils.rmdir).
@@ -689,13 +813,13 @@ Marshal.dump(obj)
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#double-colons](https://github.com/bbatsov/ruby-style-guide#double-colons)
+* [https://github.com/rubocop-hq/ruby-style-guide#double-colons](https://github.com/rubocop-hq/ruby-style-guide#double-colons)
 
 ## Style/ColonMethodDefinition
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 This cop checks for class methods that are defined using the `::`
 operator instead of the `.` operator.
@@ -718,13 +842,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#colon-method-definition](https://github.com/bbatsov/ruby-style-guide#colon-method-definition)
+* [https://github.com/rubocop-hq/ruby-style-guide#colon-method-definition](https://github.com/rubocop-hq/ruby-style-guide#colon-method-definition)
 
 ## Style/CommandLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | -
 
 This cop enforces using `` or %x around command literals.
 
@@ -821,13 +945,13 @@ AllowInnerBackticks | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#percent-x](https://github.com/bbatsov/ruby-style-guide#percent-x)
+* [https://github.com/rubocop-hq/ruby-style-guide#percent-x](https://github.com/rubocop-hq/ruby-style-guide#percent-x)
 
 ## Style/CommentAnnotation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.10 | 0.31
 
 This cop checks that comment annotation keywords are written according
 to guidelines.
@@ -868,19 +992,19 @@ Keywords | `TODO`, `FIXME`, `OPTIMIZE`, `HACK`, `REVIEW` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#annotate-keywords](https://github.com/bbatsov/ruby-style-guide#annotate-keywords)
+* [https://github.com/rubocop-hq/ruby-style-guide#annotate-keywords](https://github.com/rubocop-hq/ruby-style-guide#annotate-keywords)
 
 ## Style/CommentedKeyword
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.51 | -
 
 This cop checks for comments put on the same line as some keywords.
 These keywords are: `begin`, `class`, `def`, `end`, `module`.
 
-Note that some comments (such as `:nodoc:` and `rubocop:disable`) are
-allowed.
+Note that some comments (`:nodoc:`, `:yields:, and `rubocop:disable`)
+are allowed.
 
 ### Examples
 
@@ -911,9 +1035,9 @@ end
 
 ## Style/ConditionalAssignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | 0.47
 
 Check for `if` and `case` statements where each branch is used for
 assignment to the same variable when using the return of the
@@ -1024,21 +1148,52 @@ EnforcedStyle | `assign_to_condition` | `assign_to_condition`, `assign_inside_co
 SingleLineConditionsOnly | `true` | Boolean
 IncludeTernaryExpressions | `true` | Boolean
 
+## Style/ConstantVisibility
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.66 | -
+
+This cop checks that constants defined in classes and modules have
+an explicit visibility declaration. By default, Ruby makes all class-
+and module constants public, which litters the public API of the
+class or module. Explicitly declaring a visibility makes intent more
+clear, and prevents outside actors from touching private state.
+
+### Examples
+
+```ruby
+# bad
+class Foo
+  BAR = 42
+  BAZ = 43
+end
+
+# good
+class Foo
+  BAR = 42
+  private_constant :BAR
+
+  BAZ = 43
+  public_constant :BAZ
+end
+```
+
 ## Style/Copyright
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.30 | -
 
 Check that a copyright notice was given in each source file.
 
 The default regexp for an acceptable copyright notice can be found in
-config/default.yml.  The default can be changed as follows:
+config/default.yml. The default can be changed as follows:
 
     Style/Copyright:
       Notice: '^Copyright (\(c\) )?2\d{3} Acme Inc'
 
-This regex string is treated as an unanchored regex.  For each file
+This regex string is treated as an unanchored regex. For each file
 that RuboCop scans, a comment that matches this regex must be found or
 an offense is reported.
 
@@ -1051,12 +1206,15 @@ AutocorrectNotice | `` | String
 
 ## Style/DateTime
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.51 | 0.59
 
-This cop checks for uses of `DateTime` that should be replaced by
-`Date` or `Time`.
+This cop checks for consistent usage of the `DateTime` class over the
+`Time` class. This cop is disabled by default since these classes,
+although highly overlapping, have particularities that make them not
+replaceable in certain situations when dealing with multiple timezones
+and/or DST.
 
 ### Examples
 
@@ -1070,22 +1228,46 @@ Time.now
 # bad - uses `DateTime` for modern date
 DateTime.iso8601('2016-06-29')
 
-# good - uses `Date` for modern date
-Date.iso8601('2016-06-29')
+# good - uses `Time` for modern date
+Time.iso8601('2016-06-29')
 
 # good - uses `DateTime` with start argument for historical date
 DateTime.iso8601('1751-04-23', Date::ENGLAND)
 ```
+#### AllowCoercion: false (default)
+
+```ruby
+# bad - coerces to `DateTime`
+something.to_datetime
+
+# good - coerces to `Time`
+something.to_time
+```
+#### AllowCoercion: true
+
+```ruby
+# good
+something.to_datetime
+
+# good
+something.to_time
+```
+
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+AllowCoercion | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#date--time](https://github.com/bbatsov/ruby-style-guide#date--time)
+* [https://github.com/rubocop-hq/ruby-style-guide#date--time](https://github.com/rubocop-hq/ruby-style-guide#date--time)
 
 ## Style/DefWithParentheses
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.12
 
 This cop checks for parentheses in the definition of a method,
 that does not take any arguments. Both instance and
@@ -1121,13 +1303,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#method-parens](https://github.com/bbatsov/ruby-style-guide#method-parens)
+* [https://github.com/rubocop-hq/ruby-style-guide#method-parens](https://github.com/rubocop-hq/ruby-style-guide#method-parens)
 
 ## Style/Dir
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.50 | -
 
 This cop checks for places where the `#__dir__` method can replace more
 complex constructs to retrieve a canonicalized absolute path to the
@@ -1148,9 +1330,9 @@ path = __dir__
 
 ## Style/Documentation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | -
 
 This cop checks for missing top-level documentation of
 classes and modules. Classes with no body are exempt from the
@@ -1184,9 +1366,9 @@ Exclude | `spec/**/*`, `test/**/*` | Array
 
 ## Style/DocumentationMethod
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.43 | -
 
 This cop checks for missing documentation comment for public methods.
 It can optionally be configured to also require documentation for
@@ -1244,9 +1426,9 @@ RequireForNonPublicMethods | `false` | Boolean
 
 ## Style/DoubleNegation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.19 | -
 
 This cop checks for uses of double negation (!!) to convert something
 to a boolean value. As this is both cryptic and usually redundant, it
@@ -1269,13 +1451,13 @@ this is rarely a problem in practice.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-bang-bang](https://github.com/bbatsov/ruby-style-guide#no-bang-bang)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-bang-bang](https://github.com/rubocop-hq/ruby-style-guide#no-bang-bang)
 
 ## Style/EachForSimpleLoop
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.41 | -
 
 This cop checks for loops which iterate a constant number of times,
 using a Range literal and `#each`. This can be done more readably using
@@ -1302,9 +1484,9 @@ This check only applies if the block takes no parameters.
 
 ## Style/EachWithObject
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.22 | 0.42
 
 This cop looks for inject / reduce calls where the passed in object is
 returned at the end and so could be replaced by each_with_object without
@@ -1325,9 +1507,9 @@ parameter is assigned to within the block.
 
 ## Style/EmptyBlockParameter
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 This cop checks for pipes for empty block parameters. Pipes for empty
 block parameters do not cause syntax errors, but they are redundant.
@@ -1353,9 +1535,9 @@ a { do_something }
 
 ## Style/EmptyCaseCondition
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.40 | -
 
 This cop checks for case statements with an empty condition.
 
@@ -1394,9 +1576,9 @@ end
 
 ## Style/EmptyElse
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.28 | 0.32
 
 Checks for empty else-clauses, possibly including comments and/or an
 explicit `nil` depending on the EnforcedStyle.
@@ -1502,9 +1684,9 @@ EnforcedStyle | `both` | `empty`, `nil`, `both`
 
 ## Style/EmptyLambdaParameter
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 This cop checks for parentheses for empty lambda parameters. Parentheses
 for empty lambda parameters do not cause syntax errors, but they are
@@ -1523,55 +1705,14 @@ redundant.
 -> (arg) { do_something(arg) }
 ```
 
-## Style/EmptyLineAfterGuardClause
-
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
-
-This cop enforces empty line after guard clause
-
-### Examples
-
-```ruby
-# bad
-def foo
-  return if need_return?
-  bar
-end
-
-# good
-def foo
-  return if need_return?
-
-  bar
-end
-
-# good
-def foo
-  return if something?
-  return if something_different?
-
-  bar
-end
-
-# also good
-def foo
-  if something?
-    do_something
-    return if need_return?
-  end
-end
-```
-
 ## Style/EmptyLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.12
 
 This cop checks for the use of a method, the result of which
-would be a literal, like an empty array, hash or string.
+would be a literal, like an empty array, hash, or string.
 
 ### Examples
 
@@ -1589,13 +1730,13 @@ s = ''
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#literal-array-hash](https://github.com/bbatsov/ruby-style-guide#literal-array-hash)
+* [https://github.com/rubocop-hq/ruby-style-guide#literal-array-hash](https://github.com/rubocop-hq/ruby-style-guide#literal-array-hash)
 
 ## Style/EmptyMethod
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.46 | -
 
 This cop checks for the formatting of empty method definitions.
 By default it enforces empty method definitions to go on a single
@@ -1650,37 +1791,56 @@ EnforcedStyle | `compact` | `compact`, `expanded`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-single-line-methods](https://github.com/bbatsov/ruby-style-guide#no-single-line-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-single-line-methods](https://github.com/rubocop-hq/ruby-style-guide#no-single-line-methods)
 
 ## Style/Encoding
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.50
 
 This cop checks ensures source files have no utf-8 encoding comments.
 
+### Examples
+
+```ruby
+# bad
+# encoding: UTF-8
+# coding: UTF-8
+# -*- coding: UTF-8 -*-
+```
+
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#utf-8](https://github.com/bbatsov/ruby-style-guide#utf-8)
+* [https://github.com/rubocop-hq/ruby-style-guide#utf-8](https://github.com/rubocop-hq/ruby-style-guide#utf-8)
 
 ## Style/EndBlock
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | -
 
 This cop checks for END blocks.
 
+### Examples
+
+```ruby
+# bad
+END { puts 'Goodbye!' }
+
+# good
+at_exit { puts 'Goodbye!' }
+```
+
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-END-blocks](https://github.com/bbatsov/ruby-style-guide#no-END-blocks)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-END-blocks](https://github.com/rubocop-hq/ruby-style-guide#no-END-blocks)
 
 ## Style/EvalWithLocation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.52 | -
 
 This cop checks `eval` method usage. `eval` can receive source location
 metadata, that are filename and line number. The metadata is used by
@@ -1716,12 +1876,12 @@ RUBY
 
 ## Style/EvenOdd
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.12 | 0.29
 
-This cop checks for places where Integer#even? or Integer#odd?
-should have been used.
+This cop checks for places where `Integer#even?` or `Integer#odd?`
+can be used.
 
 ### Examples
 
@@ -1737,13 +1897,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#predicate-methods](https://github.com/bbatsov/ruby-style-guide#predicate-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#predicate-methods](https://github.com/rubocop-hq/ruby-style-guide#predicate-methods)
 
 ## Style/ExpandPathArguments
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks for use of the `File.expand_path` arguments.
 Likewise, it also checks for the `Pathname.new` argument.
@@ -1785,42 +1945,16 @@ Pathname.new(__FILE__).parent.expand_path
 Pathname.new(__dir__).expand_path
 ```
 
-## Style/FlipFlop
-
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
-
-This cop looks for uses of flip flop operator
-
-### Examples
-
-```ruby
-# bad
-(1..20).each do |x|
-  puts x if (x == 5) .. (x == 10)
-end
-
-# good
-(1..20).each do |x|
-  puts x if (x >= 5) && (x <= 10)
-end
-```
-
-### References
-
-* [https://github.com/bbatsov/ruby-style-guide#no-flip-flops](https://github.com/bbatsov/ruby-style-guide#no-flip-flops)
-
 ## Style/For
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.13 | 0.59
 
-This cop looks for uses of the *for* keyword, or *each* method. The
+This cop looks for uses of the `for` keyword or `each` method. The
 preferred alternative is set in the EnforcedStyle configuration
-parameter. An *each* call with a block on a single line is always
-allowed, however.
+parameter. An `each` call with a block on a single line is always
+allowed.
 
 ### Examples
 
@@ -1867,13 +2001,13 @@ EnforcedStyle | `each` | `each`, `for`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-for-loops](https://github.com/bbatsov/ruby-style-guide#no-for-loops)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-for-loops](https://github.com/rubocop-hq/ruby-style-guide#no-for-loops)
 
 ## Style/FormatString
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.19 | 0.49
 
 This cop enforces the use of a single string formatting utility.
 Valid options include Kernel#format, Kernel#sprintf and String#%.
@@ -1924,13 +2058,13 @@ EnforcedStyle | `format` | `format`, `sprintf`, `percent`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#sprintf](https://github.com/bbatsov/ruby-style-guide#sprintf)
+* [https://github.com/rubocop-hq/ruby-style-guide#sprintf](https://github.com/rubocop-hq/ruby-style-guide#sprintf)
 
 ## Style/FormatStringToken
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.49 | 0.52
 
 Use a consistent style for named format string tokens.
 
@@ -1982,14 +2116,14 @@ EnforcedStyle | `annotated` | `annotated`, `template`, `unannotated`
 
 ## Style/FrozenStringLiteralComment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | 0.47
 
-This cop is designed to help upgrade to Ruby 3.0. It will add the
+This cop is designed to help upgrade to after Ruby 3.0. It will add the
 comment `# frozen_string_literal: true` to the top of files to
 enable frozen string literals. Frozen string literals may be default
-in Ruby 3.0. The comment will be added below a shebang and encoding
+after Ruby 3.0. The comment will be added below a shebang and encoding
 comment. The frozen string literal comment is only valid in Ruby 2.3+.
 
 ### Examples
@@ -2055,11 +2189,11 @@ EnforcedStyle | `when_needed` | `when_needed`, `always`, `never`
 
 ## Style/GlobalVars
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.13 | -
 
-This cops looks for uses of global variables.
+This cop looks for uses of global variables.
 It does not report offenses for built-in global variables.
 Built-in global variables are allowed by default. Additionally
 users can allow additional variables via the AllowedVariables option.
@@ -2087,14 +2221,14 @@ AllowedVariables | `[]` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#instance-vars](https://github.com/bbatsov/ruby-style-guide#instance-vars)
-* [http://www.zenspider.com/Languages/Ruby/QuickRef.html](http://www.zenspider.com/Languages/Ruby/QuickRef.html)
+* [https://github.com/rubocop-hq/ruby-style-guide#instance-vars](https://github.com/rubocop-hq/ruby-style-guide#instance-vars)
+* [https://www.zenspider.com/ruby/quickref.html](https://www.zenspider.com/ruby/quickref.html)
 
 ## Style/GuardClause
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.20 | 0.22
 
 Use a guard clause instead of wrapping the code inside a conditional
 expression
@@ -2140,13 +2274,13 @@ MinBodyLength | `1` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-nested-conditionals](https://github.com/bbatsov/ruby-style-guide#no-nested-conditionals)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-nested-conditionals](https://github.com/rubocop-hq/ruby-style-guide#no-nested-conditionals)
 
 ## Style/HashSyntax
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.43
 
 This cop checks hash literal syntax.
 
@@ -2221,13 +2355,13 @@ PreferHashRocketsForNonAlnumEndingSymbols | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#hash-literals](https://github.com/bbatsov/ruby-style-guide#hash-literals)
+* [https://github.com/rubocop-hq/ruby-style-guide#hash-literals](https://github.com/rubocop-hq/ruby-style-guide#hash-literals)
 
 ## Style/IdenticalConditionalBranches
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.36 | -
 
 This cop checks for identical lines at the beginning or end of
 each branch of a conditional statement.
@@ -2294,9 +2428,9 @@ end
 
 ## Style/IfInsideElse
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.36 | -
 
 If the `else` branch of a conditional consists solely of an `if` node,
 it can be combined with the `else` to become an `elsif`.
@@ -2328,13 +2462,14 @@ end
 
 ## Style/IfUnlessModifier
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.30
 
 Checks for if and unless statements that would fit on one line
 if written as a modifier if/unless. The maximum line length is
-configured in the `Metrics/LineLength` cop.
+configured in the `Metrics/LineLength` cop. The tab size is configured
+in the `IndentationWidth` of the `Layout/Tab` cop.
 
 ### Examples
 
@@ -2355,13 +2490,13 @@ Foo.do_something unless qux.empty?
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#if-as-a-modifier](https://github.com/bbatsov/ruby-style-guide#if-as-a-modifier)
+* [https://github.com/rubocop-hq/ruby-style-guide#if-as-a-modifier](https://github.com/rubocop-hq/ruby-style-guide#if-as-a-modifier)
 
 ## Style/IfUnlessModifierOfIfUnless
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.39 | -
 
 Checks for if and unless statements used as modifiers of other if or
 unless statements.
@@ -2387,9 +2522,9 @@ end
 
 ## Style/IfWithSemicolon
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | -
 
 Checks for uses of semicolon in if statements.
 
@@ -2405,13 +2540,13 @@ result = some_condition ? something : another_thing
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-semicolon-ifs](https://github.com/bbatsov/ruby-style-guide#no-semicolon-ifs)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-semicolon-ifs](https://github.com/rubocop-hq/ruby-style-guide#no-semicolon-ifs)
 
 ## Style/ImplicitRuntimeError
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.41 | -
 
 This cop checks for `raise` or `fail` statements which do not specify an
 explicit exception class. (This raises a `RuntimeError`. Some projects
@@ -2430,9 +2565,9 @@ raise ArgumentError, 'Error message here'
 
 ## Style/InfiniteLoop
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.26 | 0.61
 
 Use `Kernel#loop` for infinite loops.
 
@@ -2452,13 +2587,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#infinite-loop](https://github.com/bbatsov/ruby-style-guide#infinite-loop)
+* [https://github.com/rubocop-hq/ruby-style-guide#infinite-loop](https://github.com/rubocop-hq/ruby-style-guide#infinite-loop)
 
 ## Style/InlineComment
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.23 | -
 
 This cop checks for trailing inline comments.
 
@@ -2479,9 +2614,9 @@ end
 
 ## Style/InverseMethods
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | No | Yes  | 0.48 | -
 
 This cop check for usages of not (`not` or `!`) called on a method
 when an inverse of that method can be used instead.
@@ -2519,11 +2654,39 @@ Name | Default value | Configurable values
 InverseMethods | `{:any?=>:none?, :even?=>:odd?, :===>:!=, :=~=>:!~, :<=>:>=, :>=>:<=}` | 
 InverseBlocks | `{:select=>:reject, :select!=>:reject!}` | 
 
+## Style/IpAddresses
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.58 | -
+
+This cop checks for hardcoded IP addresses, which can make code
+brittle. IP addresses are likely to need to be changed when code
+is deployed to a different server or environment, which may break
+a deployment if forgotten. Prefer setting IP addresses in ENV or
+other configuration.
+
+### Examples
+
+```ruby
+# bad
+ip_address = '127.59.241.29'
+
+# good
+ip_address = ENV['DEPLOYMENT_IP_ADDRESS']
+```
+
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+Whitelist | `::` | Array
+
 ## Style/Lambda
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.40
 
 This cop (by default) checks for uses of the lambda literal syntax for
 single line lambdas, and the method call syntax for multiline lambdas.
@@ -2586,13 +2749,13 @@ EnforcedStyle | `line_count_dependent` | `line_count_dependent`, `lambda`, `lite
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#lambda-multi-line](https://github.com/bbatsov/ruby-style-guide#lambda-multi-line)
+* [https://github.com/rubocop-hq/ruby-style-guide#lambda-multi-line](https://github.com/rubocop-hq/ruby-style-guide#lambda-multi-line)
 
 ## Style/LambdaCall
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.13.1 | 0.14
 
 This cop checks for use of the lambda.(args) syntax.
 
@@ -2625,13 +2788,13 @@ EnforcedStyle | `call` | `call`, `braces`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#proc-call](https://github.com/bbatsov/ruby-style-guide#proc-call)
+* [https://github.com/rubocop-hq/ruby-style-guide#proc-call](https://github.com/rubocop-hq/ruby-style-guide#proc-call)
 
 ## Style/LineEndConcatenation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.18 | 0.64
 
 This cop checks for string literal concatenation at
 the end of a line.
@@ -2653,15 +2816,41 @@ some_str = 'ala' \
 
 ## Style/MethodCallWithArgsParentheses
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.47 | 0.61
 
-This cop checks presence of parentheses in method calls containing
-parameters. By default, macro methods are ignored. Additional methods
-can be added to the `IgnoredMethods` list.
+This cop enforces the presence (default) or absence of parentheses in
+method calls containing parameters.
+
+In the default style (require_parentheses), macro methods are ignored.
+Additional methods can be added to the `IgnoredMethods` list. This
+option is valid only in the default style. Macros can be included by
+either setting `IgnoreMacros` to false or adding specific macros to
+the `IncludedMacros` list. If a method is listed in both
+`IncludedMacros` and `IgnoredMethods`, then the latter takes
+precedence (that is, the method is ignored).
+
+In the alternative style (omit_parentheses), there are three additional
+options.
+
+1. `AllowParenthesesInChaining` is `false` by default. Setting it to
+   `true` allows the presence of parentheses in the last call during
+   method chaining.
+
+2. `AllowParenthesesInMultilineCall` is `false` by default. Setting it
+    to `true` allows the presence of parentheses in multi-line method
+    calls.
+
+3. `AllowParenthesesInCamelCaseMethod` is `false` by default. This
+    allows the presence of parentheses when calling a method whose name
+    begins with a capital letter and which has no arguments. Setting it
+    to `true` allows the presence of parentheses in such a method call
+    even with arguments.
 
 ### Examples
+
+#### EnforcedStyle: require_parentheses (default)
 
 ```ruby
 # bad
@@ -2695,6 +2884,75 @@ class Foo
   bar :baz
 end
 ```
+#### EnforcedStyle: omit_parentheses
+
+```ruby
+# bad
+array.delete(e)
+
+# good
+array.delete e
+
+# bad
+foo.enforce(strict: true)
+
+# good
+foo.enforce strict: true
+
+# AllowParenthesesInMultilineCall: false (default)
+
+# bad
+foo.enforce(
+  strict: true
+)
+
+# good
+foo.enforce \
+  strict: true
+
+# AllowParenthesesInMultilineCall: true
+
+# good
+foo.enforce(
+  strict: true
+)
+
+# good
+foo.enforce \
+  strict: true
+
+# AllowParenthesesInChaining: false (default)
+
+# bad
+foo().bar(1)
+
+# good
+foo().bar 1
+
+# AllowParenthesesInChaining: true
+
+# good
+foo().bar(1)
+
+# good
+foo().bar 1
+
+# AllowParenthesesInCamelCaseMethod: false (default)
+
+# bad
+Array(1)
+
+# good
+Array 1
+
+# AllowParenthesesInCamelCaseMethod: true
+
+# good
+Array(1)
+
+# good
+Array 1
+```
 
 ### Configurable attributes
 
@@ -2702,16 +2960,20 @@ Name | Default value | Configurable values
 --- | --- | ---
 IgnoreMacros | `true` | Boolean
 IgnoredMethods | `[]` | Array
+AllowParenthesesInMultilineCall | `false` | Boolean
+AllowParenthesesInChaining | `false` | Boolean
+AllowParenthesesInCamelCaseMethod | `false` | Boolean
+EnforcedStyle | `require_parentheses` | `require_parentheses`, `omit_parentheses`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#method-invocation-parens](https://github.com/bbatsov/ruby-style-guide#method-invocation-parens)
+* [https://github.com/rubocop-hq/ruby-style-guide#method-invocation-parens](https://github.com/rubocop-hq/ruby-style-guide#method-invocation-parens)
 
 ## Style/MethodCallWithoutArgsParentheses
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.47 | 0.55
 
 This cop checks for unwanted parentheses in parameterless method calls.
 
@@ -2733,13 +2995,13 @@ IgnoredMethods | `[]` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#method-invocation-parens](https://github.com/bbatsov/ruby-style-guide#method-invocation-parens)
+* [https://github.com/rubocop-hq/ruby-style-guide#method-invocation-parens](https://github.com/rubocop-hq/ruby-style-guide#method-invocation-parens)
 
 ## Style/MethodCalledOnDoEndBlock
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.14 | -
 
 This cop checks for methods called on a do...end block. The point of
 this check is that it's easy to miss the call tacked on to the block
@@ -2755,15 +3017,15 @@ end.c
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#single-line-blocks](https://github.com/bbatsov/ruby-style-guide#single-line-blocks)
+* [https://github.com/rubocop-hq/ruby-style-guide#single-line-blocks](https://github.com/rubocop-hq/ruby-style-guide#single-line-blocks)
 
 ## Style/MethodDefParentheses
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.16 | 0.35
 
-This cops checks for parentheses around the arguments in method
+This cop checks for parentheses around the arguments in method
 definitions. Both instance and class/singleton methods are checked.
 
 ### Examples
@@ -2828,8 +3090,8 @@ end
 
 ```ruby
 # The `require_no_parentheses_except_multiline` style prefers no
-# parantheses when method definition arguments fit on single line,
-# but prefers parantheses when arguments span multiple lines.
+# parentheses when method definition arguments fit on single line,
+# but prefers parentheses when arguments span multiple lines.
 
 # bad
 def bar(num1, num2)
@@ -2862,16 +3124,16 @@ EnforcedStyle | `require_parentheses` | `require_parentheses`, `require_no_paren
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#method-parens](https://github.com/bbatsov/ruby-style-guide#method-parens)
+* [https://github.com/rubocop-hq/ruby-style-guide#method-parens](https://github.com/rubocop-hq/ruby-style-guide#method-parens)
 
-## Style/MethodMissing
+## Style/MethodMissingSuper
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.56 | -
 
-This cop checks for the presence of `method_missing` without also
-defining `respond_to_missing?` and falling back on `super`.
+This cop checks for the presence of `method_missing` without
+falling back on `super`.
 
 ### Examples
 
@@ -2882,9 +3144,6 @@ def method_missing(name, *args)
 end
 
 #good
-def respond_to_missing?(name, include_private)
-  # ...
-end
 
 def method_missing(name, *args)
   # ...
@@ -2894,13 +3153,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-method-missing](https://github.com/bbatsov/ruby-style-guide#no-method-missing)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-method-missing](https://github.com/rubocop-hq/ruby-style-guide#no-method-missing)
 
 ## Style/MinMax
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.50 | -
 
 This cop checks for potential uses of `Enumerable#minmax`.
 
@@ -2918,9 +3177,9 @@ return foo.minmax
 
 ## Style/MissingElse
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.30 | 0.38
 
 Checks for `if` expressions that do not have an `else` branch.
 
@@ -3028,11 +3287,42 @@ Name | Default value | Configurable values
 --- | --- | ---
 EnforcedStyle | `both` | `if`, `case`, `both`
 
+## Style/MissingRespondToMissing
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.56 | -
+
+This cop checks for the presence of `method_missing` without also
+defining `respond_to_missing?`.
+
+### Examples
+
+```ruby
+#bad
+def method_missing(name, *args)
+  # ...
+end
+
+#good
+def respond_to_missing?(name, include_private)
+  # ...
+end
+
+def method_missing(name, *args)
+  # ...
+end
+```
+
+### References
+
+* [https://github.com/rubocop-hq/ruby-style-guide#no-method-missing](https://github.com/rubocop-hq/ruby-style-guide#no-method-missing)
+
 ## Style/MixinGrouping
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.48 | 0.49
 
 This cop checks for grouping of mixins in `class` and `module` bodies.
 By default it enforces mixins to be placed in separate declarations,
@@ -3077,13 +3367,13 @@ EnforcedStyle | `separated` | `separated`, `grouped`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#mixin-grouping](https://github.com/bbatsov/ruby-style-guide#mixin-grouping)
+* [https://github.com/rubocop-hq/ruby-style-guide#mixin-grouping](https://github.com/rubocop-hq/ruby-style-guide#mixin-grouping)
 
 ## Style/MixinUsage
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.51 | -
 
 This cop checks that `include`, `extend` and `prepend` statements appear
 inside classes and modules, not at the top level, so as to not affect
@@ -3128,16 +3418,19 @@ end
 
 ## Style/ModuleFunction
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.11 | 0.65
 
-This cops checks for use of `extend self` or `module_function` in a
+This cop checks for use of `extend self` or `module_function` in a
 module.
 
 Supported styles are: module_function, extend_self.
 
-These offenses are not auto-corrected since there are different
+In case there are private methods, the cop won't be activated.
+Otherwise, it forces to change the flow of the default code.
+
+These offenses are not safe to auto-correct since there are different
 implications to each approach.
 
 ### Examples
@@ -3154,6 +3447,17 @@ end
 # good
 module Test
   module_function
+  # ...
+end
+```
+#### EnforcedStyle: module_function (default)
+
+```ruby
+# good
+module Test
+  extend self
+  # ...
+  private
   # ...
 end
 ```
@@ -3178,16 +3482,17 @@ end
 Name | Default value | Configurable values
 --- | --- | ---
 EnforcedStyle | `module_function` | `module_function`, `extend_self`
+Autocorrect | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#module-function](https://github.com/bbatsov/ruby-style-guide#module-function)
+* [https://github.com/rubocop-hq/ruby-style-guide#module-function](https://github.com/rubocop-hq/ruby-style-guide#module-function)
 
 ## Style/MultilineBlockChain
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.13 | -
 
 This cop checks for chaining of a block after another block that spans
 multiple lines.
@@ -3204,13 +3509,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#single-line-blocks](https://github.com/bbatsov/ruby-style-guide#single-line-blocks)
+* [https://github.com/rubocop-hq/ruby-style-guide#single-line-blocks](https://github.com/rubocop-hq/ruby-style-guide#single-line-blocks)
 
 ## Style/MultilineIfModifier
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.45 | -
 
 Checks for uses of if/unless modifiers with multiple-lines bodies.
 
@@ -3228,13 +3533,13 @@ Checks for uses of if/unless modifiers with multiple-lines bodies.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-multiline-if-modifiers](https://github.com/bbatsov/ruby-style-guide#no-multiline-if-modifiers)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-multiline-if-modifiers](https://github.com/rubocop-hq/ruby-style-guide#no-multiline-if-modifiers)
 
 ## Style/MultilineIfThen
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.26
 
 Checks for uses of the `then` keyword in multi-line if statements.
 
@@ -3255,13 +3560,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-then](https://github.com/bbatsov/ruby-style-guide#no-then)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-then](https://github.com/rubocop-hq/ruby-style-guide#no-then)
 
 ## Style/MultilineMemoization
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.44 | 0.48
 
 This cop checks expressions wrapping styles for multiline memoization.
 
@@ -3304,11 +3609,34 @@ Name | Default value | Configurable values
 --- | --- | ---
 EnforcedStyle | `keyword` | `keyword`, `braces`
 
+## Style/MultilineMethodSignature
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.59 | -
+
+This cop checks for method signatures that span multiple lines.
+
+### Examples
+
+```ruby
+# good
+
+def foo(bar, baz)
+end
+
+# bad
+
+def foo(bar,
+        baz)
+end
+```
+
 ## Style/MultilineTernaryOperator
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | -
 
 This cop checks for multi-line ternary op expressions.
 
@@ -3336,13 +3664,13 @@ a =
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-multiline-ternary](https://github.com/bbatsov/ruby-style-guide#no-multiline-ternary)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-multiline-ternary](https://github.com/rubocop-hq/ruby-style-guide#no-multiline-ternary)
 
 ## Style/MultipleComparison
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.49 | -
 
 This cop checks against comparing a variable with multiple items, where
 `Array#include?` could be used instead to avoid code repetition.
@@ -3361,14 +3689,24 @@ foo if ['a', 'b', 'c'].include?(a)
 
 ## Style/MutableConstant
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.34 | 0.65
 
 This cop checks whether some constant value isn't a
 mutable literal (e.g. array or hash).
 
+Strict mode can be used to freeze all constants, rather than
+just literals.
+Strict mode is considered an experimental feature. It has not been
+updated with an exhaustive list of all methods that will produce
+frozen objects so there is a decent chance of getting some false
+positives. Luckily, there is no harm in freezing an already
+frozen object.
+
 ### Examples
+
+#### EnforcedStyle: literals (default)
 
 ```ruby
 # bad
@@ -3379,15 +3717,47 @@ CONST = [1, 2, 3].freeze
 
 # good
 CONST = <<~TESTING.freeze
-This is a heredoc
+  This is a heredoc
 TESTING
+
+# good
+CONST = Something.new
 ```
+#### EnforcedStyle: strict
+
+```ruby
+# bad
+CONST = Something.new
+
+# bad
+CONST = Struct.new do
+  def foo
+    puts 1
+  end
+end
+
+# good
+CONST = Something.new.freeze
+
+# good
+CONST = Struct.new do
+  def foo
+    puts 1
+  end
+end.freeze
+```
+
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+EnforcedStyle | `literals` | `literals`, `strict`
 
 ## Style/NegatedIf
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.20 | 0.48
 
 Checks for uses of if with a negated condition. Only ifs
 without else are considered. There are three different styles:
@@ -3472,13 +3842,13 @@ EnforcedStyle | `both` | `both`, `prefix`, `postfix`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#unless-for-negatives](https://github.com/bbatsov/ruby-style-guide#unless-for-negatives)
+* [https://github.com/rubocop-hq/ruby-style-guide#unless-for-negatives](https://github.com/rubocop-hq/ruby-style-guide#unless-for-negatives)
 
 ## Style/NegatedWhile
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.20 | -
 
 Checks for uses of while with a negated condition.
 
@@ -3505,13 +3875,13 @@ bar while !foo && baz
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#until-for-negatives](https://github.com/bbatsov/ruby-style-guide#until-for-negatives)
+* [https://github.com/rubocop-hq/ruby-style-guide#until-for-negatives](https://github.com/rubocop-hq/ruby-style-guide#until-for-negatives)
 
 ## Style/NestedModifier
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.35 | -
 
 This cop checks for nested use of if, unless, while and until in their
 modifier form.
@@ -3528,13 +3898,13 @@ something if b && a
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-nested-modifiers](https://github.com/bbatsov/ruby-style-guide#no-nested-modifiers)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-nested-modifiers](https://github.com/rubocop-hq/ruby-style-guide#no-nested-modifiers)
 
 ## Style/NestedParenthesizedCalls
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | 0.50
 
 This cop checks for unparenthesized method calls in the argument list
 of a parenthesized method call.
@@ -3557,9 +3927,9 @@ Whitelist | `be`, `be_a`, `be_an`, `be_between`, `be_falsey`, `be_kind_of`, `be_
 
 ## Style/NestedTernaryOperator
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.9 | -
 
 This cop checks for nested ternary op expressions.
 
@@ -3579,13 +3949,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-nested-ternary](https://github.com/bbatsov/ruby-style-guide#no-nested-ternary)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-nested-ternary](https://github.com/rubocop-hq/ruby-style-guide#no-nested-ternary)
 
 ## Style/Next
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.22 | 0.35
 
 Use `next` to skip iteration instead of a condition at the end.
 
@@ -3647,17 +4017,22 @@ MinBodyLength | `3` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-nested-conditionals](https://github.com/bbatsov/ruby-style-guide#no-nested-conditionals)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-nested-conditionals](https://github.com/rubocop-hq/ruby-style-guide#no-nested-conditionals)
 
 ## Style/NilComparison
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.12 | 0.59
 
-This cop checks for comparison of something with nil using ==.
+This cop checks for comparison of something with nil using `==` and
+`nil?`.
+
+Supported styles are: predicate, comparison.
 
 ### Examples
+
+#### EnforcedStyle: predicate (default)
 
 ```ruby
 # bad
@@ -3668,16 +4043,33 @@ end
 if x.nil?
 end
 ```
+#### EnforcedStyle: comparison
+
+```ruby
+# bad
+if x.nil?
+end
+
+# good
+if x == nil
+end
+```
+
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+EnforcedStyle | `predicate` | `predicate`, `comparison`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#predicate-methods](https://github.com/bbatsov/ruby-style-guide#predicate-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#predicate-methods](https://github.com/rubocop-hq/ruby-style-guide#predicate-methods)
 
 ## Style/NonNilCheck
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.20 | 0.22
 
 This cop checks for non-nil checks, which are usually redundant.
 
@@ -3713,13 +4105,13 @@ IncludeSemanticChanges | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-non-nil-checks](https://github.com/bbatsov/ruby-style-guide#no-non-nil-checks)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-non-nil-checks](https://github.com/rubocop-hq/ruby-style-guide#no-non-nil-checks)
 
 ## Style/Not
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.20
 
 This cop checks for uses of the keyword `not` instead of `!`.
 
@@ -3735,21 +4127,51 @@ x = !something
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#bang-not-not](https://github.com/bbatsov/ruby-style-guide#bang-not-not)
+* [https://github.com/rubocop-hq/ruby-style-guide#bang-not-not](https://github.com/rubocop-hq/ruby-style-guide#bang-not-not)
 
 ## Style/NumericLiteralPrefix
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.41 | -
 
-This cop checks for octal, hex, binary and decimal literals using
+This cop checks for octal, hex, binary, and decimal literals using
 uppercase prefixes and corrects them to lowercase prefix
 or no prefix (in case of decimals).
-eg. for octal use `0o` instead of `0` or `0O`.
 
-Can be configured to use `0` only for octal literals using
-`EnforcedOctalStyle` => `zero_only`
+### Examples
+
+#### EnforcedOctalStyle: zero_with_o (default)
+
+```ruby
+# bad - missing octal prefix
+num = 01234
+
+# bad - uppercase prefix
+num = 0O1234
+num = 0X12AB
+num = 0B10101
+
+# bad - redundant decimal prefix
+num = 0D1234
+num = 0d1234
+
+# good
+num = 0o1234
+num = 0x12AB
+num = 0b10101
+num = 1234
+```
+#### EnforcedOctalStyle: zero_only
+
+```ruby
+# bad
+num = 0o1234
+num = 0O1234
+
+# good
+num = 01234
+```
 
 ### Configurable attributes
 
@@ -3759,13 +4181,13 @@ EnforcedOctalStyle | `zero_with_o` | `zero_with_o`, `zero_only`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#numeric-literal-prefixes](https://github.com/bbatsov/ruby-style-guide#numeric-literal-prefixes)
+* [https://github.com/rubocop-hq/ruby-style-guide#numeric-literal-prefixes](https://github.com/rubocop-hq/ruby-style-guide#numeric-literal-prefixes)
 
 ## Style/NumericLiterals
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.48
 
 This cop checks for big numeric literals without _ between groups
 of digits in them.
@@ -3798,13 +4220,13 @@ Strict | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#underscores-in-numerics](https://github.com/bbatsov/ruby-style-guide#underscores-in-numerics)
+* [https://github.com/rubocop-hq/ruby-style-guide#underscores-in-numerics](https://github.com/rubocop-hq/ruby-style-guide#underscores-in-numerics)
 
 ## Style/NumericPredicate
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | No | Yes (Unsafe) | 0.42 | 0.59
 
 This cop checks for usage of comparison operators (`==`,
 `>`, `<`) to test numbers as zero, positive, or negative.
@@ -3858,17 +4280,18 @@ Name | Default value | Configurable values
 --- | --- | ---
 AutoCorrect | `false` | Boolean
 EnforcedStyle | `predicate` | `predicate`, `comparison`
+IgnoredMethods | `[]` | Array
 Exclude | `spec/**/*` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#predicate-methods](https://github.com/bbatsov/ruby-style-guide#predicate-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#predicate-methods](https://github.com/rubocop-hq/ruby-style-guide#predicate-methods)
 
 ## Style/OneLineConditional
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.38
 
 TODO: Make configurable.
 Checks for uses of if/then/else/end on a single line.
@@ -3895,13 +4318,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#ternary-operator](https://github.com/bbatsov/ruby-style-guide#ternary-operator)
+* [https://github.com/rubocop-hq/ruby-style-guide#ternary-operator](https://github.com/rubocop-hq/ruby-style-guide#ternary-operator)
 
 ## Style/OptionHash
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.33 | 0.34
 
 This cop checks for options hashes and discourages them if the
 current Ruby version supports keyword arguments.
@@ -3929,9 +4352,9 @@ SuspiciousParamNames | `options`, `opts`, `args`, `params`, `parameters` | Array
 
 ## Style/OptionalArguments
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.33 | -
 
 This cop checks for optional arguments to methods
 that do not come at the end of the argument list
@@ -3953,13 +4376,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#optional-arguments](https://github.com/bbatsov/ruby-style-guide#optional-arguments)
+* [https://github.com/rubocop-hq/ruby-style-guide#optional-arguments](https://github.com/rubocop-hq/ruby-style-guide#optional-arguments)
 
 ## Style/OrAssignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.50 | -
 
 This cop checks for potential usage of the `||=` operator.
 
@@ -3990,13 +4413,13 @@ name ||= 'Bozhidar'
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#double-pipe-for-uninit](https://github.com/bbatsov/ruby-style-guide#double-pipe-for-uninit)
+* [https://github.com/rubocop-hq/ruby-style-guide#double-pipe-for-uninit](https://github.com/rubocop-hq/ruby-style-guide#double-pipe-for-uninit)
 
 ## Style/ParallelAssignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.32 | -
 
 Checks for simple usages of parallel assignment.
 This will only complain when the number of variables
@@ -4021,13 +4444,13 @@ c = 3
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#parallel-assignment](https://github.com/bbatsov/ruby-style-guide#parallel-assignment)
+* [https://github.com/rubocop-hq/ruby-style-guide#parallel-assignment](https://github.com/rubocop-hq/ruby-style-guide#parallel-assignment)
 
 ## Style/ParenthesesAroundCondition
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.56
 
 This cop checks for the presence of superfluous parentheses around the
 condition of if/unless/while/until.
@@ -4051,22 +4474,44 @@ if x > 10
 elsif x < 3
 end
 ```
+#### AllowInMultilineConditions: false (default)
+
+```ruby
+# bad
+if (x > 10 &&
+   y > 10)
+end
+
+# good
+ if x > 10 &&
+    y > 10
+ end
+```
+#### AllowInMultilineConditions: true
+
+```ruby
+# good
+if (x > 10 &&
+   y > 10)
+end
+```
 
 ### Configurable attributes
 
 Name | Default value | Configurable values
 --- | --- | ---
 AllowSafeAssignment | `true` | Boolean
+AllowInMultilineConditions | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-parens-around-condition](https://github.com/bbatsov/ruby-style-guide#no-parens-around-condition)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-parens-around-condition](https://github.com/rubocop-hq/ruby-style-guide#no-parens-around-condition)
 
 ## Style/PercentLiteralDelimiters
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.19 | 0.48.1
 
 This cop enforces the consistent usage of `%`-literal delimiters.
 
@@ -4100,13 +4545,13 @@ PreferredDelimiters | `{"default"=>"()", "%i"=>"[]", "%I"=>"[]", "%r"=>"{}", "%w
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#percent-literal-braces](https://github.com/bbatsov/ruby-style-guide#percent-literal-braces)
+* [https://github.com/rubocop-hq/ruby-style-guide#percent-literal-braces](https://github.com/rubocop-hq/ruby-style-guide#percent-literal-braces)
 
 ## Style/PercentQLiterals
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.25 | -
 
 This cop checks for usage of the %Q() syntax when %q() would do.
 
@@ -4146,9 +4591,9 @@ EnforcedStyle | `lower_case_q` | `lower_case_q`, `upper_case_q`
 
 ## Style/PerlBackrefs
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.13 | -
 
 This cop looks for uses of Perl-style regexp match
 backreferences like $1, $2, etc.
@@ -4165,13 +4610,13 @@ puts Regexp.last_match(1)
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-perl-regexp-last-matchers](https://github.com/bbatsov/ruby-style-guide#no-perl-regexp-last-matchers)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-perl-regexp-last-matchers](https://github.com/rubocop-hq/ruby-style-guide#no-perl-regexp-last-matchers)
 
 ## Style/PreferredHashMethods
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.41 | 0.44
 
 This cop (by default) checks for uses of methods Hash#has_key? and
 Hash#has_value? where it enforces Hash#key? and Hash#value?
@@ -4211,15 +4656,15 @@ EnforcedStyle | `short` | `short`, `verbose`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#hash-key](https://github.com/bbatsov/ruby-style-guide#hash-key)
+* [https://github.com/rubocop-hq/ruby-style-guide#hash-key](https://github.com/rubocop-hq/ruby-style-guide#hash-key)
 
 ## Style/Proc
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.18
 
-This cops checks for uses of Proc.new where Kernel#proc
+This cop checks for uses of Proc.new where Kernel#proc
 would be more appropriate.
 
 ### Examples
@@ -4234,13 +4679,13 @@ p = proc { |n| puts n }
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#proc](https://github.com/bbatsov/ruby-style-guide#proc)
+* [https://github.com/rubocop-hq/ruby-style-guide#proc](https://github.com/rubocop-hq/ruby-style-guide#proc)
 
 ## Style/RaiseArgs
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.14 | 0.40
 
 This cop checks the args passed to `fail` and `raise`. For exploded
 style (default), it recommends passing the exception class and message
@@ -4287,13 +4732,13 @@ EnforcedStyle | `exploded` | `compact`, `exploded`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#exception-class-messages](https://github.com/bbatsov/ruby-style-guide#exception-class-messages)
+* [https://github.com/rubocop-hq/ruby-style-guide#exception-class-messages](https://github.com/rubocop-hq/ruby-style-guide#exception-class-messages)
 
 ## Style/RandomWithOffset
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 This cop checks for the use of randomly generated numbers,
 added/subtracted with integer literals, as well as those with
@@ -4321,13 +4766,13 @@ rand(1...7)
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#random-numbers](https://github.com/bbatsov/ruby-style-guide#random-numbers)
+* [https://github.com/rubocop-hq/ruby-style-guide#random-numbers](https://github.com/rubocop-hq/ruby-style-guide#random-numbers)
 
 ## Style/RedundantBegin
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.10 | 0.21
 
 This cop checks for redundant `begin` blocks.
 
@@ -4371,17 +4816,27 @@ do_something do
 rescue => ex
   anything
 end
+
+# good
+# Stabby lambdas don't support implicit `begin` in `do-end` blocks.
+-> do
+  begin
+    foo
+  rescue Bar
+    baz
+  end
+end
 ```
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#begin-implicit](https://github.com/bbatsov/ruby-style-guide#begin-implicit)
+* [https://github.com/rubocop-hq/ruby-style-guide#begin-implicit](https://github.com/rubocop-hq/ruby-style-guide#begin-implicit)
 
 ## Style/RedundantConditional
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.50 | -
 
 This cop checks for redundant returning of true/false in conditionals.
 
@@ -4410,9 +4865,9 @@ x != y
 
 ## Style/RedundantException
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.14 | 0.29
 
 This cop checks for RuntimeError as the argument of raise/fail.
 
@@ -4433,13 +4888,13 @@ raise 'message'
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-explicit-runtimeerror](https://github.com/bbatsov/ruby-style-guide#no-explicit-runtimeerror)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-explicit-runtimeerror](https://github.com/rubocop-hq/ruby-style-guide#no-explicit-runtimeerror)
 
 ## Style/RedundantFreeze
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.34 | 0.66
 
 This cop check for uses of Object#freeze on immutable objects.
 
@@ -4455,9 +4910,9 @@ CONST = 1
 
 ## Style/RedundantParentheses
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop checks for redundant parentheses.
 
@@ -4473,9 +4928,9 @@ x if y.z.nil?
 
 ## Style/RedundantReturn
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.10 | 0.14
 
 This cop checks for redundant `return` expressions.
 
@@ -4520,13 +4975,13 @@ AllowMultipleReturnValues | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-explicit-return](https://github.com/bbatsov/ruby-style-guide#no-explicit-return)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-explicit-return](https://github.com/rubocop-hq/ruby-style-guide#no-explicit-return)
 
 ## Style/RedundantSelf
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.10 | 0.13
 
 This cop checks for redundant uses of `self`.
 
@@ -4571,13 +5026,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-self-unless-required](https://github.com/bbatsov/ruby-style-guide#no-self-unless-required)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-self-unless-required](https://github.com/rubocop-hq/ruby-style-guide#no-self-unless-required)
 
 ## Style/RegexpLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.30
 
 This cop enforces using // or %r around regular expressions.
 
@@ -4680,13 +5135,13 @@ AllowInnerSlashes | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#percent-r](https://github.com/bbatsov/ruby-style-guide#percent-r)
+* [https://github.com/rubocop-hq/ruby-style-guide#percent-r](https://github.com/rubocop-hq/ruby-style-guide#percent-r)
 
 ## Style/RescueModifier
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.34
 
 This cop checks for uses of rescue in its modifier form.
 
@@ -4706,13 +5161,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-rescue-modifiers](https://github.com/bbatsov/ruby-style-guide#no-rescue-modifiers)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-rescue-modifiers](https://github.com/rubocop-hq/ruby-style-guide#no-rescue-modifiers)
 
 ## Style/RescueStandardError
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 This cop checks for rescuing `StandardError`. There are two supported
 styles `implicit` and `explicit`. This cop will not register an offense
@@ -4797,9 +5252,9 @@ EnforcedStyle | `explicit` | `implicit`, `explicit`
 
 ## Style/ReturnNil
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.50 | -
 
 This cop enforces consistency between 'return nil' and 'return'.
 
@@ -4842,9 +5297,9 @@ EnforcedStyle | `return` | `return`, `return_nil`
 
 ## Style/SafeNavigation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.43 | 0.56
 
 This cop transforms usages of a method call safeguarded by a non `nil`
 check for the variable whose method is being called to
@@ -4910,13 +5365,13 @@ foo.bar > 2 if foo
 Name | Default value | Configurable values
 --- | --- | ---
 ConvertCodeThatCanStartToReturnNil | `false` | Boolean
-Whitelist | `present?`, `blank?`, `presence`, `try` | Array
+Whitelist | `present?`, `blank?`, `presence`, `try`, `try!` | Array
 
 ## Style/SelfAssignment
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.19 | 0.29
 
 This cop enforces the use the shorthand for self-assignment.
 
@@ -4932,13 +5387,13 @@ x += 1
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#self-assignment](https://github.com/bbatsov/ruby-style-guide#self-assignment)
+* [https://github.com/rubocop-hq/ruby-style-guide#self-assignment](https://github.com/rubocop-hq/ruby-style-guide#self-assignment)
 
 ## Style/Semicolon
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.19
 
 This cop checks for multiple expressions placed on the same line.
 It also checks for lines terminated with a semicolon.
@@ -4964,13 +5419,13 @@ AllowAsExpressionSeparator | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-semicolon](https://github.com/bbatsov/ruby-style-guide#no-semicolon)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-semicolon](https://github.com/rubocop-hq/ruby-style-guide#no-semicolon)
 
 ## Style/Send
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.33 | -
 
 This cop checks for the use of the send method.
 
@@ -4988,13 +5443,13 @@ quuz.public_send(:fred)
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#prefer-public-send](https://github.com/bbatsov/ruby-style-guide#prefer-public-send)
+* [https://github.com/rubocop-hq/ruby-style-guide#prefer-public-send](https://github.com/rubocop-hq/ruby-style-guide#prefer-public-send)
 
 ## Style/SignalException
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.11 | 0.37
 
 This cop checks for uses of `fail` and `raise`.
 
@@ -5115,13 +5570,13 @@ EnforcedStyle | `only_raise` | `only_raise`, `only_fail`, `semantic`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#prefer-raise-over-fail](https://github.com/bbatsov/ruby-style-guide#prefer-raise-over-fail)
+* [https://github.com/rubocop-hq/ruby-style-guide#prefer-raise-over-fail](https://github.com/rubocop-hq/ruby-style-guide#prefer-raise-over-fail)
 
 ## Style/SingleLineBlockParams
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.16 | 0.47
 
 This cop checks whether the block parameters of a single-line
 method accepting a block match the names specified via configuration.
@@ -5162,9 +5617,9 @@ Methods | `{"reduce"=>["acc", "elem"]}`, `{"inject"=>["acc", "elem"]}` | Array
 
 ## Style/SingleLineMethods
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.19
 
 This cop checks for single-line method definitions that contain a body.
 It will accept single-line methods with no body.
@@ -5191,13 +5646,13 @@ AllowIfMethodIsEmpty | `true` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-single-line-methods](https://github.com/bbatsov/ruby-style-guide#no-single-line-methods)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-single-line-methods](https://github.com/rubocop-hq/ruby-style-guide#no-single-line-methods)
 
 ## Style/SpecialGlobalVars
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.13 | 0.36
 
 This cop looks for uses of Perl-style global variables.
 
@@ -5266,13 +5721,13 @@ EnforcedStyle | `use_english_names` | `use_perl_names`, `use_english_names`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-cryptic-perlisms](https://github.com/bbatsov/ruby-style-guide#no-cryptic-perlisms)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-cryptic-perlisms](https://github.com/rubocop-hq/ruby-style-guide#no-cryptic-perlisms)
 
 ## Style/StabbyLambdaParentheses
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.35 | -
 
 Check for parentheses around stabby lambda arguments.
 There are two different styles. Defaults to `require_parentheses`.
@@ -5306,17 +5761,17 @@ EnforcedStyle | `require_parentheses` | `require_parentheses`, `require_no_paren
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#stabby-lambda-with-args](https://github.com/bbatsov/ruby-style-guide#stabby-lambda-with-args)
+* [https://github.com/rubocop-hq/ruby-style-guide#stabby-lambda-with-args](https://github.com/rubocop-hq/ruby-style-guide#stabby-lambda-with-args)
 
 ## Style/StderrPuts
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.51 | -
 
 This cop identifies places where `$stderr.puts` can be replaced by
 `warn`. The latter has the advantage of easily being disabled by,
-e.g. the -W0 interpreter flag, or setting $VERBOSE to nil.
+the `-W0` interpreter flag or setting `$VERBOSE` to `nil`.
 
 ### Examples
 
@@ -5330,13 +5785,13 @@ warn('hello')
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#warn](https://github.com/bbatsov/ruby-style-guide#warn)
+* [https://github.com/rubocop-hq/ruby-style-guide#warn](https://github.com/rubocop-hq/ruby-style-guide#warn)
 
 ## Style/StringHashKeys
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.52 | -
 
 This cop checks for the use of strings as keys in hashes. The use of
 symbols is preferred instead.
@@ -5353,13 +5808,13 @@ symbols is preferred instead.
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#symbols-as-keys](https://github.com/bbatsov/ruby-style-guide#symbols-as-keys)
+* [https://github.com/rubocop-hq/ruby-style-guide#symbols-as-keys](https://github.com/rubocop-hq/ruby-style-guide#symbols-as-keys)
 
 ## Style/StringLiterals
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.36
 
 Checks if uses of quotes match the configured preference.
 
@@ -5401,13 +5856,13 @@ ConsistentQuotesInMultiline | `false` | Boolean
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#consistent-string-literals](https://github.com/bbatsov/ruby-style-guide#consistent-string-literals)
+* [https://github.com/rubocop-hq/ruby-style-guide#consistent-string-literals](https://github.com/rubocop-hq/ruby-style-guide#consistent-string-literals)
 
 ## Style/StringLiteralsInInterpolation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.27 | -
 
 This cop checks that quotes inside the string interpolation
 match the configured preference.
@@ -5441,9 +5896,9 @@ EnforcedStyle | `single_quotes` | `single_quotes`, `double_quotes`
 
 ## Style/StringMethods
 
-Enabled by default | Supports autocorrection
---- | ---
-Disabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes  | 0.34 | 0.34.2
 
 This cop enforces the use of consistent method names
 from the String class.
@@ -5468,9 +5923,9 @@ PreferredMethods | `{"intern"=>"to_sym"}` |
 
 ## Style/StructInheritance
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.29 | -
 
 This cop checks for inheritance from Struct.new.
 
@@ -5487,13 +5942,13 @@ Person = Struct.new(:first_name, :last_name)
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-extend-struct-new](https://github.com/bbatsov/ruby-style-guide#no-extend-struct-new)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-extend-struct-new](https://github.com/rubocop-hq/ruby-style-guide#no-extend-struct-new)
 
 ## Style/SymbolArray
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.49
 
 This cop can check for array literals made up of symbols that are not
 using the %i() syntax.
@@ -5532,17 +5987,17 @@ of 2 or fewer elements.
 Name | Default value | Configurable values
 --- | --- | ---
 EnforcedStyle | `percent` | `percent`, `brackets`
-MinSize | `0` | Integer
+MinSize | `2` | Integer
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#percent-i](https://github.com/bbatsov/ruby-style-guide#percent-i)
+* [https://github.com/rubocop-hq/ruby-style-guide#percent-i](https://github.com/rubocop-hq/ruby-style-guide#percent-i)
 
 ## Style/SymbolLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | -
 
 This cop checks symbol literal syntax.
 
@@ -5558,9 +6013,9 @@ This cop checks symbol literal syntax.
 
 ## Style/SymbolProc
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.26 | 0.64
 
 Use symbols as procs when possible.
 
@@ -5582,9 +6037,9 @@ IgnoredMethods | `respond_to`, `define_method` | Array
 
 ## Style/TernaryParentheses
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.42 | 0.46
 
 This cop checks for the presence of parentheses around ternary
 conditions. It is configurable to enforce inclusion or omission of
@@ -5642,9 +6097,9 @@ AllowSafeAssignment | `true` | Boolean
 
 ## Style/TrailingBodyOnClass
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks for trailing code after the class definition.
 
@@ -5663,9 +6118,9 @@ end
 
 ## Style/TrailingBodyOnMethodDefinition
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 This cop checks for trailing code after the method definition.
 
@@ -5693,9 +6148,9 @@ end
 
 ## Style/TrailingBodyOnModule
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks for trailing code after the module definition.
 
@@ -5714,9 +6169,9 @@ end
 
 ## Style/TrailingCommaInArguments
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop checks for trailing comma in argument lists.
 
@@ -5727,6 +6182,9 @@ This cop checks for trailing comma in argument lists.
 ```ruby
 # bad
 method(1, 2,)
+
+# good
+method(1, 2)
 
 # good
 method(
@@ -5747,6 +6205,9 @@ method(
 method(1, 2,)
 
 # good
+method(1, 2)
+
+# good
 method(
   1,
   2,
@@ -5757,6 +6218,9 @@ method(
 ```ruby
 # bad
 method(1, 2,)
+
+# good
+method(1, 2)
 
 # good
 method(
@@ -5773,13 +6237,13 @@ EnforcedStyleForMultiline | `no_comma` | `comma`, `consistent_comma`, `no_comma`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-trailing-params-comma](https://github.com/bbatsov/ruby-style-guide#no-trailing-params-comma)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-trailing-params-comma](https://github.com/rubocop-hq/ruby-style-guide#no-trailing-params-comma)
 
 ## Style/TrailingCommaInArrayLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks for trailing comma in array literals.
 
@@ -5836,13 +6300,13 @@ EnforcedStyleForMultiline | `no_comma` | `comma`, `consistent_comma`, `no_comma`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-trailing-array-commas](https://github.com/bbatsov/ruby-style-guide#no-trailing-array-commas)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-trailing-array-commas](https://github.com/rubocop-hq/ruby-style-guide#no-trailing-array-commas)
 
 ## Style/TrailingCommaInHashLiteral
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.53 | -
 
 This cop checks for trailing comma in hash literals.
 
@@ -5899,9 +6363,9 @@ EnforcedStyleForMultiline | `no_comma` | `comma`, `consistent_comma`, `no_comma`
 
 ## Style/TrailingMethodEndStatement
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.52 | -
 
 This cop checks for trailing code after the method definition.
 
@@ -5938,9 +6402,9 @@ end
 
 ## Style/TrailingUnderscoreVariable
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.31 | 0.35
 
 This cop checks for extra underscores in variable assignment.
 
@@ -5973,9 +6437,9 @@ AllowNamedUnderscoreVariables | `true` | Boolean
 
 ## Style/TrivialAccessors
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.38
 
 This cop looks for trivial reader/writer methods, that could
 have been created with the attr_* family of functions automatically.
@@ -6017,13 +6481,13 @@ Whitelist | `to_ary`, `to_a`, `to_c`, `to_enum`, `to_h`, `to_hash`, `to_i`, `to_
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#attr_family](https://github.com/bbatsov/ruby-style-guide#attr_family)
+* [https://github.com/rubocop-hq/ruby-style-guide#attr_family](https://github.com/rubocop-hq/ruby-style-guide#attr_family)
 
 ## Style/UnlessElse
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | -
 
 This cop looks for *unless* expressions with *else* clauses.
 
@@ -6047,13 +6511,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-else-with-unless](https://github.com/bbatsov/ruby-style-guide#no-else-with-unless)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-else-with-unless](https://github.com/rubocop-hq/ruby-style-guide#no-else-with-unless)
 
 ## Style/UnneededCapitalW
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.21 | 0.24
 
 This cop checks for usage of the %W() syntax when %w() would do.
 
@@ -6070,11 +6534,47 @@ This cop checks for usage of the %W() syntax when %w() would do.
 %W(apple #{fruit} grape)
 ```
 
+## Style/UnneededCondition
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.57 | -
+
+This cop checks for unnecessary conditional expressions.
+
+### Examples
+
+```ruby
+# bad
+a = b ? b : c
+
+# good
+a = b || c
+```
+```ruby
+# bad
+if b
+  b
+else
+  c
+end
+
+# good
+b || c
+
+# good
+if b
+  b
+elsif cond
+  c
+end
+```
+
 ## Style/UnneededInterpolation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop checks for strings that are just an interpolated expression.
 
@@ -6093,21 +6593,35 @@ This cop checks for strings that are just an interpolated expression.
 
 ## Style/UnneededPercentQ
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.24 | -
 
 This cop checks for usage of the %q/%Q syntax when '' or "" would do.
 
+### Examples
+
+```ruby
+# bad
+name = %q(Bruce Wayne)
+time = %q(8 o'clock)
+question = %q("What did you say?")
+
+# good
+name = 'Bruce Wayne'
+time = "8 o'clock"
+question = '"What did you say?"'
+```
+
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#percent-q](https://github.com/bbatsov/ruby-style-guide#percent-q)
+* [https://github.com/rubocop-hq/ruby-style-guide#percent-q](https://github.com/rubocop-hq/ruby-style-guide#percent-q)
 
 ## Style/UnpackFirst
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.54 | -
 
 This cop checks for accessing the first element of `String#unpack`
 which can be replaced with the shorter method `unpack1`.
@@ -6127,9 +6641,9 @@ which can be replaced with the shorter method `unpack1`.
 
 ## Style/VariableInterpolation
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.20
 
 This cop checks for variable interpolation (like "#@ivar").
 
@@ -6149,13 +6663,13 @@ This cop checks for variable interpolation (like "#@ivar").
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#curlies-interpolate](https://github.com/bbatsov/ruby-style-guide#curlies-interpolate)
+* [https://github.com/rubocop-hq/ruby-style-guide#curlies-interpolate](https://github.com/rubocop-hq/ruby-style-guide#curlies-interpolate)
 
 ## Style/WhenThen
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | -
 
 This cop checks for *when;* uses in *case* expressions.
 
@@ -6177,13 +6691,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#one-line-cases](https://github.com/bbatsov/ruby-style-guide#one-line-cases)
+* [https://github.com/rubocop-hq/ruby-style-guide#one-line-cases](https://github.com/rubocop-hq/ruby-style-guide#one-line-cases)
 
 ## Style/WhileUntilDo
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | -
 
 Checks for uses of `do` in multi-line `while/until` statements.
 
@@ -6214,13 +6728,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#no-multiline-while-do](https://github.com/bbatsov/ruby-style-guide#no-multiline-while-do)
+* [https://github.com/rubocop-hq/ruby-style-guide#no-multiline-while-do](https://github.com/rubocop-hq/ruby-style-guide#no-multiline-while-do)
 
 ## Style/WhileUntilModifier
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.30
 
 Checks for while and until statements that would fit on one line
 if written as a modifier while/until. The maximum line length is
@@ -6249,13 +6763,13 @@ x += 1 until x > 10
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#while-as-a-modifier](https://github.com/bbatsov/ruby-style-guide#while-as-a-modifier)
+* [https://github.com/rubocop-hq/ruby-style-guide#while-as-a-modifier](https://github.com/rubocop-hq/ruby-style-guide#while-as-a-modifier)
 
 ## Style/WordArray
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.9 | 0.36
 
 This cop can check for array literals made up of word-like
 strings, that are not using the %w() syntax.
@@ -6294,26 +6808,26 @@ array of 2 or fewer elements.
 Name | Default value | Configurable values
 --- | --- | ---
 EnforcedStyle | `percent` | `percent`, `brackets`
-MinSize | `0` | Integer
+MinSize | `2` | Integer
 WordRegex | `(?-mix:\A[\p{Word}\n\t]+\z)` | 
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#percent-w](https://github.com/bbatsov/ruby-style-guide#percent-w)
+* [https://github.com/rubocop-hq/ruby-style-guide#percent-w](https://github.com/rubocop-hq/ruby-style-guide#percent-w)
 
 ## Style/YodaCondition
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.49 | 0.63
 
-This cop checks for Yoda conditions, i.e. comparison operations where
-readability is reduced because the operands are not ordered the same
-way as they would be ordered in spoken English.
+This cop can either enforce or forbid Yoda conditions,
+i.e. comparison operations where the order of expression is reversed.
+eg. `5 == x`
 
 ### Examples
 
-#### EnforcedStyle: all_comparison_operators (default)
+#### EnforcedStyle: forbid_for_all_comparison_operators (default)
 
 ```ruby
 # bad
@@ -6328,7 +6842,7 @@ foo == "bar"
 foo <= 42
 bar > 10
 ```
-#### EnforcedStyle: equality_operators_only
+#### EnforcedStyle: forbid_for_equality_operators_only
 
 ```ruby
 # bad
@@ -6339,12 +6853,38 @@ bar > 10
 99 >= foo
 3 < a && a < 5
 ```
+#### EnforcedStyle: require_for_all_comparison_operators
+
+```ruby
+# bad
+foo == 99
+foo == "bar"
+foo <= 42
+bar > 10
+
+# good
+99 == foo
+"bar" != foo
+42 >= foo
+10 < bar
+```
+#### EnforcedStyle: require_for_equality_operators_only
+
+```ruby
+# bad
+99 >= foo
+3 < a && a < 5
+
+# good
+99 == foo
+"bar" != foo
+```
 
 ### Configurable attributes
 
 Name | Default value | Configurable values
 --- | --- | ---
-EnforcedStyle | `all_comparison_operators` | `all_comparison_operators`, `equality_operators_only`
+EnforcedStyle | `forbid_for_all_comparison_operators` | `forbid_for_all_comparison_operators`, `forbid_for_equality_operators_only`, `require_for_all_comparison_operators`, `require_for_equality_operators_only`
 
 ### References
 
@@ -6352,9 +6892,9 @@ EnforcedStyle | `all_comparison_operators` | `all_comparison_operators`, `equali
 
 ## Style/ZeroLengthPredicate
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | No | Yes  | 0.37 | 0.39
 
 This cop checks for numeric comparisons that can be replaced
 by a predicate method, such as receiver.length == 0,

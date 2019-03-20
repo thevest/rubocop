@@ -5,6 +5,14 @@ RSpec.describe RuboCop::Cop::Layout::IndentationConsistency, :config do
 
   let(:cop_config) { { 'EnforcedStyle' => 'normal' } }
 
+  context 'with top-level code' do
+    it 'accepts an empty expression string interpolation' do
+      expect_no_offenses(<<-'RUBY'.strip_indent)
+        "#{}"
+      RUBY
+    end
+  end
+
   context 'with if statement' do
     it 'registers an offense for bad indentation in an if body' do
       expect_offense(<<-RUBY.strip_indent)
@@ -154,26 +162,24 @@ RSpec.describe RuboCop::Cop::Layout::IndentationConsistency, :config do
 
     it 'accepts an if/else in assignment with end aligned with variable ' \
        'and chaining after the end' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         var = if a
           0
         else
           1
         end.abc.join("")
       RUBY
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'accepts an if/else in assignment with end aligned with variable ' \
        'and chaining with a block after the end' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         var = if a
           0
         else
           1
         end.abc.tap {}
       RUBY
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'accepts an if in assignment with end aligned with if' do
@@ -196,7 +202,7 @@ RSpec.describe RuboCop::Cop::Layout::IndentationConsistency, :config do
 
     it 'accepts an if/else in assignment on next line with end aligned ' \
        'with if' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         var =
           if a
             0
@@ -204,7 +210,6 @@ RSpec.describe RuboCop::Cop::Layout::IndentationConsistency, :config do
             1
           end
       RUBY
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'accepts an if/else branches with rescue clauses' do
@@ -493,7 +498,7 @@ RSpec.describe RuboCop::Cop::Layout::IndentationConsistency, :config do
 
       it 'registers an offense for bad indentation in def but not for ' \
          'outdented public, protected, and private' do
-        inspect_source(<<-RUBY.strip_indent)
+        expect_offense(<<-RUBY.strip_indent)
           class Test
           public
 
@@ -508,11 +513,10 @@ RSpec.describe RuboCop::Cop::Layout::IndentationConsistency, :config do
           private
 
            def g
+           ^^^^^ Inconsistent indentation detected.
            end
           end
         RUBY
-        expect(cop.messages).to eq(['Inconsistent indentation detected.'])
-        expect(cop.highlights).to eq(["def g\n end"])
       end
     end
   end
@@ -535,6 +539,32 @@ RSpec.describe RuboCop::Cop::Layout::IndentationConsistency, :config do
         module Test
         end
       RUBY
+    end
+
+    it 'registers an offense for bad indentation of private methods' do
+      expect_offense(<<-RUBY.strip_indent)
+        module Test
+          def pub
+          end
+          private
+            def priv
+            ^^^^^^^^ Inconsistent indentation detected.
+            end
+        end
+      RUBY
+    end
+
+    context 'even when there are no public methods' do
+      it 'still registers an offense for bad indentation of private methods' do
+        expect_offense(<<-RUBY.strip_indent)
+          module Test
+            private
+              def priv
+              ^^^^^^^^ Inconsistent indentation detected.
+              end
+          end
+        RUBY
+      end
     end
   end
 

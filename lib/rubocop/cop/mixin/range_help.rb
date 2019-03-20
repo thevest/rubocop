@@ -6,6 +6,8 @@ module RuboCop
     module RangeHelp
       private
 
+      BYTE_ORDER_MARK = 0xfeff # The Unicode codepoint
+
       def source_range(source_buffer, line_number, column, length = 1)
         if column.is_a?(Range)
           column_index = column.begin
@@ -63,20 +65,33 @@ module RuboCop
       def range_by_whole_lines(range, include_final_newline: false)
         buffer = @processed_source.buffer
 
-        begin_pos = range.begin_pos
-        begin_offset = range.column
-        begin_of_first_line = begin_pos - begin_offset
-
         last_line = buffer.source_line(range.last_line)
-        end_pos = range.end_pos
         end_offset = last_line.length - range.last_column
         end_offset += 1 if include_final_newline
-        end_of_last_line = end_pos + end_offset
 
-        Parser::Source::Range.new(buffer, begin_of_first_line, end_of_last_line)
+        range
+          .adjust(begin_pos: -range.column, end_pos: end_offset)
+          .intersect(buffer.source_range)
+      end
+
+      def column_offset_between(base_range, range)
+        effective_column(base_range) - effective_column(range)
       end
 
       ## Helpers for above range methods. Do not use inside Cops.
+
+      # Returns the column attribute of the range, except if the range is on
+      # the first line and there's a byte order mark at the beginning of that
+      # line, in which case 1 is subtracted from the column value. This gives
+      # the column as it appears when viewing the file in an editor.
+      def effective_column(range)
+        if range.line == 1 &&
+           @processed_source.raw_source.codepoints.first == BYTE_ORDER_MARK
+          range.column - 1
+        else
+          range.column
+        end
+      end
 
       def directions(side)
         if side == :both

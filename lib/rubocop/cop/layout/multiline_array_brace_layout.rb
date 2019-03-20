@@ -4,7 +4,7 @@ module RuboCop
   module Cop
     module Layout
       # This cop checks that the closing brace in an array literal is either
-      # on the same line as the last array element, or a new line.
+      # on the same line as the last array element or on a new line.
       #
       # When using the `symmetrical` (default) style:
       #
@@ -91,26 +91,26 @@ module RuboCop
       class MultilineArrayBraceLayout < Cop
         include MultilineLiteralBraceLayout
 
-        SAME_LINE_MESSAGE = 'Closing array brace must be on the same line as ' \
-          'the last array element when opening brace is on the same line as ' \
-          'the first array element.'.freeze
+        SAME_LINE_MESSAGE = 'The closing array brace must be on the same ' \
+          'line as the last array element when the opening brace is on the ' \
+          'same line as the first array element.'.freeze
 
-        NEW_LINE_MESSAGE = 'Closing array brace must be on the line after ' \
-          'the last array element when opening brace is on a separate line ' \
-          'from the first array element.'.freeze
+        NEW_LINE_MESSAGE = 'The closing array brace must be on the line ' \
+          'after the last array element when the opening brace is on a ' \
+          'separate line from the first array element.'.freeze
 
-        ALWAYS_NEW_LINE_MESSAGE = 'Closing array brace must be on the line ' \
-          'after the last array element.'.freeze
+        ALWAYS_NEW_LINE_MESSAGE = 'The closing array brace must be on the ' \
+          'line after the last array element.'.freeze
 
-        ALWAYS_SAME_LINE_MESSAGE = 'Closing array brace must be on the same ' \
-          'line as the last array element.'.freeze
+        ALWAYS_SAME_LINE_MESSAGE = 'The closing array brace must be on the ' \
+          'same line as the last array element.'.freeze
 
         def on_array(node)
           check_brace_layout(node)
         end
 
         def autocorrect(node)
-          MultilineLiteralBraceCorrector.correct(processed_source, node)
+          MultilineLiteralBraceCorrector.new(node, processed_source)
         end
       end
     end

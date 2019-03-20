@@ -6,8 +6,7 @@ RSpec.describe RuboCop::Cop::Style::IfUnlessModifier do
   subject(:cop) { described_class.new(config) }
 
   let(:config) do
-    hash = { 'Metrics/LineLength' => { 'Max' => 80 } }
-    RuboCop::Config.new(hash)
+    RuboCop::Config.new('Metrics/LineLength' => { 'Max' => 80 })
   end
 
   context 'multiline if that fits on one line' do
@@ -148,11 +147,11 @@ RSpec.describe RuboCop::Cop::Style::IfUnlessModifier do
   end
 
   it "accepts multiline if that doesn't fit on one line" do
-    check_too_long(cop, 'if')
+    check_too_long('if')
   end
 
   it 'accepts multiline if whose body is more than one line' do
-    check_short_multiline(cop, 'if')
+    check_short_multiline('if')
   end
 
   context 'multiline unless that fits on one line' do
@@ -194,8 +193,8 @@ RSpec.describe RuboCop::Cop::Style::IfUnlessModifier do
   end
 
   it 'accepts an empty condition' do
-    check_empty(cop, 'if')
-    check_empty(cop, 'unless')
+    check_empty('if')
+    check_empty('unless')
   end
 
   it 'accepts if/elsif' do
@@ -241,8 +240,7 @@ RSpec.describe RuboCop::Cop::Style::IfUnlessModifier do
       it 'accepts' do
         expect("  #{body} if #{conditional}".length).to eq(81)
 
-        inspect_source(source)
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses(source)
       end
     end
   end
@@ -345,6 +343,126 @@ RSpec.describe RuboCop::Cop::Style::IfUnlessModifier do
       expect_no_offenses(<<-RUBY.strip_indent)
         unless condition
           foo ? "bar" : "baz"
+        end
+      RUBY
+    end
+  end
+
+  context 'with a named regexp capture on the LHS' do
+    it 'does not register an offense' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        if /(?<foo>\d)/ =~ "bar"
+          foo
+        end
+      RUBY
+    end
+  end
+
+  context 'with disabled Layout/Tab cop' do
+    shared_examples 'with tabs indentation' do
+      let(:source) do
+        # Empty lines should make no difference.
+        <<-RUBY
+						if #{condition}
+							#{body}
+						end
+        RUBY
+      end
+
+      let(:body) { 'bbb' }
+
+      context 'it fits on one line' do
+        let(:condition) { 'aaa' }
+
+        it 'registers an offense' do
+          # This if statement fits exactly on one line if written as a
+          # modifier.
+          expect("#{body} if #{condition}".length).to eq(10)
+
+          inspect_source(source)
+          expect(cop.messages).to eq(
+            ['Favor modifier `if` usage when having a single-line' \
+             ' body. Another good alternative is the usage of control flow' \
+             ' `&&`/`||`.']
+          )
+        end
+      end
+
+      context "it doesn't fit on one line" do
+        let(:condition) { 'aaaa' }
+
+        it "doesn't register an offense" do
+          # This if statement fits exactly on one line if written as a
+          # modifier.
+          expect("#{body} if #{condition}".length).to eq(11)
+
+          expect_no_offenses(source)
+        end
+      end
+    end
+
+    context 'with Layout/Tab: IndentationWidth config' do
+      let(:config) do
+        RuboCop::Config.new(
+          'Layout/IndentationWidth' => {
+            'Width' => 1
+          },
+          'Layout/Tab' => {
+            'Enabled' => false,
+            'IndentationWidth' => 2
+          },
+          'Metrics/LineLength' => { 'Max' => 10 + 12 } # 12 is indentation
+        )
+      end
+
+      it_behaves_like 'with tabs indentation'
+    end
+
+    context 'with Layout/IndentationWidth: Width config' do
+      let(:config) do
+        RuboCop::Config.new(
+          'Layout/IndentationWidth' => {
+            'Width' => 1
+          },
+          'Layout/Tab' => {
+            'Enabled' => false
+          },
+          'Metrics/LineLength' => { 'Max' => 10 + 6 } # 6 is indentation
+        )
+      end
+
+      it_behaves_like 'with tabs indentation'
+    end
+
+    context 'without any IndentationWidth config' do
+      let(:config) do
+        RuboCop::Config.new(
+          'Layout/Tab' => {
+            'Enabled' => false
+          },
+          'Metrics/LineLength' => { 'Max' => 10 + 12 } # 12 is indentation
+        )
+      end
+
+      it_behaves_like 'with tabs indentation'
+    end
+  end
+
+  context 'when Metrics/LineLength is disabled' do
+    let(:config) do
+      RuboCop::Config.new(
+        'Metrics/LineLength' => {
+          'Enabled' => false,
+          'Max' => 80
+        }
+      )
+    end
+
+    it 'registers an offense even for a long modifier statement' do
+      expect_offense(<<-RUBY.strip_indent)
+        if foo
+        ^^ Favor modifier `if` usage when having a single-line body. Another good alternative is the usage of control flow `&&`/`||`.
+          "This string would make the line longer than eighty characters if combined with the statement." 
         end
       RUBY
     end

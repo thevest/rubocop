@@ -3,12 +3,12 @@
 module RuboCop
   module Cop
     module Layout
-      # This cops checks the indentation of the here document bodies. The bodies
+      # This cop checks the indentation of the here document bodies. The bodies
       # are indented one step.
       # In Ruby 2.3 or newer, squiggly heredocs (`<<~`) should be used. If you
       # use the older rubies, you should introduce some library to your project
       # (e.g. ActiveSupport, Powerpack or Unindent).
-      # Note: When `Metrics/LineLength`'s `AllowHeredoc` is false(not default),
+      # Note: When `Metrics/LineLength`'s `AllowHeredoc` is false (not default),
       #       this cop does not add any offenses for long here documents to
       #       avoid `Metrics/LineLength`'s offenses.
       #
@@ -88,7 +88,7 @@ module RuboCop
 
         def on_heredoc(node)
           body = heredoc_body(node)
-          return if body =~ /\A\s*\z/
+          return if body.strip.empty?
 
           body_indent_level = indent_level(body)
 
@@ -99,7 +99,8 @@ module RuboCop
             return unless body_indent_level.zero?
           end
 
-          return if too_long_line?(node)
+          return if line_too_long?(node)
+
           add_offense(node, location: :heredoc_body)
         end
 
@@ -172,17 +173,24 @@ module RuboCop
           )
         end
 
-        def too_long_line?(node)
-          return false if config.for_cop('Metrics/LineLength')['AllowHeredoc']
+        def line_too_long?(node)
+          return false if unlimited_heredoc_length?
+
           body = heredoc_body(node)
 
           expected_indent = base_indent_level(node) + indentation_width
           actual_indent = indent_level(body)
           increase_indent_level = expected_indent - actual_indent
 
-          max_line = body.each_line.map { |line| line.chomp.size }.max
+          longest_line(body).size + increase_indent_level >= max_line_length
+        end
 
-          max_line + increase_indent_level >= max_line_length
+        def longest_line(lines)
+          lines.each_line.max_by { |line| line.chomp.size }.chomp
+        end
+
+        def unlimited_heredoc_length?
+          config.for_cop('Metrics/LineLength')['AllowHeredoc']
         end
 
         def max_line_length
@@ -191,15 +199,25 @@ module RuboCop
 
         def correct_by_squiggly(node)
           return if target_ruby_version < 2.3
+
           lambda do |corrector|
             if heredoc_indent_type(node) == '~'
-              corrector.replace(node.loc.heredoc_body, indented_body(node))
+              adjust_squiggly(corrector, node)
             else
-              heredoc_beginning = node.loc.expression.source
-              corrected = heredoc_beginning.sub(/<<-?/, '<<~')
-              corrector.replace(node.loc.expression, corrected)
+              adjust_minus(corrector, node)
             end
           end
+        end
+
+        def adjust_squiggly(corrector, node)
+          corrector.replace(node.loc.heredoc_body, indented_body(node))
+          corrector.replace(node.loc.heredoc_end, indented_end(node))
+        end
+
+        def adjust_minus(corrector, node)
+          heredoc_beginning = node.loc.expression.source
+          corrected = heredoc_beginning.sub(/<<-?/, '<<~')
+          corrector.replace(node.loc.expression, corrected)
         end
 
         def correct_by_library(node)
@@ -230,6 +248,17 @@ module RuboCop
           body.gsub(/^\s{#{body_indent_level}}/, ' ' * correct_indent_level)
         end
 
+        def indented_end(node)
+          end_ = heredoc_end(node)
+          end_indent_level = indent_level(end_)
+          correct_indent_level = base_indent_level(node)
+          if end_indent_level < correct_indent_level
+            end_.gsub(/^\s{#{end_indent_level}}/, ' ' * correct_indent_level)
+          else
+            end_
+          end
+        end
+
         def base_indent_level(node)
           base_line_num = node.loc.expression.line
           base_line = processed_source.lines[base_line_num - 1]
@@ -254,6 +283,10 @@ module RuboCop
 
         def heredoc_body(node)
           node.loc.heredoc_body.source.scrub
+        end
+
+        def heredoc_end(node)
+          node.loc.heredoc_end.source.scrub
         end
       end
     end

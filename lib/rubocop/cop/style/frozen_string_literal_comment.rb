@@ -3,10 +3,10 @@
 module RuboCop
   module Cop
     module Style
-      # This cop is designed to help upgrade to Ruby 3.0. It will add the
+      # This cop is designed to help upgrade to after Ruby 3.0. It will add the
       # comment `# frozen_string_literal: true` to the top of files to
       # enable frozen string literals. Frozen string literals may be default
-      # in Ruby 3.0. The comment will be added below a shebang and encoding
+      # after Ruby 3.0. The comment will be added below a shebang and encoding
       # comment. The frozen string literal comment is only valid in Ruby 2.3+.
       #
       # @example EnforcedStyle: when_needed (default)
@@ -101,9 +101,9 @@ module RuboCop
             token_number += 1
           end
 
-          if processed_source.tokens[token_number].text =~
-             Encoding::ENCODING_PATTERN
-            token = processed_source.tokens[token_number]
+          next_token = processed_source.tokens[token_number]
+          if next_token && next_token.text =~ Encoding::ENCODING_PATTERN
+            token = next_token
           end
 
           token
@@ -139,14 +139,39 @@ module RuboCop
         def insert_comment(corrector)
           last_special_comment = last_special_comment(processed_source)
           if last_special_comment.nil?
-            corrector.insert_before(processed_source.tokens[0].pos,
-                                    "#{FROZEN_STRING_LITERAL_ENABLED}\n\n")
-          elsif processed_source.following_line(last_special_comment).empty?
-            corrector.insert_after(last_special_comment.pos,
-                                   "\n#{FROZEN_STRING_LITERAL_ENABLED}")
+            corrector.insert_before(correction_range, preceding_comment)
           else
-            corrector.insert_after(last_special_comment.pos,
-                                   "\n#{FROZEN_STRING_LITERAL_ENABLED}\n")
+            corrector.insert_after(correction_range, proceeding_comment)
+          end
+        end
+
+        def preceding_comment
+          if processed_source.tokens[0].space_before?
+            "#{FROZEN_STRING_LITERAL_ENABLED}\n"
+          else
+            "#{FROZEN_STRING_LITERAL_ENABLED}\n\n"
+          end
+        end
+
+        def proceeding_comment
+          last_special_comment = last_special_comment(processed_source)
+          following_line = processed_source.following_line(last_special_comment)
+
+          if following_line && following_line.empty?
+            "\n#{FROZEN_STRING_LITERAL_ENABLED}"
+          else
+            "\n#{FROZEN_STRING_LITERAL_ENABLED}\n"
+          end
+        end
+
+        def correction_range
+          last_special_comment = last_special_comment(processed_source)
+
+          if last_special_comment.nil?
+            range_with_surrounding_space(range: processed_source.tokens[0],
+                                         side: :left)
+          else
+            last_special_comment.pos
           end
         end
       end

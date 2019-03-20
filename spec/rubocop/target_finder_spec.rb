@@ -3,6 +3,61 @@
 RSpec.describe RuboCop::TargetFinder, :isolated_environment do
   include FileHelper
 
+  RUBY_EXTENSIONS = %w[.rb
+                       .arb
+                       .axlsx
+                       .builder
+                       .fcgi
+                       .gemfile
+                       .gemspec
+                       .god
+                       .jb
+                       .jbuilder
+                       .mspec
+                       .opal
+                       .pluginspec
+                       .podspec
+                       .rabl
+                       .rake
+                       .rbuild
+                       .rbw
+                       .rbx
+                       .ru
+                       .ruby
+                       .spec
+                       .thor
+                       .watchr].freeze
+
+  RUBY_INTERPRETERS = %w[ruby
+                         macruby
+                         rake
+                         jruby
+                         rbx].freeze
+
+  RUBY_FILENAMES = %w[.irbrc
+                      .pryrc
+                      Appraisals
+                      Berksfile
+                      Brewfile
+                      Buildfile
+                      Capfile
+                      Cheffile
+                      Dangerfile
+                      Deliverfile
+                      Fastfile
+                      Gemfile
+                      Guardfile
+                      Jarfile
+                      Mavenfile
+                      Podfile
+                      Puppetfile
+                      Rakefile
+                      Snapfile
+                      Thorfile
+                      Vagabondfile
+                      Vagrantfile
+                      buildfile].freeze
+
   subject(:target_finder) do
     described_class.new(config_store, options)
   end
@@ -13,12 +68,13 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
   let(:debug) { false }
 
   before do
-    create_file('dir1/ruby1.rb',   '# encoding: utf-8')
-    create_file('dir1/ruby2.rb',   '# encoding: utf-8')
-    create_file('dir1/file.txt',   '# encoding: utf-8')
-    create_file('dir1/file',       '# encoding: utf-8')
-    create_file('dir1/executable', '#!/usr/bin/env ruby')
-    create_file('dir2/ruby3.rb',   '# encoding: utf-8')
+    create_empty_file('dir1/ruby1.rb')
+    create_empty_file('dir1/ruby2.rb')
+    create_empty_file('dir1/file.txt')
+    create_empty_file('dir1/file')
+    create_file('dir1/executable',  '#!/usr/bin/env ruby')
+    create_empty_file('dir2/ruby3.rb')
+    create_empty_file('.hidden/ruby4.rb')
   end
 
   describe '#find' do
@@ -33,11 +89,15 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
       end
     end
 
+    it 'does not find hidden files' do
+      expect(found_files).not_to include('.hidden/ruby4.rb')
+    end
+
     context 'when no argument is passed' do
       let(:args) { [] }
 
       it 'finds files under the current directory' do
-        Dir.chdir('dir1') do
+        RuboCop::PathUtil.chdir('dir1') do
           expect(found_files.empty?).to be(false)
           found_files.each do |file|
             expect(file).to include('/dir1/')
@@ -51,13 +111,22 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
       let(:args) { ['../dir2'] }
 
       it 'finds files under the specified directory' do
-        Dir.chdir('dir1') do
+        RuboCop::PathUtil.chdir('dir1') do
           expect(found_files.empty?).to be(false)
           found_files.each do |file|
             expect(file).to include('/dir2/')
             expect(file).not_to include('/dir1/')
           end
         end
+      end
+    end
+
+    context 'when a hidden directory path is passed' do
+      let(:args) { ['.hidden'] }
+
+      it 'finds files under the specified directory' do
+        expect(found_files.size).to be(1)
+        expect(found_files.first).to include('.hidden/ruby4.rb')
       end
     end
 
@@ -70,34 +139,64 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
     end
 
     context 'when files with a ruby extension are passed' do
-      let(:args) { RuboCop::RUBY_EXTENSIONS.map { |ext| "dir2/file#{ext}" } }
+      let(:args) { RUBY_EXTENSIONS.map { |ext| "dir2/file#{ext}" } }
 
       it 'picks all the ruby files' do
-        expect(found_basenames).to eq(
-          RuboCop::RUBY_EXTENSIONS.map { |ext| "file#{ext}" }
-        )
+        expect(found_basenames)
+          .to eq(RUBY_EXTENSIONS.map { |ext| "file#{ext}" })
+      end
+
+      context 'when local AllCops/Include lists two patterns' do
+        before do
+          create_file('.rubocop.yml', <<-YAML)
+            AllCops:
+              Include:
+                - '**/*.rb'
+                - '**/*.arb'
+          YAML
+        end
+
+        it 'picks two files' do
+          expect(found_basenames).to eq(%w[file.rb file.arb])
+        end
+
+        context 'when a subdirectory AllCops/Include only lists one pattern' do
+          before do
+            create_file('dir2/.rubocop.yml', <<-YAML)
+              AllCops:
+                Include:
+                  - '**/*.ruby'
+            YAML
+          end
+
+          # Include and Exclude patterns are take from the top directory and
+          # settings in subdirectories are silently ignored.
+          it 'picks two files' do
+            expect(found_basenames).to eq(%w[file.rb file.arb])
+          end
+        end
       end
     end
 
     context 'when a file with a ruby filename is passed' do
-      let(:args) { RuboCop::RUBY_FILENAMES.map { |name| "dir2/#{name}" } }
+      let(:args) { RUBY_FILENAMES.map { |name| "dir2/#{name}" } }
 
       it 'picks all the ruby files' do
-        expect(found_basenames).to eq(RuboCop::RUBY_FILENAMES)
+        expect(found_basenames).to eq(RUBY_FILENAMES)
       end
     end
 
     context 'when files with ruby interpreters are passed' do
-      let(:args) { RuboCop::RUBY_INTERPRETERS.map { |name| "dir2/#{name}" } }
+      let(:args) { RUBY_INTERPRETERS.map { |name| "dir2/#{name}" } }
 
       before do
-        RuboCop::RUBY_INTERPRETERS.each do |interpreter|
+        RUBY_INTERPRETERS.each do |interpreter|
           create_file("dir2/#{interpreter}", "#!/usr/bin/#{interpreter}")
         end
       end
 
       it 'picks all the ruby files' do
-        expect(found_basenames).to eq(RuboCop::RUBY_INTERPRETERS)
+        expect(found_basenames).to eq(RUBY_INTERPRETERS)
       end
     end
 
@@ -154,6 +253,64 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
         end
       end
     end
+
+    context 'when some non-known Ruby files are specified in the ' \
+            'configuration Include and they are explicitly passed ' \
+            'as arguments' do
+      before do
+        create_file('.rubocop.yml', <<-YAML.strip_indent)
+          AllCops:
+            Include:
+              - dir1/file
+        YAML
+      end
+
+      let(:args) do
+        ['dir1/file']
+      end
+
+      it 'includes them' do
+        expect(found_basenames)
+          .to contain_exactly('file')
+      end
+    end
+
+    context 'when some non-known Ruby files are specified in the ' \
+            'configuration Include and they are not explicitly passed ' \
+            'as arguments' do
+      before do
+        create_file('.rubocop.yml', <<-YAML.strip_indent)
+          AllCops:
+            Include:
+              - '**/*.rb'
+              - dir1/file
+        YAML
+      end
+
+      let(:args) do
+        ['dir1/**/*']
+      end
+
+      it 'includes them' do
+        expect(found_basenames)
+          .to contain_exactly('executable', 'file', 'ruby1.rb', 'ruby2.rb')
+      end
+    end
+
+    context 'when input is passed on stdin' do
+      let(:options) do
+        {
+          force_exclusion: force_exclusion,
+          debug: debug,
+          stdin: 'def example; end'
+        }
+      end
+      let(:args) { ['Untitled'] }
+
+      it 'includes the file' do
+        expect(found_basenames).to eq(['Untitled'])
+      end
+    end
   end
 
   describe '#find_files' do
@@ -163,7 +320,7 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
     let(:flags) { 0 }
 
     it 'does not search excluded top level directories' do
-      config = double('config')
+      config = instance_double(RuboCop::Config)
       exclude_property = { 'Exclude' => [File.expand_path('dir1/**/*')] }
       allow(config).to receive(:for_all_cops).and_return(exclude_property)
       allow(config_store).to receive(:for).and_return(config)
@@ -173,9 +330,9 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
     end
 
     it 'works also if a folder is named ","' do
-      create_file(',/ruby4.rb', '# encoding: utf-8')
+      create_empty_file(',/ruby4.rb')
 
-      config = double('config')
+      config = instance_double(RuboCop::Config)
       exclude_property = { 'Exclude' => [File.expand_path('dir1/**/*')] }
       allow(config).to receive(:for_all_cops).and_return(exclude_property)
       allow(config_store).to receive(:for).and_return(config)
@@ -206,16 +363,20 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
 
     it 'does not pick directories' do
       found_basenames = found_files.map { |f| File.basename(f) }
+      allow(config_store).to receive(:for).and_return({})
       expect(found_basenames).not_to include('dir1')
     end
 
     it 'picks files specified to be included in config' do
-      config = double('config')
+      config = instance_double(RuboCop::Config)
       allow(config).to receive(:file_to_include?) do |file|
         File.basename(file) == 'file'
       end
       allow(config)
-        .to receive(:for_all_cops).and_return('Exclude' => [])
+        .to receive(:for_all_cops).and_return('Exclude' => [],
+                                              'Include' => [],
+                                              'RubyInterpreters' => [])
+      allow(config).to receive(:[]).and_return([])
       allow(config).to receive(:file_to_exclude?).and_return(false)
       allow(config_store).to receive(:for).and_return(config)
 
@@ -223,9 +384,11 @@ RSpec.describe RuboCop::TargetFinder, :isolated_environment do
     end
 
     it 'does not pick files specified to be excluded in config' do
-      config = double('config').as_null_object
+      config = instance_double(RuboCop::Config).as_null_object
       allow(config)
-        .to receive(:for_all_cops).and_return('Exclude' => [])
+        .to receive(:for_all_cops).and_return('Exclude' => [],
+                                              'Include' => [],
+                                              'RubyInterpreters' => [])
       allow(config).to receive(:file_to_include?).and_return(false)
       allow(config).to receive(:file_to_exclude?) do |file|
         File.basename(file) == 'ruby2.rb'

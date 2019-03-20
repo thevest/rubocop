@@ -9,7 +9,7 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
     inspect_source('#' * 81)
     expect(cop.offenses.size).to eq(1)
     expect(cop.offenses.first.message).to eq('Line is too long. [81/80]')
-    expect(cop.config_to_allow_offenses).to eq('Max' => 81)
+    expect(cop.config_to_allow_offenses).to eq(exclude_limit: { 'Max' => 81 })
   end
 
   it 'highlights excessive characters' do
@@ -18,14 +18,13 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
   end
 
   it "accepts a line that's 80 characters wide" do
-    inspect_source('#' * 80)
-    expect(cop.offenses.empty?).to be(true)
+    expect_no_offenses('#' * 80)
   end
 
   it 'registers an offense for long line before __END__ but not after' do
     inspect_source(['#' * 150,
                     '__END__',
-                    '#' * 200])
+                    '#' * 200].join("\n"))
     expect(cop.messages).to eq(['Line is too long. [150/80]'])
   end
 
@@ -33,71 +32,47 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
     let(:cop_config) { { 'Max' => 80, 'AllowURI' => true } }
 
     context 'and all the excessive characters are part of an URL' do
-      # This code example is allowed by AllowURI feature itself :).
-      let(:source) { <<-RUBY }
-        # Some documentation comment...
-        # See: https://github.com/bbatsov/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c
-      RUBY
-
       it 'accepts the line' do
-        inspect_source(source)
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses(<<-RUBY)
+          # Some documentation comment...
+          # See: https://github.com/rubocop-hq/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c
+        RUBY
       end
 
       context 'and the URL is wrapped in single quotes' do
-        let(:source) { <<-RUBY }
-          # See: 'https://github.com/bbatsov/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c'
-        RUBY
-
         it 'accepts the line' do
-          inspect_source(source)
-          expect(cop.offenses.empty?).to be(true)
+          expect_no_offenses(<<-RUBY)
+            # See: 'https://github.com/rubocop-hq/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c'
+          RUBY
         end
       end
 
       context 'and the URL is wrapped in double quotes' do
-        let(:source) { <<-RUBY }
-          # See: "https://github.com/bbatsov/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c"
-        RUBY
-
         it 'accepts the line' do
-          inspect_source(source)
-          expect(cop.offenses.empty?).to be(true)
+          expect_no_offenses(<<-RUBY)
+            # See: "https://github.com/rubocop-hq/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c"
+          RUBY
         end
       end
     end
 
     context 'and the excessive characters include a complete URL' do
-      let(:source) { <<-RUBY }
-        # See: http://google.com/, http://gmail.com/, https://maps.google.com/, http://plus.google.com/
-      RUBY
-
       it 'registers an offense for the line' do
-        inspect_source(source)
-        expect(cop.offenses.size).to eq(1)
-      end
-
-      it 'highlights all the excessive characters' do
-        inspect_source(source)
-        expect(cop.highlights).to eq(['http://plus.google.com/'])
+        expect_offense(<<-RUBY)
+          # See: http://google.com/, http://gmail.com/, https://maps.google.com/, http://plus.google.com/
+                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^ Line is too long. [105/80]
+        RUBY
       end
     end
 
     context 'and the excessive characters include part of an URL ' \
             'and another word' do
-      let(:source) { <<-RUBY }
-        # See: https://github.com/bbatsov/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c and
-        #   http://google.com/
-      RUBY
-
       it 'registers an offense for the line' do
-        inspect_source(source)
-        expect(cop.offenses.size).to eq(1)
-      end
-
-      it 'highlights only the non-URL part' do
-        inspect_source(source)
-        expect(cop.highlights).to eq([' and'])
+        expect_offense(<<-RUBY)
+          # See: https://github.com/rubocop-hq/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c and
+                                                                                                      ^^^^ Line is too long. [106/80]
+          #   http://google.com/
+        RUBY
       end
     end
 
@@ -131,9 +106,8 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
           { 'Max' => 80, 'AllowURI' => true, 'URISchemes' => %w[otherprotocol] }
         end
 
-        it 'accepts the line' do
-          inspect_source(source)
-          expect(cop.offenses.empty?).to be(true)
+        it 'does not register an offense' do
+          expect_no_offenses(source)
         end
       end
     end
@@ -174,8 +148,7 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
     RUBY
 
     it 'accepts long lines in heredocs' do
-      inspect_source(source)
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(source)
     end
 
     context 'when the source has no AST' do
@@ -193,23 +166,23 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
 
       let(:source) { <<-RUBY }
         foo(<<-DOC, <<-SQL, <<-FOO)
-          1st offence: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          1st offense: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           \#{<<-OK}
-            no offence (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            no offense (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           OK
-          2nd offence: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          2nd offense: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         DOC
-          no offence (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          no offense (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           \#{<<-XXX}
-            no offence (nested inside whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            no offense (nested inside whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           XXX
-          no offence (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          no offense (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         SQL
-          3rd offence: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          3rd offense: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           \#{<<-SQL}
-            no offence (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            no offense (whitelisted): Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           SQL
-          4th offence: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          4th offense: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         FOO
       RUBY
 
@@ -224,13 +197,11 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
     let(:cop_config) { { 'Max' => 80, 'AllowURI' => false } }
 
     context 'and all the excessive characters are part of an URL' do
-      let(:source) { <<-RUBY }
-        # See: https://github.com/bbatsov/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c
-      RUBY
-
       it 'registers an offense for the line' do
-        inspect_source(source)
-        expect(cop.offenses.size).to eq(1)
+        expect_offense(<<-RUBY)
+          # See: https://github.com/rubocop-hq/rubocop/commit/3b48d8bdf5b1c2e05e35061837309890f04ab08c
+                                                                                ^^^^^^^^^^^^^^^^^^^^^^ Line is too long. [102/80]
+        RUBY
       end
     end
   end
@@ -287,8 +258,7 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
       RUBY
 
       it 'accepts the line' do
-        inspect_source(source)
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses(source)
       end
     end
 
@@ -300,8 +270,7 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
       RUBY
 
       it 'accepts the line' do
-        inspect_source(source)
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses(source)
       end
 
       context 'and has explanatory text' do
@@ -311,9 +280,8 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
           end
         RUBY
 
-        it 'accepts the line' do
-          inspect_source(source)
-          expect(cop.offenses.empty?).to be(true)
+        it 'does not register an offense' do
+          expect_no_offenses(source)
         end
       end
     end
@@ -361,6 +329,84 @@ RSpec.describe RuboCop::Cop::Metrics::LineLength, :config do
           inspect_source(source)
           expect(cop.highlights).to eq([']*={0,2})#([A-Za-z0-9+/#]*={0,2})z}'])
         end
+      end
+    end
+  end
+
+  context 'affecting by IndentationWidth from Layout\Tab' do
+    shared_examples 'with tabs indentation' do
+      it "registers an offense for a line that's including 2 tab with size 2" \
+         ' and 28 other characters' do
+        inspect_source("\t\t" + '#' * 28)
+        expect(cop.offenses.size).to eq(1)
+        expect(cop.offenses.first.message).to eq('Line is too long. [32/30]')
+        expect(cop.config_to_allow_offenses)
+          .to eq(exclude_limit: { 'Max' => 32 })
+      end
+
+      it 'highlights excessive characters' do
+        inspect_source("\t" + '#' * 28 + 'a')
+        expect(cop.highlights).to eq(['a'])
+      end
+
+      it "accepts a line that's including 1 tab with size 2" \
+         ' and 28 other characters' do
+        expect_no_offenses("\t" + '#' * 28)
+      end
+    end
+
+    context 'without AllowURI option' do
+      let(:config) do
+        RuboCop::Config.new(
+          'Layout/IndentationWidth' => {
+            'Width' => 1
+          },
+          'Layout/Tab' => {
+            'Enabled' => false,
+            'IndentationWidth' => 2
+          },
+          'Metrics/LineLength' => {
+            'Max' => 30
+          }
+        )
+      end
+
+      it_behaves_like 'with tabs indentation'
+    end
+
+    context 'with AllowURI option' do
+      let(:config) do
+        RuboCop::Config.new(
+          'Layout/IndentationWidth' => {
+            'Width' => 1
+          },
+          'Layout/Tab' => {
+            'Enabled' => false,
+            'IndentationWidth' => 2
+          },
+          'Metrics/LineLength' => {
+            'Max' => 30,
+            'AllowURI' => true
+          }
+        )
+      end
+
+      it_behaves_like 'with tabs indentation'
+
+      it "accepts a line that's including URI" do
+        expect_no_offenses("\t\t# https://github.com/rubocop-hq/rubocop")
+      end
+
+      it "accepts a line that's including URI and exceeds by 1 char" do
+        expect_no_offenses("\t\t# https://github.com/ruboco")
+      end
+
+      it "accepts a line that's including URI with text" do
+        expect_no_offenses("\t\t# See https://github.com/rubocop-hq/rubocop")
+      end
+
+      it "accepts a line that's including URI in quotes with text" do
+        expect_no_offenses("\t\t# See 'https://github.com/rubocop-hq/rubocop'")
       end
     end
   end

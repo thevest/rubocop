@@ -3,7 +3,7 @@
 module RuboCop
   module Cop
     module Style
-      # This cops looks for uses of global variables.
+      # This cop looks for uses of global variables.
       # It does not report offenses for built-in global variables.
       # Built-in global variables are allowed by default. Additionally
       # users can allow additional variables via the AllowedVariables option.
@@ -23,7 +23,7 @@ module RuboCop
         MSG = 'Do not introduce global variables.'.freeze
 
         # built-in global variables and their English aliases
-        # http://www.zenspider.com/Languages/Ruby/QuickRef.html
+        # https://www.zenspider.com/ruby/quickref.html
         BUILT_IN_VARS = %w[
           $: $LOAD_PATH
           $" $LOADED_FEATURES

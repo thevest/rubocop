@@ -33,10 +33,15 @@ module RuboCop
       #
       #   # bad
       #   array = [ a, [ b, c ] ]
+      #   array = [
+      #     [ a ],
+      #     [ b, c ]
+      #   ]
       #
       #   # good
       #   array = [ a, [ b, c ]]
-      #
+      #   array = [[ a ],
+      #     [ b, c ]]
       #
       # @example EnforcedStyleForEmptyBrackets: no_space (default)
       #   # The `no_space` EnforcedStyleForEmptyBrackets style enforces that
@@ -71,6 +76,7 @@ module RuboCop
 
         def on_array(node)
           return unless node.square_brackets?
+
           left, right = array_brackets(node)
           if empty_brackets?(left, right)
             return empty_offenses(node, left, right, EMPTY_MSG)
@@ -125,6 +131,7 @@ module RuboCop
         def end_has_own_line?(token)
           line, col = line_and_column_for(token)
           return true if col == -1
+
           processed_source.lines[line][0..col].delete(' ').empty?
         end
 

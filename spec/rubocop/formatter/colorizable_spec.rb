@@ -13,7 +13,7 @@ RSpec.describe RuboCop::Formatter::Colorizable do
     formatter_class.new(output, options)
   end
 
-  let(:output) { double('output') }
+  let(:output) { instance_double(IO) }
 
   around do |example|
     original_state = Rainbow.enabled
@@ -26,11 +26,11 @@ RSpec.describe RuboCop::Formatter::Colorizable do
   end
 
   describe '#colorize' do
-    subject { formatter.colorize('foo', :red) }
+    subject(:colorized_output) { formatter.colorize('foo', :red) }
 
     shared_examples 'does nothing' do
       it 'does nothing' do
-        is_expected.to eq('foo')
+        expect(colorized_output).to eq('foo')
       end
     end
 
@@ -45,7 +45,7 @@ RSpec.describe RuboCop::Formatter::Colorizable do
         end
 
         it 'colorizes the passed string' do
-          is_expected.to eq("\e[31mfoo\e[0m")
+          expect(colorized_output).to eq("\e[31mfoo\e[0m")
         end
       end
 
@@ -65,7 +65,7 @@ RSpec.describe RuboCop::Formatter::Colorizable do
         end
 
         it 'colorizes the passed string' do
-          is_expected.to eq("\e[31mfoo\e[0m")
+          expect(colorized_output).to eq("\e[31mfoo\e[0m")
         end
       end
     end
@@ -105,8 +105,11 @@ RSpec.describe RuboCop::Formatter::Colorizable do
   ].each do |color|
     describe "##{color}" do
       it "invokes #colorize(string, #{color}" do
-        expect(formatter).to receive(:colorize).with('foo', color)
+        allow(formatter).to receive(:colorize)
+
         formatter.send(color, 'foo')
+
+        expect(formatter).to have_received(:colorize).with('foo', color)
       end
     end
   end

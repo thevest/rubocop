@@ -5,7 +5,7 @@ module RuboCop
     module Rails
       # This cop checks for the use of Time methods without zone.
       #
-      # Built on top of Ruby on Rails style guide (https://github.com/bbatsov/rails-style-guide#time)
+      # Built on top of Ruby on Rails style guide (https://github.com/rubocop-hq/rails-style-guide#time)
       # and the article http://danilenko.org/2012/7/6/rails_timezones/ .
       #
       # Two styles are supported for this cop. When EnforcedStyle is 'strict'
@@ -66,8 +66,8 @@ module RuboCop
                                parse at current].freeze
 
         ACCEPTED_METHODS = %i[in_time_zone utc getlocal
-                              iso8601 jisx0301 rfc3339
-                              to_i to_f].freeze
+                              xmlschema iso8601 jisx0301 rfc3339
+                              httpdate to_i to_f].freeze
 
         def on_const(node)
           mod, klass = *node
@@ -76,6 +76,16 @@ module RuboCop
           return unless (mod.nil? || mod.cbase_type?) && method_send?(node)
 
           check_time_node(klass, node.parent) if TIMECLASS.include?(klass)
+        end
+
+        def autocorrect(node)
+          lambda do |corrector|
+            if acceptable?
+              corrector.insert_after(node.source_range, '.in_time_zone')
+            else
+              corrector.insert_after(node.children[0].source_range, '.zone')
+            end
+          end
         end
 
         private
@@ -165,6 +175,7 @@ module RuboCop
 
           while node && node.send_type?
             break if extract_method(node) == :localtime
+
             node = node.parent
           end
 

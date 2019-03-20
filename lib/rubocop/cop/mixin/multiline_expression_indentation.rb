@@ -5,10 +5,9 @@ module RuboCop
     # Common functionality for checking multiline method calls and binary
     # operations.
     module MultilineExpressionIndentation # rubocop:disable Metrics/ModuleLength
-      KEYWORD_ANCESTOR_TYPES  = [:for, :return, *Util::MODIFIER_NODES].freeze
+      KEYWORD_ANCESTOR_TYPES  = %i[for if while until return].freeze
       UNALIGNED_RHS_TYPES     = %i[if while until for return
                                    array kwbegin].freeze
-      ASSIGNMENT_RHS_TYPES    = [:send, *Util::ASGN_NODES].freeze
       DEFAULT_MESSAGE_TAIL    = 'an expression'.freeze
       ASSIGNMENT_MESSAGE_TAIL = 'an expression in an assignment'.freeze
       KEYWORD_MESSAGE_TAIL    = 'a %<kind>s in %<article>s `%<keyword>s` ' \
@@ -56,8 +55,25 @@ module RuboCop
         end
       end
 
+      # The correct indentation of `node` is usually `IndentationWidth`, with
+      # one exception: prefix keywords.
+      #
+      # ```
+      # while foo &&  # Here, `while` is called a "prefix keyword"
+      #     bar       # This is called "special indentation"
+      #   baz
+      # end
+      # ```
+      #
+      # Note that *postfix conditionals* do *not* get "special indentation".
+      #
+      # ```
+      # next if foo &&
+      #   bar # normal indentation, not special
+      # ```
       def correct_indentation(node)
-        if kw_node_with_special_indentation(node)
+        kw_node = kw_node_with_special_indentation(node)
+        if kw_node && !postfix_conditional?(kw_node)
           # This cop could have its own IndentationWidth configuration
           configured_indentation_width +
             @config.for_cop('Layout/IndentationWidth')['Width']
@@ -104,7 +120,7 @@ module RuboCop
       def keyword_message_tail(node)
         keyword = node.loc.keyword.source
         kind    = keyword == 'for' ? 'collection' : 'condition'
-        article = keyword =~ /^[iu]/ ? 'an' : 'a'
+        article = keyword.start_with?('i', 'u') ? 'an' : 'a'
 
         format(KEYWORD_MESSAGE_TAIL, kind: kind,
                                      article: article,
@@ -115,6 +131,7 @@ module RuboCop
         keyword_node =
           node.each_ancestor(*KEYWORD_ANCESTOR_TYPES).find do |ancestor|
             next if ancestor.if_type? && ancestor.ternary?
+
             within_node?(node, indented_keyword_expression(ancestor))
           end
 
@@ -173,7 +190,7 @@ module RuboCop
       def valid_rhs?(candidate, ancestor)
         if ancestor.send_type?
           valid_method_rhs_candidate?(candidate, ancestor)
-        elsif Util::ASGN_NODES.include?(ancestor.type)
+        elsif ancestor.assignment?
           valid_rhs_candidate?(candidate, assignment_rhs(ancestor))
         else
           false
@@ -220,6 +237,12 @@ module RuboCop
 
         node.source_range.begin_pos > ancestor.loc.begin.begin_pos &&
           node.source_range.end_pos < ancestor.loc.end.end_pos
+      end
+
+      # Returns true if `node` is a conditional whose `body` and `condition`
+      # begin on the same line.
+      def postfix_conditional?(node)
+        node.if_type? && node.modifier_form?
       end
 
       def within_node?(inner, outer)

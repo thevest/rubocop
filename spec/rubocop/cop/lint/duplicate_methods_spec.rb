@@ -7,236 +7,251 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
 
   shared_examples 'in scope' do |type, opening_line|
     it "registers an offense for duplicate method in #{type}" do
-      inspect_source([opening_line,
-                      '  def some_method',
-                      '    implement 1',
-                      '  end',
-                      '  def some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.size).to eq(1)
+      expect_offense(<<-RUBY.strip_indent)
+        #{opening_line}
+          def some_method
+            implement 1
+          end
+          def some_method
+          ^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both (string):2 and (string):5.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "doesn't register an offense for non-duplicate method in #{type}" do
-      inspect_source([opening_line,
-                      '  def some_method',
-                      '    implement 1',
-                      '  end',
-                      '  def any_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        #{opening_line}
+          def some_method
+            implement 1
+          end
+          def any_method
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "registers an offense for duplicate class methods in #{type}" do
-      inspect_source([opening_line,
-                      '  def self.some_method',
-                      '    implement 1',
-                      '  end',
-                      '  def self.some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'], 'src.rb')
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(
-        ['Method `A.some_method` is defined at both src.rb:2 and src.rb:5.']
-      )
+      expect_offense(<<-RUBY.strip_indent, 'dups.rb')
+        #{opening_line}
+          def self.some_method
+            implement 1
+          end
+          def self.some_method
+          ^^^^^^^^^^^^^^^^^^^^ Method `A.some_method` is defined at both dups.rb:2 and dups.rb:5.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "doesn't register offense for non-duplicate class methods in #{type}" do
-      inspect_source([opening_line,
-                      '  def self.some_method',
-                      '    implement 1',
-                      '  end',
-                      '  def self.any_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        #{opening_line}
+          def self.some_method
+            implement 1
+          end
+          def self.any_method
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "recognizes difference between instance and class methods in #{type}" do
-      inspect_source([opening_line,
-                      '  def some_method',
-                      '    implement 1',
-                      '  end',
-                      '  def self.some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        #{opening_line}
+          def some_method
+            implement 1
+          end
+          def self.some_method
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "registers an offense for duplicate private methods in #{type}" do
-      inspect_source([opening_line,
-                      '  private def some_method',
-                      '    implement 1',
-                      '  end',
-                      '  private def some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.size).to eq(1)
+      expect_offense(<<-RUBY.strip_indent)
+        #{opening_line}
+          private def some_method
+            implement 1
+          end
+          private def some_method
+                  ^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both (string):2 and (string):5.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "registers an offense for duplicate private self methods in #{type}" do
-      inspect_source([opening_line,
-                      '  private def self.some_method',
-                      '    implement 1',
-                      '  end',
-                      '  private def self.some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.size).to eq(1)
+      expect_offense(<<-RUBY.strip_indent)
+        #{opening_line}
+          private def self.some_method
+            implement 1
+          end
+          private def self.some_method
+                  ^^^^^^^^^^^^^^^^^^^^ Method `A.some_method` is defined at both (string):2 and (string):5.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "doesn't register an offense for different private methods in #{type}" do
-      inspect_source([opening_line,
-                      '  private def some_method',
-                      '    implement 1',
-                      '  end',
-                      '  private def any_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        #{opening_line}
+          private def some_method
+            implement 1
+          end
+          private def any_method
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "registers an offense for duplicate protected methods in #{type}" do
-      inspect_source([opening_line,
-                      '  protected def some_method',
-                      '    implement 1',
-                      '  end',
-                      '  protected def some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.size).to eq(1)
+      expect_offense(<<-RUBY.strip_indent)
+        #{opening_line}
+          protected def some_method
+            implement 1
+          end
+          protected def some_method
+                    ^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both (string):2 and (string):5.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it "registers 2 offenses for pair of duplicate methods in #{type}" do
-      inspect_source([opening_line,
-                      '  def some_method',
-                      '    implement 1',
-                      '  end',
-                      '  def some_method',
-                      '    implement 2',
-                      '  end',
-                      '  def any_method',
-                      '    implement 1',
-                      '  end',
-                      '  def any_method',
-                      '    implement 2',
-                      '  end',
-                      'end'], 'dups.rb')
-      expect(cop.offenses.size).to eq(2)
-      expect(cop.messages).to contain_exactly(
-        'Method `A#any_method` is defined at both dups.rb:8 and dups.rb:11.',
-        'Method `A#some_method` is defined at both dups.rb:2 and dups.rb:5.'
-      )
+      expect_offense(<<-RUBY.strip_indent, 'dups.rb')
+        #{opening_line}
+          def some_method
+            implement 1
+          end
+          def some_method
+          ^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both dups.rb:2 and dups.rb:5.
+            implement 2
+          end
+          def any_method
+            implement 1
+          end
+          def any_method
+          ^^^^^^^^^^^^^^ Method `A#any_method` is defined at both dups.rb:8 and dups.rb:11.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it 'registers an offense for a duplicate instance method in separate ' \
        "#{type} blocks" do
-      inspect_source([opening_line,
-                      '  def some_method',
-                      '    implement 1',
-                      '  end',
-                      'end',
-                      opening_line,
-                      '  def some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
-      expect(cop.offenses.size).to eq(1)
+      expect_offense(<<-RUBY.strip_indent, 'dups.rb')
+        #{opening_line}
+          def some_method
+            implement 1
+          end
+        end
+        #{opening_line}
+          def some_method
+          ^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both dups.rb:2 and dups.rb:7.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it 'registers an offense for a duplicate class method in separate ' \
        "#{type} blocks" do
-      inspect_source([opening_line,
-                      '  def self.some_method',
-                      '    implement 1',
-                      '  end',
-                      'end',
-                      opening_line,
-                      '  def self.some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'])
+      inspect_source(<<-RUBY.strip_indent)
+        #{opening_line}
+          def self.some_method
+            implement 1
+          end
+        end
+        #{opening_line}
+          def self.some_method
+            implement 2
+          end
+        end
+      RUBY
       expect(cop.offenses.size).to eq(1)
     end
 
     it 'registers offense for a duplicate instance method in separate files' do
-      inspect_source([opening_line,
-                      '  def some_method',
-                      '    implement 1',
-                      '  end',
-                      'end'], 'first.rb')
-      inspect_source([opening_line,
-                      '  def some_method',
-                      '    implement 2',
-                      '  end',
-                      'end'], 'second.rb')
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(['Method `A#some_method` is defined at both ' \
-                                  'first.rb:2 and second.rb:2.'])
+      inspect_source(<<-RUBY.strip_indent, 'first.rb')
+        #{opening_line}
+          def some_method
+            implement 1
+          end
+        end
+      RUBY
+      expect_offense(<<-RUBY.strip_indent, 'second.rb')
+        #{opening_line}
+          def some_method
+          ^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both first.rb:2 and second.rb:2.
+            implement 2
+          end
+        end
+      RUBY
     end
 
     it 'understands class << self' do
-      inspect_source([opening_line,
-                      '  class << self',
-                      '    def some_method',
-                      '      implement 1',
-                      '    end',
-                      '    def some_method',
-                      '      implement 2',
-                      '    end',
-                      '  end',
-                      'end'], 'test.rb')
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(
-        ['Method `A.some_method` is defined at both test.rb:3 and test.rb:6.']
-      )
+      expect_offense(<<-RUBY.strip_indent, 'test.rb')
+        #{opening_line}
+          class << self
+            def some_method
+              implement 1
+            end
+            def some_method
+            ^^^^^^^^^^^^^^^ Method `A.some_method` is defined at both test.rb:3 and test.rb:6.
+              implement 2
+            end
+          end
+        end
+      RUBY
     end
 
     it 'understands nested modules' do
-      inspect_source(['module B',
-                      "  #{opening_line}",
-                      '    def some_method',
-                      '      implement 1',
-                      '    end',
-                      '    def some_method',
-                      '      implement 2',
-                      '    end',
-                      '    def self.another',
-                      '    end',
-                      '    def self.another',
-                      '    end',
-                      '  end',
-                      'end'], 'test.rb')
-      expect(cop.offenses.size).to eq(2)
-      expect(cop.messages).to eq(
-        ['Method `B::A#some_method` is defined at both test.rb:3 and ' \
-         'test.rb:6.',
-         'Method `B::A.another` is defined at both test.rb:9 and test.rb:11.']
-      )
+      expect_offense(<<-RUBY.strip_indent, 'test.rb')
+        module B
+          #{opening_line}
+            def some_method
+              implement 1
+            end
+            def some_method
+            ^^^^^^^^^^^^^^^ Method `B::A#some_method` is defined at both test.rb:3 and test.rb:6.
+              implement 2
+            end
+            def self.another
+            end
+            def self.another
+            ^^^^^^^^^^^^^^^^ Method `B::A.another` is defined at both test.rb:9 and test.rb:11.
+            end
+          end
+        end
+      RUBY
     end
 
     it 'registers an offense when class << exp is used' do
       pending
-      inspect_source([opening_line,
-                      '  class << blah',
-                      '    def some_method',
-                      '      implement 1',
-                      '    end',
-                      '    def some_method',
-                      '      implement 2',
-                      '    end',
-                      '  end',
-                      'end'], 'test.rb')
+      inspect_source(<<-RUBY.strip_indent, 'test.rb')
+        #{opening_line}
+          class << blah
+            def some_method
+              implement 1
+            end
+            def some_method
+              implement 2
+            end
+          end
+        end
+      RUBY
       expect(cop.offenses.empty?).to be(false)
     end
 
@@ -247,7 +262,7 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
             implement 1
           end
           alias some_method any_method
-          ^^^^^ Method `A#some_method` is defined at both example.rb:2 and example.rb:5.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both example.rb:2 and example.rb:5.
         end
       RUBY
     end
@@ -270,7 +285,7 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
             implement 1
           end
           alias_method :some_method, :any_method
-          ^^^^^^^^^^^^ Method `A#some_method` is defined at both example.rb:2 and example.rb:5.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both example.rb:2 and example.rb:5.
         end
       RUBY
     end
@@ -300,7 +315,7 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
           def something
           end
           attr_reader :something
-          ^^^^^^^^^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
+          ^^^^^^^^^^^^^^^^^^^^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
         end
       RUBY
     end
@@ -311,7 +326,7 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
           def something=(right)
           end
           attr_writer :something
-          ^^^^^^^^^^^ Method `A#something=` is defined at both example.rb:2 and example.rb:4.
+          ^^^^^^^^^^^^^^^^^^^^^^ Method `A#something=` is defined at both example.rb:2 and example.rb:4.
         end
       RUBY
     end
@@ -322,10 +337,10 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
           attr_accessor :something
 
           def something
-          ^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
+          ^^^^^^^^^^^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
           end
           def something=(right)
-          ^^^ Method `A#something=` is defined at both example.rb:2 and example.rb:6.
+          ^^^^^^^^^^^^^^ Method `A#something=` is defined at both example.rb:2 and example.rb:6.
           end
         end
       RUBY
@@ -337,7 +352,7 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
           def something
           end
           attr :something
-          ^^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
+          ^^^^^^^^^^^^^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
         end
       RUBY
     end
@@ -348,10 +363,10 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
           attr :something, true
 
           def something
-          ^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
+          ^^^^^^^^^^^^^ Method `A#something` is defined at both example.rb:2 and example.rb:4.
           end
           def something=(right)
-          ^^^ Method `A#something=` is defined at both example.rb:2 and example.rb:6.
+          ^^^^^^^^^^^^^^ Method `A#something=` is defined at both example.rb:2 and example.rb:6.
           end
         end
       RUBY
@@ -384,50 +399,95 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
   include_examples('in scope', 'dynamic module', 'A = Module.new do')
   include_examples('in scope', 'class_eval block', 'A.class_eval do')
 
+  %w[class module].each do |type|
+    it 'registers an offense for duplicate class methods with named receiver ' \
+       "in #{type}" do
+      expect_offense(<<-RUBY.strip_indent, 'src.rb')
+        #{type} A
+          def A.some_method
+            implement 1
+          end
+          def A.some_method
+          ^^^^^^^^^^^^^^^^^ Method `A.some_method` is defined at both src.rb:2 and src.rb:5.
+            implement 2
+          end
+        end
+      RUBY
+    end
+
+    it 'registers an offense for duplicate class methods with `self` and ' \
+       "named receiver in #{type}" do
+      expect_offense(<<-RUBY.strip_indent, 'src.rb')
+        #{type} A
+          def self.some_method
+            implement 1
+          end
+          def A.some_method
+          ^^^^^^^^^^^^^^^^^ Method `A.some_method` is defined at both src.rb:2 and src.rb:5.
+            implement 2
+          end
+        end
+      RUBY
+    end
+
+    it 'registers an offense for duplicate class methods with `<<` and named ' \
+       "receiver in #{type}" do
+      expect_offense(<<-RUBY.strip_indent, 'test.rb')
+        #{type} A
+          class << self
+            def some_method
+              implement 1
+            end
+          end
+          def A.some_method
+          ^^^^^^^^^^^^^^^^^ Method `A.some_method` is defined at both test.rb:3 and test.rb:7.
+            implement 2
+          end
+        end
+      RUBY
+    end
+  end
+
   it 'registers an offense for duplicate methods at top level' do
-    inspect_source(['  def some_method',
-                    '    implement 1',
-                    '  end',
-                    '  def some_method',
-                    '    implement 2',
-                    '  end'], 'toplevel.rb')
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.messages).to eq(
-      ['Method `Object#some_method` is defined at both toplevel.rb:1 and ' \
-       'toplevel.rb:4.']
-    )
+    expect_offense(<<-RUBY.strip_indent, 'toplevel.rb')
+      def some_method
+        implement 1
+      end
+      def some_method
+      ^^^^^^^^^^^^^^^ Method `Object#some_method` is defined at both toplevel.rb:1 and toplevel.rb:4.
+        implement 2
+      end
+    RUBY
   end
 
   it 'understands class << A' do
-    inspect_source(['class << A',
-                    '  def some_method',
-                    '    implement 1',
-                    '  end',
-                    '  def some_method',
-                    '    implement 2',
-                    '  end',
-                    'end'], 'test.rb')
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.messages).to eq(
-      ['Method `A.some_method` is defined at both test.rb:2 and test.rb:5.']
-    )
+    expect_offense(<<-RUBY.strip_indent, 'test.rb')
+      class << A
+        def some_method
+          implement 1
+        end
+        def some_method
+        ^^^^^^^^^^^^^^^ Method `A.some_method` is defined at both test.rb:2 and test.rb:5.
+          implement 2
+        end
+      end
+    RUBY
   end
 
   it 'handles class_eval with implicit receiver' do
-    inspect_source(['module A',
-                    '  class_eval do',
-                    '    def some_method',
-                    '      implement 1',
-                    '    end',
-                    '    def some_method',
-                    '      implement 2',
-                    '    end',
-                    '  end',
-                    'end'], 'test.rb')
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.messages).to eq(
-      ['Method `A#some_method` is defined at both test.rb:3 and test.rb:6.']
-    )
+    expect_offense(<<-RUBY.strip_indent, 'test.rb')
+      module A
+        class_eval do
+          def some_method
+            implement 1
+          end
+          def some_method
+          ^^^^^^^^^^^^^^^ Method `A#some_method` is defined at both test.rb:3 and test.rb:6.
+            implement 2
+          end
+        end
+      end
+    RUBY
   end
 
   it 'ignores method definitions in RSpec `describe` blocks' do
@@ -468,7 +528,7 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
         def something
         end
         def something
-        ^^^ Method `Object#something` is defined at both lib/foo.rb:1 and lib/foo.rb:3.
+        ^^^^^^^^^^^^^ Method `Object#something` is defined at both lib/foo.rb:1 and lib/foo.rb:3.
         end
       RUBY
     end
@@ -486,7 +546,7 @@ RSpec.describe RuboCop::Cop::Lint::DuplicateMethods do
         def something
         end
         def something
-        ^^^ Method `Object#something` is defined at both /no/project/root/foo.rb:1 and /no/project/root/foo.rb:3.
+        ^^^^^^^^^^^^^ Method `Object#something` is defined at both /no/project/root/foo.rb:1 and /no/project/root/foo.rb:3.
         end
       RUBY
     end

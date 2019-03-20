@@ -18,8 +18,7 @@ RSpec.describe RuboCop::Cop::Rails::Date, :config do
       end
 
       it "accepts Some::Date.#{day}" do
-        inspect_source("Some::Date.#{day}")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses("Some::Date.#{day}")
       end
     end
 
@@ -29,14 +28,19 @@ RSpec.describe RuboCop::Cop::Rails::Date, :config do
         expect(cop.offenses.size).to eq(1)
       end
 
+      context 'when using safe navigation operator', :ruby23 do
+        it "registers an offense for ##{method}" do
+          inspect_source("date&.#{method}")
+          expect(cop.offenses.size).to eq(1)
+        end
+      end
+
       it "accepts variable named #{method}" do
-        inspect_source("#{method} = 1")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses("#{method} = 1")
       end
 
       it "accepts variable #{method} as range end" do
-        inspect_source("from_time..#{method}")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses("from_time..#{method}")
       end
     end
 
@@ -77,6 +81,13 @@ RSpec.describe RuboCop::Cop::Rails::Date, :config do
         expect(cop.offenses.size).to eq(1)
       end
     end
+
+    it 'registers an offense for #to_time_in_current_zone' do
+      expect_offense(<<-RUBY.strip_indent)
+          "2016-07-12 14:36:31".to_time_in_current_zone
+                                ^^^^^^^^^^^^^^^^^^^^^^^ `to_time_in_current_zone` is deprecated. Use `in_time_zone` instead.
+      RUBY
+    end
   end
 
   context 'when EnforcedStyle is "flexible"' do
@@ -84,8 +95,7 @@ RSpec.describe RuboCop::Cop::Rails::Date, :config do
 
     %w[current yesterday tomorrow].each do |day|
       it "accepts Date.#{day}" do
-        inspect_source("Date.#{day}")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses("Date.#{day}")
       end
     end
 
@@ -98,13 +108,15 @@ RSpec.describe RuboCop::Cop::Rails::Date, :config do
 
     RuboCop::Cop::Rails::TimeZone::ACCEPTED_METHODS.each do |a_method|
       it "accepts val.to_time.#{a_method}" do
-        inspect_source("val.to_time.#{a_method}")
-        expect(cop.offenses.empty?).to be(true)
+        expect_no_offenses("val.to_time.#{a_method}")
       end
     end
 
-    it 'accepts #to_time_in_current_zone' do
-      expect_no_offenses('date.to_time_in_current_zone')
+    it 'registers an offense for #to_time_in_current_zone' do
+      expect_offense(<<-RUBY.strip_indent)
+          "2016-07-12 14:36:31".to_time_in_current_zone
+                                ^^^^^^^^^^^^^^^^^^^^^^^ `to_time_in_current_zone` is deprecated. Use `in_time_zone` instead.
+      RUBY
     end
   end
 end

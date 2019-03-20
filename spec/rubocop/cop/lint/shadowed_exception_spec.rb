@@ -30,6 +30,18 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
       RUBY
     end
 
+    it 'rescue a exception without causing constant name deprecation warning' do
+      expect do
+        inspect_source(<<-RUBY.strip_indent)
+          def foo
+            something
+          rescue TimeoutError
+            handle_exception
+          end
+        RUBY
+      end.not_to output(/.*TimeoutError is deprecated/).to_stderr
+    end
+
     it 'accepts rescuing a single custom exception' do
       expect_no_offenses(<<-RUBY.strip_indent)
         begin
@@ -77,28 +89,26 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
 
     it 'registers an offense rescuing exceptions that are ' \
       'ancestors of each other ' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         def
           something
         rescue StandardError, RuntimeError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
           handle_exception
         end
       RUBY
-
-      expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
     end
 
     it 'registers an offense rescuing Exception with any other error or ' \
        'exception' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         begin
           something
         rescue NonStandardError, Exception
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
           handle_exception
         end
       RUBY
-
-      expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
     end
 
     it 'accepts rescuing a single exception that is assigned to a variable' do
@@ -137,7 +147,7 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
 
     it 'accepts rescuing a multiple exceptions that are not ancestors that ' \
        'have an else' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         begin
           something
         rescue NoMethodError, ZeroDivisionError
@@ -146,8 +156,6 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
           handle_non_exception
         end
       RUBY
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     context 'when there are multiple levels of exceptions in the same rescue' do
@@ -194,87 +202,61 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
         end
       RUBY
     end
-
-    it 'accepts rescuing nil' do
-      expect_no_offenses(<<-RUBY.strip_indent)
-        begin
-          a
-        rescue nil
-          b
-        end
-      RUBY
-    end
-
-    it 'accepts rescuing nil and another exception' do
-      expect_no_offenses(<<-RUBY.strip_indent)
-        begin
-          a
-        rescue nil, Exception
-          b
-        end
-      RUBY
-    end
-
-    it 'registers an offense when rescuing nil multiple exceptions of ' \
-       'different levels' do
-      inspect_source(<<-RUBY.strip_indent)
-        begin
-          a
-        rescue nil, StandardError, Exception
-          b
-        end
-      RUBY
-
-      expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
-      expect(cop.highlights).to eq(['rescue nil, StandardError, Exception'])
-    end
   end
 
   context 'multiple rescues' do
     it 'registers an offense when a higher level exception is rescued before' \
        ' a lower level exception' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         begin
           something
+        rescue NoMethodError
+          handle_no_method_error
         rescue Exception
+        ^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
           handle_exception
         rescue StandardError
           handle_standard_error
         end
       RUBY
-
-      expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
-      expect(cop.highlights).to eq([['rescue Exception',
-                                     '  handle_exception',
-                                     'rescue StandardError'].join("\n")])
     end
 
     it 'registers an offense when a higher level exception is rescued before ' \
        'a lower level exception when there are multiple exceptions ' \
        'rescued in a group' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         begin
           something
         rescue Exception
+        ^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
           handle_exception
         rescue NoMethodError, ZeroDivisionError
           handle_standard_error
         end
       RUBY
+    end
 
-      expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
-      expect(cop.highlights).to eq([['rescue Exception',
-                                     '  handle_exception',
-                                     'rescue NoMethodError, ZeroDivisionError']
-                                     .join("\n")])
+    it 'registers an offense for two exceptions when there are ' \
+       'multiple levels of exceptions in the same rescue' do
+      expect_offense(<<-RUBY.strip_indent)
+        begin
+          something
+        rescue ZeroDivisionError
+          handle_exception
+        rescue NoMethodError, StandardError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
+          handle_standard_error
+        end
+      RUBY
     end
 
     it 'registers an offense rescuing out of order exceptions when there ' \
        'is an ensure' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         begin
           something
         rescue Exception
+        ^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
           handle_exception
         rescue StandardError
           handle_standard_error
@@ -282,11 +264,6 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
           everything_is_ok
         end
       RUBY
-
-      expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
-      expect(cop.highlights).to eq([['rescue Exception',
-                                     '  handle_exception',
-                                     'rescue StandardError'].join("\n")])
     end
 
     it 'accepts rescuing exceptions in order of level' do
@@ -325,7 +302,7 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
 
     it 'accepts rescuing exceptions in order of level with multiple ' \
        'exceptions in a group' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         begin
           something
         rescue NoMethodError, ZeroDivisionError
@@ -334,13 +311,11 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
           handle_exception
         end
       RUBY
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'accepts rescuing exceptions in order of level with multiple ' \
        'exceptions in a group with custom exceptions' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         begin
           something
         rescue NonStandardError, NoMethodError
@@ -349,8 +324,6 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
           handle_exception
         end
       RUBY
-
-      expect(cop.offenses.empty?).to be(true)
     end
 
     it 'accepts rescuing custom exceptions in multiple rescue groups' do
@@ -380,7 +353,7 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
 
       it 'registers an offense for splat arguments rescued after ' \
          'rescuing a known exception' do
-        inspect_source(<<-RUBY.strip_indent)
+        expect_no_offenses(<<-RUBY.strip_indent)
           begin
             a
           rescue StandardError
@@ -389,26 +362,20 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
             c
           end
         RUBY
-
-        expect(cop.offenses.empty?).to be(true)
       end
 
       it 'registers an offense for splat arguments rescued after ' \
          'rescuing Exception' do
-        inspect_source(<<-RUBY.strip_indent)
+        expect_offense(<<-RUBY.strip_indent)
           begin
             a
           rescue Exception
+          ^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
             b
           rescue *BAR
             c
           end
         RUBY
-
-        expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
-        expect(cop.highlights).to eq([['rescue Exception',
-                                       '  b',
-                                       'rescue *BAR'].join("\n")])
       end
     end
 
@@ -436,30 +403,6 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
           end
         RUBY
       end
-    end
-
-    it 'accepts rescuing nil before another exception' do
-      expect_no_offenses(<<-RUBY.strip_indent)
-        begin
-          a
-        rescue nil
-          b
-        rescue
-          c
-        end
-      RUBY
-    end
-
-    it 'accepts rescuing nil after another exception' do
-      expect_no_offenses(<<-RUBY.strip_indent)
-        begin
-          a
-        rescue
-          b
-        rescue nil
-          c
-        end
-      RUBY
     end
 
     it 'accepts rescuing a known exception after an unknown exceptions' do
@@ -501,20 +444,16 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
     end
 
     it 'registers an offense rescuing Exception before an unknown exceptions' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         begin
           a
         rescue Exception
+        ^^^^^^^^^^^^^^^^ Do not shadow rescued Exceptions.
           b
         rescue UnknownException
           c
         end
       RUBY
-
-      expect(cop.messages).to eq(['Do not shadow rescued Exceptions.'])
-      expect(cop.highlights).to eq([['rescue Exception',
-                                     '  b',
-                                     'rescue UnknownException'].join("\n")])
     end
 
     it 'ignores expressions of non-const' do
@@ -530,23 +469,6 @@ RSpec.describe RuboCop::Cop::Lint::ShadowedException do
     end
 
     context 'last rescue does not specify exception class' do
-      let(:source) do
-        <<-RUBY.strip_indent
-          begin
-          rescue A, B
-            do_something
-          rescue C
-            do_something
-          rescue
-            do_something
-          end
-        RUBY
-      end
-
-      it 'does not raise error' do
-        expect { inspect_source(source) }.not_to raise_error
-      end
-
       it 'highlights range ending at rescue keyword' do
         expect_no_offenses(<<-RUBY.strip_indent)
           begin

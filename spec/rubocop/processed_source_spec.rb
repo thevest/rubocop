@@ -8,7 +8,7 @@ RSpec.describe RuboCop::ProcessedSource do
   let(:ruby_version) { RuboCop::Config::KNOWN_RUBIES.last }
 
   let(:source) { <<-RUBY.strip_indent }
-    # encoding: utf-8
+    # an awesome method
     def some_method
       puts 'foo'
     end
@@ -79,7 +79,6 @@ RSpec.describe RuboCop::ProcessedSource do
   shared_context 'invalid encoding source' do
     let(:source) do
       [
-        '# encoding: utf-8',
         "# \xf9"
       ].join("\n")
     end
@@ -131,7 +130,7 @@ RSpec.describe RuboCop::ProcessedSource do
 
     it 'contains lines as string without linefeed' do
       first_line = processed_source.lines.first
-      expect(first_line).to eq('# encoding: utf-8')
+      expect(first_line).to eq('# an awesome method')
     end
   end
 
@@ -252,18 +251,6 @@ RSpec.describe RuboCop::ProcessedSource do
         end
 
         expect(comment).to eq nil
-      end
-    end
-
-    describe '#comment_on_line?' do
-      it 'returns true when passed line number with comment' do
-        expect(processed_source.comment_on_line?(1)).to be true
-        expect(processed_source.comment_on_line?(2)).to be true
-        expect(processed_source.comment_on_line?(3)).to be true
-      end
-
-      it 'returns false when passed line number without comment' do
-        expect(processed_source.comment_on_line?(4)).to be false
       end
     end
 

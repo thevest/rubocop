@@ -13,7 +13,7 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
   shared_examples 'iso-8859-15' do |eol|
     it 'can inspect non-UTF-8 encoded source with proper encoding comment' do
       inspect_source_file(["# coding: ISO-8859-15#{eol}",
-                           "# Euro symbol: \xa4#{eol}"])
+                           "# Euro symbol: \xa4#{eol}"].join("\n"))
       expect(cop.offenses.size).to eq(1)
     end
   end
@@ -26,7 +26,7 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
     end
 
     it 'registers an offense for an incorrect EOL' do
-      inspect_source_file(['x=0', '', "y=1\r"])
+      inspect_source_file(['x=0', '', "y=1\r"].join("\n"))
       expect(cop.messages).to eq(messages)
       expect(cop.offenses.map(&:line))
         .to eq([RuboCop::Platform.windows? ? 1 : 3])
@@ -40,13 +40,13 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
     include_examples 'all configurations'
 
     it 'registers an offense for CR+LF' do
-      inspect_source_file(['x=0', '', "y=1\r"])
+      inspect_source_file(['x=0', '', "y=1\r"].join("\n"))
       expect(cop.messages).to eq(messages)
       expect(cop.offenses.map(&:line)).to eq([1])
     end
 
     it 'highlights the whole offending line' do
-      inspect_source_file(['x=0', '', "y=1\r"])
+      inspect_source_file(['x=0', '', "y=1\r"].join("\n"))
       expect(cop.highlights).to eq(["x=0\n"])
     end
 
@@ -56,15 +56,21 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
     end
 
     it 'does not register offenses after __END__' do
-      inspect_source(["x=0\r",
-                      '__END__',
-                      'x=0'])
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        x=0\r
+        __END__
+        x=0
+      RUBY
     end
 
     context 'and there are many lines ending with LF' do
       it 'registers only one offense' do
-        inspect_source_file(['x=0', '', 'y=1'].join("\n"))
+        inspect_source_file(<<-RUBY.strip_indent)
+          x=0
+
+          y=1
+        RUBY
+
         expect(cop.messages.size).to eq(1)
       end
 
@@ -80,8 +86,7 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
       end
 
       it 'does not crash on UTF-8 encoded non-ascii characters' do
-        source = ['# encoding: UTF-8',
-                  'class Epd::ReportsController < EpdAreaController',
+        source = ['class Epd::ReportsController < EpdAreaController',
                   "  'terecht bij uw ROM-coördinator.'",
                   'end'].join("\r\n")
         inspect_source_file(source)
@@ -106,13 +111,13 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
     include_examples 'all configurations'
 
     it 'registers an offense for CR+LF' do
-      inspect_source_file(['x=0', '', "y=1\r"])
+      inspect_source_file(['x=0', '', "y=1\r"].join("\n"))
       expect(cop.messages).to eq(['Carriage return character detected.'])
       expect(cop.offenses.map(&:line)).to eq([3])
     end
 
     it 'highlights the whole offending line' do
-      inspect_source_file(['x=0', '', "y=1\r"])
+      inspect_source_file(['x=0', '', "y=1\r"].join("\n"))
       expect(cop.highlights).to eq(["y=1\r"])
     end
 
@@ -122,10 +127,11 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
     end
 
     it 'does not register offenses after __END__' do
-      inspect_source(['x=0',
-                      '__END__',
-                      "x=0\r"])
-      expect(cop.offenses.empty?).to be(true)
+      expect_no_offenses(<<-RUBY.strip_indent)
+        x=0
+        __END__
+        x=0\r
+      RUBY
     end
 
     context 'and there are many lines ending with CR+LF' do
@@ -146,8 +152,7 @@ RSpec.describe RuboCop::Cop::Layout::EndOfLine, :config do
       end
 
       it 'does not crash on UTF-8 encoded non-ascii characters' do
-        source = ['# encoding: UTF-8',
-                  'class Epd::ReportsController < EpdAreaController',
+        source = ['class Epd::ReportsController < EpdAreaController',
                   "  'terecht bij uw ROM-coördinator.'",
                   'end'].join("\n")
         inspect_source_file(source)

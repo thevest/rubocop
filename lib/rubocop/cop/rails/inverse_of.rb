@@ -38,9 +38,8 @@ module RuboCop
       #   # good
       #   class Blog < ApplicationRecord
       #     has_many(:posts,
-      #       -> { order(published_at: :desc) },
-      #       inverse_of: :blog
-      #     )
+      #              -> { order(published_at: :desc) },
+      #              inverse_of: :blog)
       #   end
       #
       #   class Post < ApplicationRecord
@@ -62,9 +61,8 @@ module RuboCop
       #   # When you don't want to use the inverse association.
       #   class Blog < ApplicationRecord
       #     has_many(:posts,
-      #       -> { order(published_at: :desc) },
-      #       inverse_of: false
-      #     )
+      #              -> { order(published_at: :desc) },
+      #              inverse_of: false)
       #   end
       #
       # @example
@@ -128,8 +126,8 @@ module RuboCop
       #     has_many :physicians, through: :appointments
       #   end
       #
-      # @see http://guides.rubyonrails.org/association_basics.html#bi-directional-associations
-      # @see http://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html#module-ActiveRecord::Associations::ClassMethods-label-Setting+Inverses
+      # @see https://guides.rubyonrails.org/association_basics.html#bi-directional-associations
+      # @see https://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html#module-ActiveRecord::Associations::ClassMethods-label-Setting+Inverses
       class InverseOf < Cop
         extend TargetRailsVersion
 
@@ -178,6 +176,7 @@ module RuboCop
         def on_send(node)
           recv, arguments = association_recv_arguments(node)
           return unless arguments
+
           with_options = with_options_arguments(recv, node)
 
           options = arguments.concat(with_options).flat_map do |arg|
@@ -189,6 +188,7 @@ module RuboCop
                         options_requiring_inverse_of?(options)
 
           return if options_contain_inverse_of?(options)
+
           add_offense(node, message: message(options), location: :selector)
         end
 
@@ -203,6 +203,7 @@ module RuboCop
           end
 
           return required if target_rails_version >= 5.2
+
           required || options.any? { |opt| as_option?(opt) }
         end
 
@@ -226,6 +227,7 @@ module RuboCop
 
         def same_context_in_with_options?(arg, recv)
           return true if arg.nil? && recv.nil?
+
           arg && recv && arg.children[0] == recv.children[0]
         end
 

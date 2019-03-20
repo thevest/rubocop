@@ -24,7 +24,6 @@ module RuboCop
 
       # <=> isn't included here, because it doesn't return a boolean.
       COMPARISON_OPERATORS = %i[== === != <= >= > <].freeze
-      ARITHMETIC_OPERATORS = %i[+ - * / % **].freeze
 
       TRUTHY_LITERALS = %i[str dstr xstr int float sym dsym array
                            hash regexp true irange erange complex
@@ -34,9 +33,17 @@ module RuboCop
       COMPOSITE_LITERALS = %i[dstr xstr dsym array hash irange
                               erange regexp].freeze
       BASIC_LITERALS = (LITERALS - COMPOSITE_LITERALS).freeze
-      MUTABLE_LITERALS = %i[str dstr xstr array hash].freeze
+      MUTABLE_LITERALS = %i[str dstr xstr array hash
+                            regexp irange erange].freeze
       IMMUTABLE_LITERALS = (LITERALS - MUTABLE_LITERALS).freeze
 
+      EQUALS_ASSIGNMENTS = %i[lvasgn ivasgn cvasgn gvasgn
+                              casgn masgn].freeze
+      SHORTHAND_ASSIGNMENTS = %i[op_asgn or_asgn and_asgn].freeze
+      ASSIGNMENTS = (EQUALS_ASSIGNMENTS + SHORTHAND_ASSIGNMENTS).freeze
+
+      BASIC_CONDITIONALS = %i[if while until].freeze
+      CONDITIONALS = [*BASIC_CONDITIONALS, :case].freeze
       VARIABLES = %i[ivar gvar cvar lvar].freeze
       REFERENCES = %i[nth_ref back_ref].freeze
       KEYWORDS = %i[alias and break case class def defs defined?
@@ -47,7 +54,7 @@ module RuboCop
       OPERATOR_KEYWORDS = %i[and or].freeze
       SPECIAL_KEYWORDS = %w[__FILE__ __LINE__ __ENCODING__].freeze
 
-      # @see http://rubydoc.info/gems/ast/AST/Node:initialize
+      # @see https://www.rubydoc.info/gems/ast/AST/Node:initialize
       def initialize(type, children = [], properties = {})
         @mutable_attributes = {}
 
@@ -91,7 +98,7 @@ module RuboCop
         @mutable_attributes.frozen?
       end
 
-      protected :parent=
+      protected :parent= # rubocop:disable Style/AccessModifierDeclarations
 
       # Override `AST::Node#updated` so that `AST::Processor` does not try to
       # mutate our ASTs. Since we keep references from children to parents and
@@ -182,6 +189,7 @@ module RuboCop
 
         children.each do |child|
           next unless child.is_a?(Node)
+
           yield child if types.empty? || types.include?(child.type)
         end
 
@@ -280,6 +288,7 @@ module RuboCop
 
       def line_count
         return 0 unless source_range
+
         source_range.last_line - source_range.first_line + 1
       end
 
@@ -297,16 +306,13 @@ module RuboCop
         {(send $_ ...) (block (send $_ ...) ...)}
       PATTERN
 
-      def_node_matcher :method_name, <<-PATTERN
-        {(send _ $_ ...) (block (send _ $_ ...) ...)}
-      PATTERN
-
       # Note: for masgn, #asgn_rhs will be an array node
       def_node_matcher :asgn_rhs, '[assignment? (... $_)]'
       def_node_matcher :str_content, '(str $_)'
 
       def const_name
         return unless const_type?
+
         namespace, name = *self
         if namespace && !namespace.cbase_type?
           "#{namespace.const_name}::#{name}"
@@ -321,7 +327,9 @@ module RuboCop
          (casgn $_ $_        (send (const nil? {:Class :Module}) :new ...))
          (casgn $_ $_ (block (send (const nil? {:Class :Module}) :new ...) ...))}
       PATTERN
+      # rubocop:disable Style/AccessModifierDeclarations
       private :defined_module0
+      # rubocop:enable Style/AccessModifierDeclarations
 
       def defined_module
         namespace, name = *defined_module0
@@ -358,23 +366,9 @@ module RuboCop
         source_length.zero?
       end
 
-      def asgn_method_call?
-        !COMPARISON_OPERATORS.include?(method_name) &&
-          method_name.to_s.end_with?('='.freeze)
-      end
-
-      def arithmetic_operation?
-        ARITHMETIC_OPERATORS.include?(method_name)
-      end
-
-      def_node_matcher :equals_asgn?, <<-PATTERN
-        {lvasgn ivasgn cvasgn gvasgn casgn masgn}
-      PATTERN
-
-      def_node_matcher :shorthand_asgn?, '{op_asgn or_asgn and_asgn}'
-
-      def_node_matcher :assignment?, <<-PATTERN
-        {equals_asgn? shorthand_asgn? asgn_method_call?}
+      # Some cops treat the shovel operator as a kind of assignment.
+      def_node_matcher :assignment_or_similar?, <<-PATTERN
+        {assignment? (send _recv :<< ...)}
       PATTERN
 
       def literal?
@@ -407,10 +401,9 @@ module RuboCop
         define_method(recursive_kind) do
           case type
           when :send
-            receiver, method_name, *args = *self
             [*COMPARISON_OPERATORS, :!, :<=>].include?(method_name) &&
               receiver.send(recursive_kind) &&
-              args.all?(&recursive_kind)
+              arguments.all?(&recursive_kind)
           when :begin, :pair, *OPERATOR_KEYWORDS, *COMPOSITE_LITERALS
             children.all?(&recursive_kind)
           else
@@ -427,8 +420,28 @@ module RuboCop
         REFERENCES.include?(type)
       end
 
+      def equals_asgn?
+        EQUALS_ASSIGNMENTS.include?(type)
+      end
+
+      def shorthand_asgn?
+        SHORTHAND_ASSIGNMENTS.include?(type)
+      end
+
+      def assignment?
+        ASSIGNMENTS.include?(type)
+      end
+
+      def basic_conditional?
+        BASIC_CONDITIONALS.include?(type)
+      end
+
+      def conditional?
+        CONDITIONALS.include?(type)
+      end
+
       def keyword?
-        return true if special_keyword? || keyword_not?
+        return true if special_keyword? || send_type? && prefix_not?
         return false unless KEYWORDS.include?(type)
 
         !OPERATOR_KEYWORDS.include?(type) || loc.operator.is?(type.to_s)
@@ -442,45 +455,24 @@ module RuboCop
         OPERATOR_KEYWORDS.include?(type)
       end
 
-      def keyword_not?
-        _receiver, method_name, *args = *self
-        args.empty? && method_name == :! && loc.selector.is?('not'.freeze)
-      end
-
-      def keyword_bang?
-        _receiver, method_name, *args = *self
-        args.empty? && method_name == :! && loc.selector.is?('!'.freeze)
-      end
-
-      def unary_operation?
-        return false unless loc.respond_to?(:selector) && loc.selector
-        Cop::Util.operator?(loc.selector.source.to_sym) &&
-          source_range.begin_pos == loc.selector.begin_pos
-      end
-
-      def binary_operation?
-        return false unless loc.respond_to?(:selector) && loc.selector
-        Cop::Util.operator?(method_name) &&
-          source_range.begin_pos != loc.selector.begin_pos
-      end
-
       def parenthesized_call?
-        loc.begin && loc.begin.is?('(')
+        loc.respond_to?(:begin) && loc.begin && loc.begin.is?('(')
       end
 
       def chained?
-        return false unless argument?
-
-        receiver, _method_name, *_args = *parent
-        equal?(receiver)
+        parent && parent.send_type? && eql?(parent.receiver)
       end
 
       def argument?
-        parent && parent.send_type?
+        parent && parent.send_type? && parent.arguments.include?(self)
       end
 
       def numeric_type?
         int_type? || float_type?
+      end
+
+      def range_type?
+        irange_type? || erange_type?
       end
 
       def_node_matcher :guard_clause?, <<-PATTERN
@@ -634,6 +626,7 @@ module RuboCop
           # `class_eval` with no receiver applies to whatever module or class
           # we are currently in
           return unless (receiver = ancestor.receiver)
+
           yield unless receiver.const_type?
           receiver.const_name
         elsif !new_class_or_module_block?(ancestor)

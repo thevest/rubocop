@@ -29,8 +29,41 @@ module RuboCop
         MSG_BEFORE_AND_AFTER = 'Keep a blank line before and after ' \
                                '`%<modifier>s`.'.freeze
 
+        def initialize(config = nil, options = nil)
+          super
+
+          @block_line = nil
+        end
+
+        def on_class(node)
+          _name, superclass, _body = *node
+
+          @class_or_module_def_first_line = if superclass
+                                              superclass.first_line
+                                            else
+                                              node.source_range.first_line
+                                            end
+          @class_or_module_def_last_line = node.source_range.last_line
+        end
+
+        def on_module(node)
+          @class_or_module_def_first_line = node.source_range.first_line
+          @class_or_module_def_last_line = node.source_range.last_line
+        end
+
+        def on_sclass(node)
+          self_node, _body = *node
+
+          @class_or_module_def_first_line = self_node.source_range.first_line
+          @class_or_module_def_last_line = self_node.source_range.last_line
+        end
+
+        def on_block(node)
+          @block_line = node.source_range.first_line
+        end
+
         def on_send(node)
-          return unless node.access_modifier?
+          return unless node.bare_access_modifier?
 
           return if empty_lines_around?(node)
 
@@ -39,16 +72,13 @@ module RuboCop
 
         def autocorrect(node)
           lambda do |corrector|
-            send_line = node.first_line
-            previous_line = processed_source[send_line - 2]
-            next_line = processed_source[send_line]
             line = range_by_whole_lines(node.source_range)
 
-            unless previous_line_empty?(previous_line)
+            unless previous_line_empty?(node.first_line)
               corrector.insert_before(line, "\n")
             end
 
-            unless next_line_empty?(next_line)
+            unless next_line_empty?(node.last_line)
               corrector.insert_after(line, "\n")
             end
           end
@@ -62,42 +92,49 @@ module RuboCop
           end
         end
 
-        def previous_line_empty?(previous_line)
-          block_start?(previous_line) ||
-            class_def?(previous_line) ||
+        def previous_line_empty?(send_line)
+          previous_line = previous_line_ignoring_comments(processed_source,
+                                                          send_line)
+
+          block_start?(send_line) ||
+            class_def?(send_line) ||
             previous_line.blank?
         end
 
-        def next_line_empty?(next_line)
-          body_end?(next_line) || next_line.blank?
+        def next_line_empty?(last_send_line)
+          next_line = processed_source[last_send_line]
+
+          body_end?(last_send_line) || next_line.blank?
         end
 
         def empty_lines_around?(node)
-          send_line = node.first_line
-          previous_line = previous_line_ignoring_comments(processed_source,
-                                                          send_line)
-          next_line = processed_source[send_line]
-
-          previous_line_empty?(previous_line) && next_line_empty?(next_line)
+          previous_line_empty?(node.first_line) &&
+            next_line_empty?(node.last_line)
         end
 
         def class_def?(line)
-          line =~ /^\s*(class|module)/
+          return false unless @class_or_module_def_first_line
+
+          line == @class_or_module_def_first_line + 1
         end
 
         def block_start?(line)
-          line.match(/ (do|{)( \|.*?\|)?\s?$/)
+          return false unless @block_line
+
+          line == @block_line + 1
         end
 
         def body_end?(line)
-          line =~ /^\s*end\b/
+          return false unless @class_or_module_def_last_line
+
+          line == @class_or_module_def_last_line - 1
         end
 
         def message(node)
-          previous_line = processed_source[node.first_line - 2]
+          send_line = node.first_line
 
-          if block_start?(previous_line) ||
-             class_def?(previous_line)
+          if block_start?(send_line) ||
+             class_def?(send_line)
             format(MSG_AFTER, modifier: node.loc.selector.source)
           else
             format(MSG_BEFORE_AND_AFTER, modifier: node.loc.selector.source)

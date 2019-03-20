@@ -7,17 +7,16 @@ RSpec.describe RuboCop::Cop::Style::StringLiterals, :config do
     let(:cop_config) { { 'EnforcedStyle' => 'single_quotes' } }
 
     it 'registers offense for double quotes when single quotes suffice' do
-      inspect_source(['s = "abc"',
-                      'x = "a\\\\b"',
-                      'y ="\\\\b"',
-                      'z = "a\\\\"'])
-      expect(cop.highlights).to eq(['"abc"',
-                                    '"a\\\\b"',
-                                    '"\\\\b"',
-                                    '"a\\\\"'])
-      expect(cop.messages)
-        .to eq(["Prefer single-quoted strings when you don't need " \
-                'string interpolation or special symbols.'] * 4)
+      expect_offense(<<-'RUBY'.strip_indent)
+        s = "abc"
+            ^^^^^ Prefer single-quoted strings when you don't need string interpolation or special symbols.
+        x = "a\\b"
+            ^^^^^^ Prefer single-quoted strings when you don't need string interpolation or special symbols.
+        y ="\\b"
+           ^^^^^ Prefer single-quoted strings when you don't need string interpolation or special symbols.
+        z = "a\\"
+            ^^^^^ Prefer single-quoted strings when you don't need string interpolation or special symbols.
+      RUBY
       expect(cop.config_to_allow_offenses).to eq('EnforcedStyle' =>
                                                  'double_quotes')
     end
@@ -114,9 +113,11 @@ RSpec.describe RuboCop::Cop::Style::StringLiterals, :config do
     end
 
     it 'detects unneeded double quotes within concatenated string' do
-      src = ['"#{x}" \\', '"y"']
-      inspect_source(src)
-      expect(cop.offenses.size).to eq(1)
+      expect_offense(<<-'RUBY'.strip_indent)
+        "#{x}" \
+        "y"
+        ^^^ Prefer single-quoted strings when you don't need string interpolation or special symbols.
+      RUBY
     end
 
     it 'can handle a built-in constant parsed as string' do
@@ -157,8 +158,7 @@ RSpec.describe RuboCop::Cop::Style::StringLiterals, :config do
 
     it 'does not register an offense for words with non-ascii chars and ' \
        'other control sequences' do
-      inspect_source('"España\n"')
-      expect(cop.offenses.size).to eq(0)
+      expect_no_offenses('"España\n"')
     end
 
     it 'does not autocorrect words with non-ascii chars and other control ' \
@@ -245,8 +245,10 @@ RSpec.describe RuboCop::Cop::Style::StringLiterals, :config do
     end
 
     it 'flags single quotes with plain # (not #@var or #{interpolation}' do
-      inspect_source("a = 'blah #'")
-      expect(cop.offenses.size).to be 1
+      expect_offense(<<-RUBY.strip_indent)
+        a = 'blah #'
+            ^^^^^^^^ Prefer double-quoted strings unless you need single quotes to avoid extra backslashes for escaping.
+      RUBY
     end
 
     it 'accepts single quotes at the start of regexp literals' do

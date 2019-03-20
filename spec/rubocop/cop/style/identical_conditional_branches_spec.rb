@@ -91,7 +91,7 @@ RSpec.describe RuboCop::Cop::Style::IdenticalConditionalBranches do
     end
   end
 
-  # Regression: https://github.com/bbatsov/rubocop/issues/3868
+  # Regression: https://github.com/rubocop-hq/rubocop/issues/3868
   context 'when one of the case branches is empty' do
     it 'does not register an offense' do
       expect_no_offenses(<<-RUBY.strip_indent)
@@ -149,17 +149,6 @@ RSpec.describe RuboCop::Cop::Style::IdenticalConditionalBranches do
   end
 
   context 'on case without else' do
-    let(:source) do
-      <<-RUBY.strip_indent
-        case something
-        when :a
-          do_x
-        when :b
-          do_x
-        end
-      RUBY
-    end
-
     it "doesn't register an offense" do
       expect_no_offenses(<<-RUBY.strip_indent)
         case something
@@ -183,6 +172,18 @@ RSpec.describe RuboCop::Cop::Style::IdenticalConditionalBranches do
         else
           do_x
           do_z
+        end
+      RUBY
+    end
+  end
+
+  context 'with empty brace' do
+    it 'does not raise any error' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        if condition
+          ()
+        else
+          ()
         end
       RUBY
     end

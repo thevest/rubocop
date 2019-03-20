@@ -13,12 +13,23 @@ module RuboCop
       #   name      = "RuboCop"
       #   # Some comment and an empty line
       #
-      #   website  += "/bbatsov/rubocop" unless cond
+      #   website  += "/rubocop-hq/rubocop" unless cond
       #   puts        "rubocop"          if     debug
       #
       #   # bad for any configuration
       #   set_app("RuboCop")
-      #   website  = "https://github.com/bbatsov/rubocop"
+      #   website  = "https://github.com/rubocop-hq/rubocop"
+      #
+      #   # good only if AllowBeforeTrailingComments is true
+      #   object.method(arg)  # this is a comment
+      #
+      #   # good even if AllowBeforeTrailingComments is false or not set
+      #   object.method(arg) # this is a comment
+      #
+      #   # good with either AllowBeforeTrailingComments or AllowForAlignment
+      #   object.method(arg)         # this is a comment
+      #   another_object.method(arg) # this is another comment
+      #   some_object.method(arg)    # this is some comment
       class ExtraSpacing < Cop
         include PrecedingFollowingAlignment
         include RangeHelp
@@ -89,6 +100,7 @@ module RuboCop
             message = format(MSG_UNALIGNED_ASGN, location: 'following')
           end
           return if aligned_assignment?(token.pos, assignment_line)
+
           add_offense(token.pos, location: token.pos, message: message)
         end
 
@@ -97,6 +109,9 @@ module RuboCop
         end
 
         def check_other(token1, token2, ast)
+          return false if allow_for_trailing_comments? &&
+                          token2.text.start_with?('#')
+
           extra_space_range(token1, token2) do |range|
             # Unary + doesn't appear as a token and needs special handling.
             next if ignored_range?(ast, range.begin_pos)
@@ -220,6 +235,10 @@ module RuboCop
           optargs    = processed_source.ast.each_node(:optarg)
           optarg_eql = optargs.map { |o| o.loc.operator.begin_pos }.to_set
           asgn_tokens.reject { |t| optarg_eql.include?(t.begin_pos) }
+        end
+
+        def allow_for_trailing_comments?
+          cop_config['AllowBeforeTrailingComments']
         end
       end
     end

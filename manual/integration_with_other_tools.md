@@ -2,7 +2,7 @@
 
 ### Emacs
 
-[rubocop.el](https://github.com/bbatsov/rubocop-emacs) is a simple
+[rubocop.el](https://github.com/rubocop-hq/rubocop-emacs) is a simple
 Emacs interface for RuboCop. It allows you to run RuboCop inside Emacs
 and quickly jump between problems in your code.
 
@@ -16,7 +16,7 @@ RuboCop and displays the results in Vim.
 
 There's also a RuboCop checker in
 [syntastic](https://github.com/scrooloose/syntastic),
-[neomake](https://github.com/neomake/neomake)
+[neomake](https://github.com/neomake/neomake),
 and [ale](https://github.com/w0rp/ale).
 
 ### Sublime Text
@@ -95,8 +95,8 @@ RuboCop::RakeTask.new
 If you run `rake -T`, the following two RuboCop tasks should show up:
 
 ```sh
-rake rubocop                                  # Run RuboCop
-rake rubocop:auto_correct                     # Auto-correct RuboCop offenses
+$ rake rubocop                                  # Run RuboCop
+$ rake rubocop:auto_correct                     # Auto-correct RuboCop offenses
 ```
 
 The above will use default values

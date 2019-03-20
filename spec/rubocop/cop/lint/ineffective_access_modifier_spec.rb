@@ -34,16 +34,51 @@ RSpec.describe RuboCop::Cop::Lint::IneffectiveAccessModifier do
   end
 
   context 'when `private_class_method` is used' do
+    context 'when `private_class_method` contains all private method names' do
+      it "doesn't register an offense" do
+        expect_no_offenses(<<-RUBY.strip_indent)
+          class C
+            private
+
+            def self.method
+              puts "hi"
+            end
+
+            private_class_method :method
+          end
+        RUBY
+      end
+    end
+
+    context 'when `private_class_method` does not contain the method' do
+      it 'registers an offense' do
+        expect_offense(<<-RUBY.strip_indent)
+          class C
+            private
+
+            def self.method2
+            ^^^ `private` (on line 2) does not make singleton methods private. Use `private_class_method` or `private` inside a `class << self` block instead.
+              puts "hi"
+            end
+
+            private_class_method :method
+          end
+        RUBY
+      end
+    end
+  end
+
+  context 'when no access modifier is used' do
     it "doesn't register an offense" do
       expect_no_offenses(<<-RUBY.strip_indent)
         class C
-          private
-
           def self.method
             puts "hi"
           end
 
-          private_class_method :method
+          def self.method2
+            puts "hi"
+          end
         end
       RUBY
     end

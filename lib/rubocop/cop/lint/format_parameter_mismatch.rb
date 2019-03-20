@@ -23,14 +23,15 @@ module RuboCop
         MSG = "Number of arguments (%<arg_num>i) to `%<method>s` doesn't " \
               'match the number of fields (%<field_num>i).'.freeze
         FIELD_REGEX =
-          /(%(([\s#+-0\*]*)(\d*)?(\.\d+)?[bBdiouxXeEfgGaAcps]|%))/
-        NAMED_FIELD_REGEX = /%\{[_a-zA-Z][_a-zA-Z]+\}/
+          /(%(([\s#+-0\*]*)(\d*)?(\.\d+)?[bBdiouxXeEfgGaAcps]|%))/.freeze
+        NAMED_FIELD_REGEX = /%\{[_a-zA-Z][_a-zA-Z]+\}/.freeze
         KERNEL = 'Kernel'.freeze
         SHOVEL = '<<'.freeze
         PERCENT = '%'.freeze
         PERCENT_PERCENT = '%%'.freeze
+        DIGIT_DOLLAR_FLAG = /%(\d+)\$/.freeze
         STRING_TYPES = %i[str dstr].freeze
-        NAMED_INTERPOLATION = /%(?:<\w+>|\{\w+\})/
+        NAMED_INTERPOLATION = /%(?:<\w+>|\{\w+\})/.freeze
 
         def on_send(node)
           return unless offending_node?(node)
@@ -48,6 +49,7 @@ module RuboCop
           num_of_format_args, num_of_expected_fields = count_matches(node)
 
           return false if num_of_format_args == :unknown
+
           matched_arguments_count?(num_of_expected_fields, num_of_format_args)
         end
 
@@ -85,7 +87,7 @@ module RuboCop
         def splat_args?(node)
           return false if percent?(node)
 
-          node.arguments.butfirst.any?(&:splat_type?)
+          node.arguments.drop(1).any?(&:splat_type?)
         end
 
         def heredoc?(node)
@@ -131,11 +133,21 @@ module RuboCop
           return :unknown unless node.str_type?
           return 1 if node.source =~ NAMED_INTERPOLATION
 
+          max_digit_dollar_num = max_digit_dollar_num(node)
+          return max_digit_dollar_num if max_digit_dollar_num &&
+                                         max_digit_dollar_num.nonzero?
+
           node
             .source
             .scan(FIELD_REGEX)
             .reject { |x| x.first == PERCENT_PERCENT }
             .reduce(0) { |acc, elem| acc + arguments_count(elem[2]) }
+        end
+
+        def max_digit_dollar_num(node)
+          node.source.scan(DIGIT_DOLLAR_FLAG).map do |digit_dollar_num|
+            digit_dollar_num.first.to_i
+          end.max
         end
 
         # number of arguments required for the format sequence

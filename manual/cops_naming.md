@@ -2,9 +2,9 @@
 
 ## Naming/AccessorMethodName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop makes sure that accessor methods are named properly.
 
@@ -30,13 +30,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#accessor_mutator_method_names](https://github.com/bbatsov/ruby-style-guide#accessor_mutator_method_names)
+* [https://github.com/rubocop-hq/ruby-style-guide#accessor_mutator_method_names](https://github.com/rubocop-hq/ruby-style-guide#accessor_mutator_method_names)
 
 ## Naming/AsciiIdentifiers
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop checks for non-ascii characters in identifier names.
 
@@ -74,13 +74,13 @@ params[:width_gteq]
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#english-identifiers](https://github.com/bbatsov/ruby-style-guide#english-identifiers)
+* [https://github.com/rubocop-hq/ruby-style-guide#english-identifiers](https://github.com/rubocop-hq/ruby-style-guide#english-identifiers)
 
 ## Naming/BinaryOperatorParameterName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop makes sure that certain binary operator methods have their
 sole  parameter named `other`.
@@ -97,15 +97,15 @@ def +(other); end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#other-arg](https://github.com/bbatsov/ruby-style-guide#other-arg)
+* [https://github.com/rubocop-hq/ruby-style-guide#other-arg](https://github.com/rubocop-hq/ruby-style-guide#other-arg)
 
 ## Naming/ClassAndModuleCamelCase
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
-This cops checks for class and module names with
+This cop checks for class and module names with
 an underscore in them.
 
 ### Examples
@@ -126,13 +126,13 @@ end
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#camelcase-classes](https://github.com/bbatsov/ruby-style-guide#camelcase-classes)
+* [https://github.com/rubocop-hq/ruby-style-guide#camelcase-classes](https://github.com/rubocop-hq/ruby-style-guide#camelcase-classes)
 
 ## Naming/ConstantName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop checks whether constant names are written using
 SCREAMING_SNAKE_CASE.
@@ -154,17 +154,22 @@ INCH_IN_CM = 2.54
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#screaming-snake-case](https://github.com/bbatsov/ruby-style-guide#screaming-snake-case)
+* [https://github.com/rubocop-hq/ruby-style-guide#screaming-snake-case](https://github.com/rubocop-hq/ruby-style-guide#screaming-snake-case)
 
 ## Naming/FileName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop makes sure that Ruby source files have snake_case
 names. Ruby scripts (i.e. source files with a shebang in the
 first line) are ignored.
+
+The cop also ignores `.gemspec` files, because Bundler
+recommends using dashes to separate namespaces in nested gems
+(i.e. `bundler-console` becomes `Bundler::Console`). As such, the
+gemspec is supposed to be named `bundler-console.gemspec`.
 
 ### Examples
 
@@ -192,13 +197,13 @@ AllowedAcronyms | `CLI`, `DSL`, `ACL`, `API`, `ASCII`, `CPU`, `CSS`, `DNS`, `EOF
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#snake-case-files](https://github.com/bbatsov/ruby-style-guide#snake-case-files)
+* [https://github.com/rubocop-hq/ruby-style-guide#snake-case-files](https://github.com/rubocop-hq/ruby-style-guide#snake-case-files)
 
 ## Naming/HeredocDelimiterCase
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop checks that your heredocs are using the configured case.
 By default it is configured to enforce uppercase heredocs.
@@ -240,13 +245,13 @@ EnforcedStyle | `uppercase` | `lowercase`, `uppercase`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#heredoc-delimiters](https://github.com/bbatsov/ruby-style-guide#heredoc-delimiters)
+* [https://github.com/rubocop-hq/ruby-style-guide#heredoc-delimiters](https://github.com/rubocop-hq/ruby-style-guide#heredoc-delimiters)
 
 ## Naming/HeredocDelimiterNaming
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop checks that your heredocs are using meaningful delimiters.
 By default it disallows `END` and `EO*`, and can be configured through
@@ -279,18 +284,26 @@ Blacklist | `(?-mix:(^|\s)(EO[A-Z]{1}|END)(\s|$))` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#heredoc-delimiters](https://github.com/bbatsov/ruby-style-guide#heredoc-delimiters)
+* [https://github.com/rubocop-hq/ruby-style-guide#heredoc-delimiters](https://github.com/rubocop-hq/ruby-style-guide#heredoc-delimiters)
 
 ## Naming/MemoizedInstanceVariableName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.53 | 0.58
 
 This cop checks for memoized methods whose instance variable name
 does not match the method name.
 
+This cop can be configured with the EnforcedStyleForLeadingUnderscores
+directive. It can be configured to allow for memoized instance variables
+prefixed with an underscore. Prefixing ivars with an underscore is a
+convention that is used to implicitly indicate that an ivar should not
+be set or referencd outside of the memoization method.
+
 ### Examples
+
+#### EnforcedStyleForLeadingUnderscores: disallowed (default)
 
 ```ruby
 # bad
@@ -298,6 +311,11 @@ does not match the method name.
 # not `@foo`. This can cause confusion and bugs.
 def foo
   @something ||= calculate_expensive_thing
+end
+
+# good
+def _foo
+  @foo ||= calculate_expensive_thing
 end
 
 # good
@@ -318,12 +336,64 @@ def foo
   @foo ||= calculate_expensive_thing(helper_variable)
 end
 ```
+#### EnforcedStyleForLeadingUnderscores: required
+
+```ruby
+# bad
+def foo
+  @something ||= calculate_expensive_thing
+end
+
+# bad
+def foo
+  @foo ||= calculate_expensive_thing
+end
+
+# good
+def foo
+  @_foo ||= calculate_expensive_thing
+end
+
+# good
+def _foo
+  @_foo ||= calculate_expensive_thing
+end
+```
+#### EnforcedStyleForLeadingUnderscores :optional
+
+```ruby
+# bad
+def foo
+  @something ||= calculate_expensive_thing
+end
+
+# good
+def foo
+  @foo ||= calculate_expensive_thing
+end
+
+# good
+def foo
+  @_foo ||= calculate_expensive_thing
+end
+
+# good
+def _foo
+  @_foo ||= calculate_expensive_thing
+end
+```
+
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+EnforcedStyleForLeadingUnderscores | `disallowed` | `disallowed`, `required`, `optional`
 
 ## Naming/MethodName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop makes sure that all methods use the configured style,
 snake_case or camelCase, for their names.
@@ -357,13 +427,13 @@ EnforcedStyle | `snake_case` | `snake_case`, `camelCase`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#snake-case-symbols-methods-vars](https://github.com/bbatsov/ruby-style-guide#snake-case-symbols-methods-vars)
+* [https://github.com/rubocop-hq/ruby-style-guide#snake-case-symbols-methods-vars](https://github.com/rubocop-hq/ruby-style-guide#snake-case-symbols-methods-vars)
 
 ## Naming/PredicateName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | 0.51
 
 This cop makes sure that predicates are named properly.
 
@@ -371,6 +441,9 @@ This cop makes sure that predicates are named properly.
 
 ```ruby
 # bad
+def is_even(value)
+end
+
 def is_even?(value)
 end
 
@@ -379,6 +452,9 @@ def even?(value)
 end
 
 # bad
+def has_value
+end
+
 def has_value?
 end
 
@@ -399,13 +475,13 @@ Exclude | `spec/**/*` | Array
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#bool-methods-qmark](https://github.com/bbatsov/ruby-style-guide#bool-methods-qmark)
+* [https://github.com/rubocop-hq/ruby-style-guide#bool-methods-qmark](https://github.com/rubocop-hq/ruby-style-guide#bool-methods-qmark)
 
 ## Naming/UncommunicativeBlockParamName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.53 | -
 
 This cop checks block parameter names for how descriptive they
 are. It is highly configurable.
@@ -454,9 +530,9 @@ ForbiddenNames | `[]` | Array
 
 ## Naming/UncommunicativeMethodParamName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.53 | 0.59
 
 This cop checks method parameter names for how descriptive they
 are. It is highly configurable.
@@ -508,14 +584,14 @@ Name | Default value | Configurable values
 --- | --- | ---
 MinNameLength | `3` | Integer
 AllowNamesEndingInNumbers | `true` | Boolean
-AllowedNames | `io`, `id`, `to`, `by`, `on`, `in`, `at` | Array
+AllowedNames | `io`, `id`, `to`, `by`, `on`, `in`, `at`, `ip`, `db` | Array
 ForbiddenNames | `[]` | Array
 
 ## Naming/VariableName
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop makes sure that all variables use the configured style,
 snake_case or camelCase, for their names.
@@ -549,16 +625,16 @@ EnforcedStyle | `snake_case` | `snake_case`, `camelCase`
 
 ### References
 
-* [https://github.com/bbatsov/ruby-style-guide#snake-case-symbols-methods-vars](https://github.com/bbatsov/ruby-style-guide#snake-case-symbols-methods-vars)
+* [https://github.com/rubocop-hq/ruby-style-guide#snake-case-symbols-methods-vars](https://github.com/rubocop-hq/ruby-style-guide#snake-case-symbols-methods-vars)
 
 ## Naming/VariableNumber
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 This cop makes sure that all numbered variables use the
-configured style, snake_case, normalcase or non_integer,
+configured style, snake_case, normalcase, or non_integer,
 for their numbering.
 
 ### Examples

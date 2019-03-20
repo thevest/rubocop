@@ -53,7 +53,7 @@ module RuboCop
             return "(#{to_ternary(node)})"
           end
 
-          if node.parent.send_type? && operator?(node.parent.method_name)
+          if node.parent.send_type? && node.parent.operator_method?
             return "(#{to_ternary(node)})"
           end
 
@@ -67,6 +67,8 @@ module RuboCop
         end
 
         def expr_replacement(node)
+          return 'nil' if node.nil?
+
           requires_parentheses?(node) ? "(#{node.source})" : node.source
         end
 
@@ -82,14 +84,14 @@ module RuboCop
           return false unless node.send_type? && node.arguments?
           return false if node.parenthesized_call?
 
-          !operator?(node.method_name)
+          !node.operator_method?
         end
 
         def keyword_with_changed_precedence?(node)
           return false unless node.keyword?
-          return true if node.keyword_not?
+          return true if node.prefix_not?
 
-          !node.parenthesized_call?
+          node.arguments? && !node.parenthesized_call?
         end
       end
     end

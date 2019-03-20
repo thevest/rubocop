@@ -31,15 +31,29 @@ task generate_cops_documentation: :yard_for_generate_documentation do
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def properties(config, cop)
-    header = ['Enabled by default', 'Supports autocorrection']
-    enabled_by_default = config.for_cop(cop).fetch('Enabled')
+    header = [
+      'Enabled by default', 'Safe', 'Supports autocorrection', 'VersionAdded',
+      'VersionChanged'
+    ]
+    config = config.for_cop(cop)
+    safe_auto_correct = config.fetch('SafeAutoCorrect', true)
+    autocorrect = if cop.new.support_autocorrect?
+                    "Yes #{'(Unsafe)' unless safe_auto_correct}"
+                  else
+                    'No'
+                  end
     content = [[
-      enabled_by_default ? 'Enabled' : 'Disabled',
-      cop.new.support_autocorrect? ? 'Yes' : 'No'
+      config.fetch('Enabled') ? 'Enabled' : 'Disabled',
+      config.fetch('Safe', true) ? 'Yes' : 'No',
+      autocorrect,
+      config.fetch('VersionAdded', '-'),
+      config.fetch('VersionChanged', '-')
     ]]
     to_table(header, content) + "\n"
   end
+  # rubocop:enable Metrics/MethodLength
 
   def h2(title)
     content = "\n".dup
@@ -91,6 +105,8 @@ task generate_cops_documentation: :yard_for_generate_documentation do
       format_table_value(pars[supported_style_name])
     when 'IndentationWidth'
       'Integer'
+    when 'Database'
+      format_table_value(pars['SupportedDatabases'])
     else
       case pars[name]
       when String
@@ -160,7 +176,10 @@ task generate_cops_documentation: :yard_for_generate_documentation do
 
   def print_cop_with_doc(cop, config)
     t = config.for_cop(cop)
-    non_display_keys = %w[Description Enabled StyleGuide Reference]
+    non_display_keys = %w[
+      Description Enabled StyleGuide Reference Safe SafeAutoCorrect VersionAdded
+      VersionChanged
+    ]
     pars = t.reject { |k| non_display_keys.include? k }
     description = 'No documentation'
     examples_object = []
@@ -215,7 +234,7 @@ task generate_cops_documentation: :yard_for_generate_documentation do
       return if outcome
 
       # Output diff before raising error
-      sh('git diff manual')
+      sh('GIT_PAGER=cat git diff manual')
 
       warn 'The manual directory is out of sync. ' \
         'Run `rake generate_cops_documentation` and commit the results.'

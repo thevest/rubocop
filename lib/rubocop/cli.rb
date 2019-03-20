@@ -7,12 +7,18 @@ module RuboCop
   class CLI
     include Formatter::TextUtil
 
-    SKIPPED_PHASE_1 = 'Phase 1 of 2: run Metrics/LineLength cop (skipped ' \
-                      'because the default Metrics/LineLength:Max is ' \
-                      'overridden)'.freeze
-    STATUS_SUCCESS  = 0
-    STATUS_OFFENSES = 1
-    STATUS_ERROR    = 2
+    PHASE_1 = 'Phase 1 of 2: run Metrics/LineLength cop'.freeze
+    PHASE_2 = 'Phase 2 of 2: run all cops'.freeze
+
+    PHASE_1_OVERRIDDEN = '(skipped because the default Metrics/LineLength:Max' \
+                         ' is overridden)'.freeze
+    PHASE_1_DISABLED   = '(skipped because Metrics/LineLength is ' \
+                         'disabled)'.freeze
+
+    STATUS_SUCCESS     = 0
+    STATUS_OFFENSES    = 1
+    STATUS_ERROR       = 2
+    STATUS_INTERRUPTED = 128 + Signal.list['INT']
 
     class Finished < RuntimeError; end
 
@@ -39,7 +45,7 @@ module RuboCop
       act_on_options
       apply_default_formatter
       execute_runners(paths)
-    rescue RuboCop::ConfigNotFoundError => e
+    rescue ConfigNotFoundError, IncorrectCopNameError, OptionArgumentError => e
       warn e.message
       STATUS_ERROR
     rescue RuboCop::Error => e
@@ -47,8 +53,9 @@ module RuboCop
       STATUS_ERROR
     rescue Finished
       STATUS_SUCCESS
-    rescue IncorrectCopNameError => e
+    rescue OptionParser::InvalidOption => e
       warn e.message
+      warn 'For usage information, use --help'
       STATUS_ERROR
     rescue StandardError, SyntaxError, LoadError => e
       warn e.message
@@ -57,42 +64,52 @@ module RuboCop
     end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
-    def trap_interrupt(runner)
-      Signal.trap('INT') do
-        exit!(1) if runner.aborting?
-        runner.abort
-        warn
-        warn 'Exiting... Interrupt again to exit immediately.'
-      end
-    end
-
     private
 
     def execute_runners(paths)
       if @options[:auto_gen_config]
         reset_config_and_auto_gen_file
-        line_length_contents =
-          if max_line_length(@config_store.for(Dir.pwd)) ==
-             max_line_length(ConfigLoader.default_configuration)
-            run_line_length_cop_auto_gen_config(paths)
-          else
-            puts Rainbow(SKIPPED_PHASE_1).yellow
-            ''
-          end
+        line_length_contents = maybe_run_line_length_cop(paths)
         run_all_cops_auto_gen_config(line_length_contents, paths)
       else
         execute_runner(paths)
       end
     end
 
+    def maybe_run_line_length_cop(paths)
+      if !line_length_enabled?(@config_store.for(Dir.pwd))
+        puts Rainbow("#{PHASE_1} #{PHASE_1_DISABLED}").yellow
+        ''
+      elsif !same_max_line_length?(
+        @config_store.for(Dir.pwd), ConfigLoader.default_configuration
+      )
+        puts Rainbow("#{PHASE_1} #{PHASE_1_OVERRIDDEN}").yellow
+        ''
+      else
+        run_line_length_cop_auto_gen_config(paths)
+      end
+    end
+
+    def line_length_enabled?(config)
+      line_length_cop(config)['Enabled']
+    end
+
+    def same_max_line_length?(config1, config2)
+      max_line_length(config1) == max_line_length(config2)
+    end
+
     def max_line_length(config)
-      config.for_cop('Metrics/LineLength')['Max']
+      line_length_cop(config)['Max']
+    end
+
+    def line_length_cop(config)
+      config.for_cop('Metrics/LineLength')
     end
 
     # Do an initial run with only Metrics/LineLength so that cops that depend
     # on Metrics/LineLength:Max get the correct value for that parameter.
     def run_line_length_cop_auto_gen_config(paths)
-      puts Rainbow('Phase 1 of 2: run Metrics/LineLength cop').yellow
+      puts Rainbow(PHASE_1).yellow
       @options[:only] = ['Metrics/LineLength']
       execute_runner(paths)
       @options.delete(:only)
@@ -105,7 +122,7 @@ module RuboCop
     end
 
     def run_all_cops_auto_gen_config(line_length_contents, paths)
-      puts Rainbow('Phase 2 of 2: run all cops').yellow
+      puts Rainbow(PHASE_2).yellow
       result = execute_runner(paths)
       # This run was made with the current maximum length allowed, so append
       # the saved setting for LineLength.
@@ -117,6 +134,7 @@ module RuboCop
 
     def reset_config_and_auto_gen_file
       @config_store = ConfigStore.new
+      @config_store.options_config = @options[:config] if @options[:config]
       File.open(ConfigLoader::AUTO_GENERATED_FILE, 'w') {}
       ConfigLoader.add_inheritance_from_auto_generated_file
     end
@@ -124,9 +142,9 @@ module RuboCop
     def validate_options_vs_config
       if @options[:parallel] &&
          !@config_store.for(Dir.pwd).for_all_cops['UseCache']
-        raise ArgumentError, '-P/--parallel uses caching to speed up ' \
-                             'execution, so combining with AllCops: ' \
-                             'UseCache: false is not allowed.'
+        raise OptionArgumentError, '-P/--parallel uses caching to speed up ' \
+                                   'execution, so combining with AllCops: ' \
+                                   'UseCache: false is not allowed.'
       end
     end
 
@@ -134,6 +152,7 @@ module RuboCop
       ConfigLoader.debug = @options[:debug]
       ConfigLoader.auto_gen_config = @options[:auto_gen_config]
       ConfigLoader.ignore_parent_exclusion = @options[:ignore_parent_exclusion]
+      ConfigLoader.options_config = @options[:config]
 
       @config_store.options_config = @options[:config] if @options[:config]
       @config_store.force_default_config! if @options[:force_default_config]
@@ -152,13 +171,16 @@ module RuboCop
     def execute_runner(paths)
       runner = Runner.new(@options, @config_store)
 
-      trap_interrupt(runner)
       all_passed = runner.run(paths)
       display_warning_summary(runner.warnings)
       display_error_summary(runner.errors)
       maybe_print_corrected_source
 
-      if all_passed && !runner.aborting? && runner.errors.empty?
+      all_pass_or_excluded = all_passed || @options[:auto_gen_config]
+
+      if runner.aborting?
+        STATUS_INTERRUPTED
+      elsif all_pass_or_excluded && runner.errors.empty?
         STATUS_SUCCESS
       else
         STATUS_OFFENSES
@@ -241,7 +263,7 @@ module RuboCop
 
     def config_lines(cop)
       cnf = @config_store.for(Dir.pwd).for_cop(cop)
-      cnf.to_yaml.lines.to_a.butfirst.map { |line| '  ' + line }
+      cnf.to_yaml.lines.to_a.drop(1).map { |line| '  ' + line }
     end
 
     def display_warning_summary(warnings)
@@ -276,6 +298,7 @@ module RuboCop
       # So a delimiter is needed for tools to easily identify where the
       # autocorrected source begins
       return unless @options[:stdin] && @options[:auto_correct]
+
       puts '=' * 20
       print @options[:stdin]
     end

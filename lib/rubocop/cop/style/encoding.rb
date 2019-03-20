@@ -4,11 +4,16 @@ module RuboCop
   module Cop
     module Style
       # This cop checks ensures source files have no utf-8 encoding comments.
+      # @example
+      #   # bad
+      #   # encoding: UTF-8
+      #   # coding: UTF-8
+      #   # -*- coding: UTF-8 -*-
       class Encoding < Cop
         include RangeHelp
 
         MSG_UNNECESSARY = 'Unnecessary utf-8 encoding comment.'.freeze
-        ENCODING_PATTERN = /#.*coding\s?[:=]\s?(?:UTF|utf)-8/
+        ENCODING_PATTERN = /#.*coding\s?[:=]\s?(?:UTF|utf)-8/.freeze
         SHEBANG = '#!'.freeze
 
         def investigate(processed_source)

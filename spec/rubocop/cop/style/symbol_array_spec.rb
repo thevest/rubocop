@@ -25,15 +25,20 @@ RSpec.describe RuboCop::Cop::Style::SymbolArray, :config do
     end
 
     it 'registers an offense for arrays of symbols' do
-      inspect_source('[:one, :two, :three]')
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(['Use `%i` or `%I` for an array of symbols.'])
-      expect(cop.config_to_allow_offenses).to eq('EnforcedStyle' => 'brackets')
+      expect_offense(<<-RUBY.strip_indent)
+        [:one, :two, :three]
+        ^^^^^^^^^^^^^^^^^^^^ Use `%i` or `%I` for an array of symbols.
+      RUBY
     end
 
     it 'autocorrects arrays of symbols' do
       new_source = autocorrect_source('[:one, :two, :three]')
       expect(new_source).to eq('%i(one two three)')
+    end
+
+    it 'autocorrects arrays of one symbol' do
+      new_source = autocorrect_source('[:one]')
+      expect(new_source).to eq('%i(one)')
     end
 
     it 'autocorrects arrays of symbols with new line' do
@@ -60,15 +65,11 @@ RSpec.describe RuboCop::Cop::Style::SymbolArray, :config do
       expect_no_offenses('%i(one two three)')
     end
 
-    it 'does not register an offense for array with one element' do
-      expect_no_offenses('[:three]')
-    end
-
     it 'does not register an offense if symbol contains whitespace' do
       expect_no_offenses('[:one, :two, :"space here"]')
     end
 
-    # Bug: https://github.com/bbatsov/rubocop/issues/4481
+    # Bug: https://github.com/rubocop-hq/rubocop/issues/4481
     it 'does not register an offense in an ambiguous block context' do
       expect_no_offenses('foo [:bar, :baz] { qux }')
     end
@@ -86,8 +87,6 @@ RSpec.describe RuboCop::Cop::Style::SymbolArray, :config do
         %i(a b c d)
       RUBY
 
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(['Use `%i` or `%I` for an array of symbols.'])
       expect(cop.config_to_allow_offenses).to eq('EnforcedStyle' => 'percent',
                                                  'MinSize' => 4)
     end
@@ -97,8 +96,7 @@ RSpec.describe RuboCop::Cop::Style::SymbolArray, :config do
         [:one, :two, :three]
         %i(a b)
       RUBY
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.messages).to eq(['Use `%i` or `%I` for an array of symbols.'])
+
       expect(cop.config_to_allow_offenses).to eq('Enabled' => false)
     end
 
@@ -151,7 +149,7 @@ RSpec.describe RuboCop::Cop::Style::SymbolArray, :config do
     end
   end
 
-  context 'when EnforcedStyle is array' do
+  context 'when EnforcedStyle is brackets' do
     let(:cop_config) { { 'EnforcedStyle' => 'brackets', 'MinSize' => 0 } }
 
     it 'does not register an offense for arrays of symbols' do
@@ -168,6 +166,22 @@ RSpec.describe RuboCop::Cop::Style::SymbolArray, :config do
     it 'autocorrects an array starting with %i' do
       new_source = autocorrect_source('%i(one @two $three four-five)')
       expect(new_source).to eq("[:one, :@two, :$three, :'four-five']")
+    end
+
+    it 'autocorrects an array has interpolations' do
+      new_source = autocorrect_source('%I(#{foo} #{foo}bar foo#{bar} foo)')
+      expect(new_source).to eq('[:"#{foo}", :"#{foo}bar", :"foo#{bar}", :foo]')
+    end
+  end
+
+  context 'with non-default MinSize' do
+    let(:cop_config) do
+      { 'MinSize' => 2,
+        'EnforcedStyle' => 'percent' }
+    end
+
+    it 'does not autocorrects array of one symbol if MinSize > 1' do
+      expect_no_offenses('[:one]')
     end
   end
 end

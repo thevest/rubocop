@@ -28,7 +28,7 @@ module RuboCop
         }.freeze
 
         def on_send(node)
-          return unless node.keyword_not?
+          return unless node.prefix_not?
 
           add_offense(node, location: :selector)
         end
@@ -53,7 +53,8 @@ module RuboCop
         end
 
         def requires_parens?(child)
-          child.and_type? || child.or_type? || child.binary_operation? ||
+          child.and_type? || child.or_type? ||
+            child.send_type? && child.binary_operation? ||
             child.if_type? && child.ternary?
         end
 

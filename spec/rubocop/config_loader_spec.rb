@@ -3,7 +3,14 @@
 RSpec.describe RuboCop::ConfigLoader do
   include FileHelper
 
-  before { described_class.debug = true }
+  include_context 'cli spec behavior'
+
+  before do
+    described_class.debug = true
+    # Force reload of default configuration
+    described_class.default_configuration = nil
+  end
+
   after { described_class.debug = false }
 
   let(:default_config) { described_class.default_configuration }
@@ -16,10 +23,10 @@ RSpec.describe RuboCop::ConfigLoader do
     context 'when no config file exists in ancestor directories' do
       let(:dir_path) { 'dir' }
 
-      before { create_file('dir/example.rb', '') }
+      before { create_empty_file('dir/example.rb') }
 
       context 'but a config file exists in home directory' do
-        before { create_file('~/.rubocop.yml', '') }
+        before { create_empty_file('~/.rubocop.yml') }
 
         it 'returns the path to the file in home directory' do
           expect(configuration_file_for).to end_with('home/.rubocop.yml')
@@ -45,8 +52,8 @@ RSpec.describe RuboCop::ConfigLoader do
       let(:dir_path) { 'dir' }
 
       before do
-        create_file('dir/example.rb', '')
-        create_file('.rubocop.yml', '')
+        create_empty_file('dir/example.rb')
+        create_empty_file('.rubocop.yml')
       end
 
       it 'returns the path to that configuration file' do
@@ -58,9 +65,9 @@ RSpec.describe RuboCop::ConfigLoader do
       let(:dir_path) { 'dir' }
 
       before do
-        create_file('dir/example.rb', '')
-        create_file('dir/.rubocop.yml', '')
-        create_file('.rubocop.yml', '')
+        create_empty_file('dir/example.rb')
+        create_empty_file('dir/.rubocop.yml')
+        create_empty_file('.rubocop.yml')
       end
 
       it 'prefers closer config file' do
@@ -251,6 +258,11 @@ RSpec.describe RuboCop::ConfigLoader do
           Style/For:
             Exclude:
               - spec/requests/group_invite_spec.rb
+          Rails/Exit:
+            Include:
+              - extra/*.rb
+            Exclude:
+              - junk/*.rb
         YAML
 
         create_file('.rubocop_parent.yml', <<-YAML.strip_indent)
@@ -258,6 +270,12 @@ RSpec.describe RuboCop::ConfigLoader do
             Exclude:
               - 'spec/models/expense_spec.rb'
               - 'spec/models/group_spec.rb'
+          Rails/Exit:
+            inherit_mode:
+              merge:
+                - Exclude
+            Exclude:
+              - funk/*.rb
         YAML
       end
 
@@ -272,11 +290,22 @@ RSpec.describe RuboCop::ConfigLoader do
         end.not_to output(/overrides the same parameter/).to_stdout
       end
 
-      it 'does not merge the default_config' do
-        excludes = configuration_from_file['AllCops']['Exclude']
-        defaults = default_config['AllCops']['Exclude']
+      it 'merges AllCops:Exclude with the default configuration' do
+        expect(configuration_from_file['AllCops']['Exclude'].sort)
+          .to eq(([File.expand_path('spec/requests/expense_spec.rb')] +
+                  default_config['AllCops']['Exclude']).sort)
+      end
 
-        expect((excludes & defaults).empty?).to be true
+      it 'merges Rails/Exit:Exclude with parent and default configuration' do
+        expect(configuration_from_file['Rails/Exit']['Exclude'].sort)
+          .to eq(([File.expand_path('funk/*.rb'),
+                   File.expand_path('junk/*.rb')] +
+                  default_config['Rails/Exit']['Exclude']).sort)
+      end
+
+      it 'overrides Rails/Exit:Include' do
+        expect(configuration_from_file['Rails/Exit']['Include'].sort)
+          .to eq(['extra/*.rb'].sort)
       end
     end
 
@@ -389,7 +418,7 @@ RSpec.describe RuboCop::ConfigLoader do
       let(:file_path) { 'dir/subdir/.rubocop.yml' }
 
       before do
-        create_file('dir/subdir/example.rb', '')
+        create_empty_file('dir/subdir/example.rb')
 
         create_file('.rubocop.yml', <<-YAML.strip_indent)
           Metrics/LineLength:
@@ -425,6 +454,10 @@ RSpec.describe RuboCop::ConfigLoader do
               default_config['Metrics/LineLength']['Description'],
               'StyleGuide' => '#80-character-limits',
               'Enabled' => true,
+              'VersionAdded' =>
+              default_config['Metrics/LineLength']['VersionAdded'],
+              'VersionChanged' =>
+              default_config['Metrics/LineLength']['VersionChanged'],
               'Max' => 77,
               'AllowHeredoc' => true,
               'AllowURI' => true,
@@ -437,8 +470,13 @@ RSpec.describe RuboCop::ConfigLoader do
               default_config['Metrics/MethodLength']['Description'],
               'StyleGuide' => '#short-methods',
               'Enabled' => true,
+              'VersionAdded' =>
+              default_config['Metrics/MethodLength']['VersionAdded'],
+              'VersionChanged' =>
+              default_config['Metrics/MethodLength']['VersionChanged'],
               'CountComments' => false,
-              'Max' => 5
+              'Max' => 5,
+              'ExcludedMethods' => []
             }
           )
         expect do
@@ -451,7 +489,7 @@ RSpec.describe RuboCop::ConfigLoader do
       let(:file_path) { '.rubocop.yml' }
 
       before do
-        create_file('example.rb', '')
+        create_empty_file('example.rb')
 
         create_file('normal.yml', <<-YAML.strip_indent)
           Metrics/MethodLength:
@@ -495,7 +533,7 @@ RSpec.describe RuboCop::ConfigLoader do
       let(:file_path) { '.rubocop.yml' }
 
       before do
-        create_file('example.rb', '')
+        create_empty_file('example.rb')
 
         create_file('line_length.yml', <<-YAML.strip_indent)
           LineLength:
@@ -519,6 +557,10 @@ RSpec.describe RuboCop::ConfigLoader do
               default_config['Metrics/LineLength']['Description'],
               'StyleGuide' => '#80-character-limits',
               'Enabled' => true,
+              'VersionAdded' =>
+              default_config['Metrics/LineLength']['VersionAdded'],
+              'VersionChanged' =>
+              default_config['Metrics/LineLength']['VersionChanged'],
               'Max' => 120,             # overridden in line_length.yml
               'AllowHeredoc' => false,  # overridden in rubocop.yml
               'AllowURI' => true,
@@ -623,10 +665,10 @@ RSpec.describe RuboCop::ConfigLoader do
         gem_class = Struct.new(:gem_dir)
         %w[gemone gemtwo].each do |gem_name|
           mock_spec = gem_class.new(File.join(gem_root, gem_name))
-          expect(Gem::Specification).to receive(:find_by_name)
-            .at_least(:once).with(gem_name).and_return(mock_spec)
+          allow(Gem::Specification).to receive(:find_by_name)
+            .with(gem_name).and_return(mock_spec)
         end
-        expect(Gem).to receive(:path).at_least(:once).and_return([gem_root])
+        allow(Gem).to receive(:path).and_return([gem_root])
 
         expected = { 'Enabled' => true,        # overridden in .rubocop.yml
                      'CountComments' => true,  # overridden in local.yml
@@ -859,15 +901,6 @@ RSpec.describe RuboCop::ConfigLoader do
       )
     end
 
-    it 'changes target ruby version with a patch to float' do
-      create_file(configuration_path, <<-YAML.strip_indent)
-        AllCops:
-          TargetRubyVersion: 2.3.4
-      YAML
-
-      expect(load_file.to_h).to eq('AllCops' => { 'TargetRubyVersion' => 2.3 })
-    end
-
     it 'loads configuration properly when it includes non-ascii characters ' do
       create_file(configuration_path, <<-YAML.strip_indent)
         # All these cops of mine are ❤
@@ -879,7 +912,7 @@ RSpec.describe RuboCop::ConfigLoader do
     end
 
     it 'returns an empty configuration loaded from an empty file' do
-      create_file(configuration_path, '')
+      create_empty_file(configuration_path)
       configuration = load_file
       expect(configuration.to_h).to eq({})
     end
@@ -938,6 +971,22 @@ RSpec.describe RuboCop::ConfigLoader do
             expect(e.message).to(match(/\AConfiguration file not found: .+\z/))
           end
         )
+      end
+    end
+
+    context 'when the file has duplicated keys' do
+      it 'outputs a warning' do
+        create_file(configuration_path, <<-YAML.strip_indent)
+          Style/Encoding:
+            Enabled: true
+
+          Style/Encoding:
+            Enabled: false
+        YAML
+
+        expect do
+          load_file
+        end.to output(%r{`Style/Encoding` is concealed by line 4}).to_stderr
       end
     end
   end
@@ -1019,7 +1068,7 @@ RSpec.describe RuboCop::ConfigLoader do
 
     it 'uses paths relative to the .rubocop.yml, not cwd' do
       config_path = described_class.configuration_file_for('.')
-      Dir.chdir '..' do
+      RuboCop::PathUtil.chdir '..' do
         described_class.configuration_from_file(config_path)
         expect(defined?(MyClass)).to be_truthy
       end
@@ -1037,7 +1086,7 @@ RSpec.describe RuboCop::ConfigLoader do
     it 'works without a starting .' do
       config_path = described_class.configuration_file_for('.')
       $LOAD_PATH.unshift(File.dirname(config_path))
-      Dir.chdir '..' do
+      RuboCop::PathUtil.chdir '..' do
         described_class.configuration_from_file(config_path)
         expect(defined?(MyClass)).to be_truthy
       end

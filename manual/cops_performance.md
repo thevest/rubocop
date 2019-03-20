@@ -2,9 +2,9 @@
 
 ## Performance/Caller
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.49 | -
 
 This cop identifies places where `caller[n]`
 can be replaced by `caller(n..n).first`.
@@ -27,20 +27,23 @@ caller_locations(1..1).first
 
 ## Performance/CaseWhenSplat
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | Yes (Unsafe) | 0.34 | 0.59
 
-Place `when` conditions that use splat at the end
-of the list of `when` branches.
+Reordering `when` conditions with a splat to the end
+of the `when` branches can improve performance.
 
 Ruby has to allocate memory for the splat expansion every time
 that the `case` `when` statement is run. Since Ruby does not support
 fall through inside of `case` `when`, like some other languages do,
-the order of the `when` branches does not matter. By placing any
+the order of the `when` branches should not matter. By placing any
 splat expansions at the end of the list of `when` branches we will
 reduce the number of times that memory has to be allocated for
-the expansion.
+the expansion. The exception to this is if multiple of your `when`
+conditions can be true for any given condition. A likely scenario for
+this defining a higher level when condition to override a condition
+that is inside of the splat expansion.
 
 This is not a guaranteed performance improvement. If the data being
 processed by the `case` condition is normalized in a manner that favors
@@ -82,11 +85,17 @@ when 5
 end
 ```
 
+### Configurable attributes
+
+Name | Default value | Configurable values
+--- | --- | ---
+AutoCorrect | `false` | Boolean
+
 ## Performance/Casecmp
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop identifies places where a case-insensitive string comparison
 can better be implemented using `casecmp`.
@@ -110,11 +119,42 @@ str.casecmp('ABC').zero?
 
 * [https://github.com/JuanitoFatas/fast-ruby#stringcasecmp-vs-stringdowncase---code](https://github.com/JuanitoFatas/fast-ruby#stringcasecmp-vs-stringdowncase---code)
 
+## Performance/ChainArrayAllocation
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | Yes | No | 0.59 | -
+
+This cop is used to identify usages of
+Each of these methods (`compact`, `flatten`, `map`) will generate a
+new intermediate array that is promptly thrown away. Instead it is
+faster to mutate when we know it's safe.
+
+### Examples
+
+```ruby
+# bad
+array = ["a", "b", "c"]
+array.compact.flatten.map { |x| x.downcase }
+```
+```ruby
+# good.
+array = ["a", "b", "c"]
+array.compact!
+array.flatten!
+array.map! { |x| x.downcase }
+array
+```
+
+### References
+
+* [https://twitter.com/schneems/status/1034123879978029057](https://twitter.com/schneems/status/1034123879978029057)
+
 ## Performance/CompareWithBlock
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.46 | -
 
 This cop identifies places where `sort { |a, b| a.foo <=> b.foo }`
 can be replaced by `sort_by(&:foo)`.
@@ -142,9 +182,9 @@ array.sort_by { |a| a[:foo] }
 
 ## Performance/Count
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.31 | 0.39
 
 This cop is used to identify usages of `count` on an `Enumerable` that
 follow calls to `select` or `reject`. Querying logic can instead be
@@ -192,9 +232,9 @@ SafeMode | `true` | Boolean
 
 ## Performance/Detect
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | 0.39
 
 This cop is used to identify usages of
 `select.first`, `select.last`, `find_all.first`, and `find_all.last`
@@ -231,9 +271,9 @@ SafeMode | `true` | Boolean
 
 ## Performance/DoubleStartEndWith
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | 0.48
 
 This cop checks for double `#start_with?` or `#end_with?` calls
 separated by `||`. In some cases such calls can be replaced
@@ -261,9 +301,9 @@ IncludeActiveSupportAliases | `false` | Boolean
 
 ## Performance/EndWith
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.36 | 0.44
 
 This cop identifies unnecessary use of a regex where `String#end_with?`
 would suffice.
@@ -292,9 +332,9 @@ AutoCorrect | `false` | Boolean
 
 ## Performance/FixedSize
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.35 | -
 
 Do not compute the size of statically sized objects.
 
@@ -343,9 +383,9 @@ waldo.size
 
 ## Performance/FlatMap
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | -
 
 This cop is used to identify usages of
 
@@ -372,11 +412,57 @@ EnabledForFlattenWithoutParams | `false` | Boolean
 
 * [https://github.com/JuanitoFatas/fast-ruby#enumerablemaparrayflatten-vs-enumerableflat_map-code](https://github.com/JuanitoFatas/fast-ruby#enumerablemaparrayflatten-vs-enumerableflat_map-code)
 
+## Performance/InefficientHashSearch
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | No | Yes  | 0.56 | -
+
+This cop checks for inefficient searching of keys and values within
+hashes.
+
+`Hash#keys.include?` is less efficient than `Hash#key?` because
+the former allocates a new array and then performs an O(n) search
+through that array, while `Hash#key?` does not allocate any array and
+performs a faster O(1) search for the key.
+
+`Hash#values.include?` is less efficient than `Hash#value?`. While they
+both perform an O(n) search through all of the values, calling `values`
+allocates a new array while using `value?` does not.
+
+### Examples
+
+```ruby
+# bad
+{ a: 1, b: 2 }.keys.include?(:a)
+{ a: 1, b: 2 }.keys.include?(:z)
+h = { a: 1, b: 2 }; h.keys.include?(100)
+
+# good
+{ a: 1, b: 2 }.key?(:a)
+{ a: 1, b: 2 }.has_key?(:z)
+h = { a: 1, b: 2 }; h.key?(100)
+
+# bad
+{ a: 1, b: 2 }.values.include?(2)
+{ a: 1, b: 2 }.values.include?('garbage')
+h = { a: 1, b: 2 }; h.values.include?(nil)
+
+# good
+{ a: 1, b: 2 }.value?(2)
+{ a: 1, b: 2 }.has_value?('garbage')
+h = { a: 1, b: 2 }; h.value?(nil)
+```
+
+### References
+
+* [https://github.com/JuanitoFatas/fast-ruby#hashkey-instead-of-hashkeysinclude-code](https://github.com/JuanitoFatas/fast-ruby#hashkey-instead-of-hashkeysinclude-code)
+
 ## Performance/LstripRstrip
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop identifies places where `lstrip.rstrip` can be replaced by
 `strip`.
@@ -392,11 +478,44 @@ This cop identifies places where `lstrip.rstrip` can be replaced by
 'abc'.strip
 ```
 
+## Performance/OpenStruct
+
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Disabled | No | No | 0.61 | -
+
+This cop checks for `OpenStruct.new` calls.
+Instantiation of an `OpenStruct` invalidates
+Ruby global method cache as it causes dynamic method
+definition during program runtime.
+This could have an effect on performance,
+especially in case of single-threaded
+applications with multiple `OpenStruct` instantiations.
+
+### Examples
+
+```ruby
+# bad
+class MyClass
+  def my_method
+    OpenStruct.new(my_key1: 'my_value1', my_key2: 'my_value2')
+  end
+end
+
+# good
+class MyClass
+  MyStruct = Struct.new(:my_key1, :my_key2)
+  def my_method
+    MyStruct.new('my_value1', 'my_value2')
+  end
+end
+```
+
 ## Performance/RangeInclude
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | No | Yes  | 0.36 | -
 
 This cop identifies uses of `Range#include?`, which iterates over each
 item in a `Range` to see if a specified item is there. In contrast,
@@ -404,10 +523,23 @@ item in a `Range` to see if a specified item is there. In contrast,
 end points of the `Range`. In a great majority of cases, this is what
 is wanted.
 
-Here is an example of a case where `Range#cover?` may not provide the
-desired result:
+This cop is `Safe: false` by default because `Range#include?` and
+`Range#cover?` are not equivalent behaviour.
 
-    ('a'..'z').cover?('yellow') # => true
+### Examples
+
+```ruby
+# bad
+('a'..'z').include?('b') # => true
+
+# good
+('a'..'z').cover?('b') # => true
+
+# Example of a case where `Range#cover?` may not provide
+# the desired result:
+
+('a'..'z').cover?('yellow') # => true
+```
 
 ### References
 
@@ -415,9 +547,9 @@ desired result:
 
 ## Performance/RedundantBlockCall
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop identifies the use of a `&block` parameter and `block.call`
 where `yield` would do just as well.
@@ -448,9 +580,9 @@ end
 
 ## Performance/RedundantMatch
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop identifies the use of `Regexp#match` or `String#match`, which
 returns `#<MatchData>`/`nil`. The return value of `=~` is an integral
@@ -472,9 +604,9 @@ return value unless regex =~ 'str'
 
 ## Performance/RedundantMerge
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop identifies places where `Hash#merge!` can be replaced by
 `Hash#[]=`.
@@ -499,9 +631,9 @@ MaxKeyValuePairs | `2` | Integer
 
 ## Performance/RedundantSortBy
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.36 | -
 
 This cop identifies places where `sort_by { ... }` can be replaced by
 `sort`.
@@ -521,11 +653,11 @@ array.sort
 
 ## Performance/RegexpMatch
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.47 | -
 
-In Ruby 2.4, `String#match?`, `Regexp#match?` and `Symbol#match?`
+In Ruby 2.4, `String#match?`, `Regexp#match?`, and `Symbol#match?`
 have been added. The methods are faster than `match`.
 Because the methods avoid creating a `MatchData` object or saving
 backref.
@@ -598,11 +730,15 @@ def foo
 end
 ```
 
+### References
+
+* [https://github.com/JuanitoFatas/fast-ruby#regexp-vs-stringmatch-vs-string-vs-stringmatch-code-](https://github.com/JuanitoFatas/fast-ruby#regexp-vs-stringmatch-vs-string-vs-stringmatch-code-)
+
 ## Performance/ReverseEach
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | -
 
 This cop is used to identify usages of `reverse.each` and
 change them to use `reverse_each` instead.
@@ -623,12 +759,13 @@ change them to use `reverse_each` instead.
 
 ## Performance/Sample
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | -
 
-This cop is used to identify usages of `shuffle.first`, `shuffle.last`
-and `shuffle[]` and change them to use `sample` instead.
+This cop is used to identify usages of `shuffle.first`,
+`shuffle.last`, and `shuffle[]` and change them to use
+`sample` instead.
 
 ### Examples
 
@@ -637,6 +774,8 @@ and `shuffle[]` and change them to use `sample` instead.
 [1, 2, 3].shuffle.first
 [1, 2, 3].shuffle.first(2)
 [1, 2, 3].shuffle.last
+[2, 1, 3].shuffle.at(0)
+[2, 1, 3].shuffle.slice(0)
 [1, 2, 3].shuffle[2]
 [1, 2, 3].shuffle[0, 2]    # sample(2) will do the same
 [1, 2, 3].shuffle[0..2]    # sample(3) will do the same
@@ -658,9 +797,9 @@ and `shuffle[]` and change them to use `sample` instead.
 
 ## Performance/Size
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.30 | -
 
 This cop is used to identify usages of `count` on an
 `Array` and `Hash` and change them to `size`.
@@ -693,9 +832,9 @@ have been assigned to an array or a hash.
 
 ## Performance/StartWith
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.36 | 0.44
 
 This cop identifies unnecessary use of a regex where
 `String#start_with?` would suffice.
@@ -724,9 +863,9 @@ AutoCorrect | `false` | Boolean
 
 ## Performance/StringReplacement
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.33 | -
 
 This cop identifies places where `gsub` can be replaced by
 `tr` or `delete`.
@@ -753,9 +892,9 @@ This cop identifies places where `gsub` can be replaced by
 
 ## Performance/TimesMap
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes (Unsafe) | 0.36 | 0.50
 
 This cop checks for .times.map calls.
 In most cases such calls can be replaced
@@ -783,9 +922,9 @@ AutoCorrect | `false` | Boolean
 
 ## Performance/UnfreezeString
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | No
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | No | 0.50 | -
 
 In Ruby 2.3 or later, use unary plus operator to unfreeze a string
 literal instead of `String#dup` and `String.new`.
@@ -813,9 +952,9 @@ String.new('something')
 
 ## Performance/UnneededSort
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.55 | -
 
 This cop is used to identify instances of sorting and then
 taking only the first or last element. The same behavior can
@@ -868,9 +1007,9 @@ arr.max_by(&:foo)
 
 ## Performance/UriDefaultParser
 
-Enabled by default | Supports autocorrection
---- | ---
-Enabled | Yes
+Enabled by default | Safe | Supports autocorrection | VersionAdded | VersionChanged
+--- | --- | --- | --- | ---
+Enabled | Yes | Yes  | 0.50 | -
 
 This cop identifies places where `URI::Parser.new`
 can be replaced by `URI::DEFAULT_PARSER`.

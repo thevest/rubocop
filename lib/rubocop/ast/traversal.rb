@@ -9,6 +9,7 @@ module RuboCop
     module Traversal
       def walk(node)
         return if node.nil?
+
         send(:"on_#{node.type}", node)
         nil
       end
@@ -22,7 +23,7 @@ module RuboCop
                              preexe postexe match_current_line defined?
                              arg_expr].freeze
       MANY_CHILD_NODES  = %i[dstr dsym xstr regexp array hash pair
-                             irange erange mlhs masgn or_asgn and_asgn
+                             mlhs masgn or_asgn and_asgn
                              undef alias args super yield or and
                              while_post until_post iflipflop eflipflop
                              match_with_lvasgn begin kwbegin return].freeze
@@ -65,6 +66,7 @@ module RuboCop
 
       def on_const(node)
         return unless (child = node.children[0])
+
         send(:"on_#{child.type}", child)
       end
 
@@ -74,6 +76,7 @@ module RuboCop
           send(:"on_#{child.type}", child)
         end
         return unless (child = children[2])
+
         send(:"on_#{child.type}", child)
       end
 
@@ -85,6 +88,7 @@ module RuboCop
           send(:"on_#{child.type}", child)
         end
         return unless (child = children[2])
+
         send(:"on_#{child.type}", child)
       end
 
@@ -92,12 +96,14 @@ module RuboCop
         children = node.children
         on_args(children[1])
         return unless (child = children[2])
+
         send(:"on_#{child.type}", child)
       end
 
       def on_send(node)
         node.children.each_with_index do |child, i|
           next if i == 1
+
           send(:"on_#{child.type}", child) if child
         end
         nil
@@ -119,6 +125,7 @@ module RuboCop
         send(:"on_#{child.type}", child)
         on_args(children[2])
         return unless (child = children[3])
+
         send(:"on_#{child.type}", child)
       end
 
@@ -130,6 +137,7 @@ module RuboCop
           send(:"on_#{child.type}", child)
         end
         return unless (child = children[2])
+
         send(:"on_#{child.type}", child)
       end
 
@@ -138,6 +146,7 @@ module RuboCop
         child = children[0]
         send(:"on_#{child.type}", child)
         return unless (child = children[1])
+
         send(:"on_#{child.type}", child)
       end
 
@@ -151,6 +160,7 @@ module RuboCop
         send(:"on_#{child.type}", child) # can be send, zsuper...
         on_args(children[1])
         return unless (child = children[2])
+
         send(:"on_#{child.type}", child)
       end
 
@@ -166,6 +176,8 @@ module RuboCop
       alias on_ensure  on_case
       alias on_for     on_case
       alias on_when    on_case
+      alias on_irange  on_case
+      alias on_erange  on_case
     end
   end
 end

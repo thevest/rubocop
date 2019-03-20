@@ -5,25 +5,11 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
 
   let(:cop_config) { { 'Max' => 5, 'CountComments' => false } }
 
-  shared_examples 'reports violation' do |first_line, last_line|
-    it 'rejects a method with more than 5 lines' do
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.offenses.map(&:line)).to contain_exactly(first_line)
-      expect(cop.config_to_allow_offenses).to eq('Max' => 6)
-      expect(cop.messages.first).to eq('Method has too many lines. [6/5]')
-    end
-
-    it 'reports the correct beginning and end lines' do
-      offense = cop.offenses.first
-      expect(offense.location.first_line).to eq(first_line)
-      expect(offense.location.last_line).to eq(last_line)
-    end
-  end
-
   context 'when method is an instance method' do
-    before do
-      inspect_source(<<-RUBY.strip_indent)
-        def m()
+    it 'registers an offense' do
+      expect_offense(<<-RUBY.strip_indent)
+        def m
+        ^^^^^ Method has too many lines. [6/5]
           a = 1
           a = 2
           a = 3
@@ -33,14 +19,13 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
         end
       RUBY
     end
-
-    include_examples 'reports violation', 1, 8
   end
 
   context 'when method is defined with `define_method`' do
-    before do
-      inspect_source(<<-RUBY.strip_indent)
+    it 'registers an offense' do
+      expect_offense(<<-RUBY.strip_indent)
         define_method(:m) do
+        ^^^^^^^^^^^^^^^^^^^^ Method has too many lines. [6/5]
           a = 1
           a = 2
           a = 3
@@ -50,14 +35,13 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
         end
       RUBY
     end
-
-    include_examples 'reports violation', 1, 8
   end
 
   context 'when method is a class method' do
-    before do
-      inspect_source(<<-RUBY.strip_indent)
-        def self.m()
+    it 'registers an offense' do
+      expect_offense(<<-RUBY.strip_indent)
+        def self.m
+        ^^^^^^^^^^ Method has too many lines. [6/5]
           a = 1
           a = 2
           a = 3
@@ -67,16 +51,15 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
         end
       RUBY
     end
-
-    include_examples 'reports violation', 1, 8
   end
 
   context 'when method is defined on a singleton class' do
-    before do
-      inspect_source(<<-RUBY.strip_indent)
+    it 'registers an offense' do
+      expect_offense(<<-RUBY.strip_indent)
         class K
           class << self
-            def m()
+            def m
+            ^^^^^ Method has too many lines. [6/5]
               a = 1
               a = 2
               a = 3
@@ -88,13 +71,11 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
         end
       RUBY
     end
-
-    include_examples 'reports violation', 3, 10
   end
 
   it 'accepts a method with less than 5 lines' do
     expect_no_offenses(<<-RUBY.strip_indent)
-      def m()
+      def m
         a = 1
         a = 2
         a = 3
@@ -105,7 +86,7 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
 
   it 'accepts a method with multiline arguments ' \
      'and less than 5 lines of body' do
-    inspect_source(<<-RUBY.strip_indent)
+    expect_no_offenses(<<-RUBY.strip_indent)
       def m(x,
             y,
             z)
@@ -115,7 +96,6 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
         a = 4
       end
     RUBY
-    expect(cop.offenses.empty?).to be(true)
   end
 
   it 'does not count blank lines' do
@@ -166,8 +146,9 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
   end
 
   it 'properly counts lines when method ends with block' do
-    inspect_source(<<-RUBY.strip_indent)
-      def m()
+    expect_offense(<<-RUBY.strip_indent)
+      def m
+      ^^^^^ Method has too many lines. [6/5]
         something do
           a = 2
           a = 3
@@ -176,8 +157,6 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
         end
       end
     RUBY
-    expect(cop.offenses.size).to eq(1)
-    expect(cop.offenses.map(&:line).sort).to eq([1])
   end
 
   it 'does not count commented lines by default' do
@@ -197,8 +176,9 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
     before { cop_config['CountComments'] = true }
 
     it 'also counts commented lines' do
-      inspect_source(<<-RUBY.strip_indent)
-        def m()
+      expect_offense(<<-RUBY.strip_indent)
+        def m
+        ^^^^^ Method has too many lines. [6/5]
           a = 1
           #a = 2
           a = 3
@@ -207,8 +187,37 @@ RSpec.describe RuboCop::Cop::Metrics::MethodLength, :config do
           a = 6
         end
       RUBY
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.offenses.map(&:line).sort).to eq([1])
+    end
+  end
+
+  context 'when method is defined in `ExcludedMethods`' do
+    before { cop_config['ExcludedMethods'] = ['foo'] }
+
+    it 'still rejects other methods with more than 5 lines' do
+      expect_offense(<<-RUBY.strip_indent)
+        def m 
+        ^^^^^^ Method has too many lines. [6/5]
+          a = 1
+          a = 2
+          a = 3
+          a = 4
+          a = 5
+          a = 6
+        end
+      RUBY
+    end
+
+    it 'accepts the foo method with more than 5 lines' do
+      expect_no_offenses(<<-RUBY.strip_indent)
+        def foo
+          a = 1
+          a = 2
+          a = 3
+          a = 4
+          a = 5
+          a = 6
+        end
+      RUBY
     end
   end
 end

@@ -39,7 +39,7 @@ RSpec.describe RuboCop::Cop::Layout::ElseAlignment do
 
     it 'accepts indentation after else when if is on new line after ' \
        'assignment' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_no_offenses(<<-RUBY.strip_indent)
         Rails.application.config.ideal_postcodes_key =
           if Rails.env.production? || Rails.env.staging?
             "AAAA-AAAA-AAAA-AAAA"
@@ -47,32 +47,28 @@ RSpec.describe RuboCop::Cop::Layout::ElseAlignment do
             "BBBB-BBBB-BBBB-BBBB"
           end
       RUBY
-      expect(cop.offenses.empty?).to be(true)
     end
 
     describe '#autocorrect' do
       it 'corrects bad alignment' do
-        corrected = autocorrect_source(<<-RUBY.strip_indent)
-            if a1
-              b1
-              elsif a2
-              b2
-          else
-              c
-            end
+        corrected = autocorrect_source(<<-RUBY.strip_margin('|'))
+        |    if a1
+        |      b1
+        |      elsif a2
+        |      b2
+        |  else
+        |      c
+        |    end
         RUBY
-        expect(cop.messages).to eq(['Align `elsif` with `if`.',
-                                    'Align `else` with `if`.'])
-        expect(corrected)
-          .to eq <<-RUBY.strip_margin('|')
-            |  if a1
-            |    b1
-            |  elsif a2
-            |    b2
-            |  else
-            |    c
-            |  end
-          RUBY
+        expect(corrected).to eq(<<-RUBY.strip_margin('|'))
+        |    if a1
+        |      b1
+        |    elsif a2
+        |      b2
+        |    else
+        |      c
+        |    end
+        RUBY
       end
     end
 

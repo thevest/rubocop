@@ -1,12 +1,12 @@
 RuboCop currently has several official & unofficial support channels.
 
-For questions, suggestions and support refer to one of them.  Please, don't
+For questions, suggestions, and support refer to one of them. Please, don't
 use the support channels to report issues, as this makes them harder to track.
 
 ## Gitter
 
 Most internal discussions about the development of RuboCop happen on its
-[gitter channel](https://gitter.im/bbatsov/rubocop).  You can often find
+[gitter channel](https://gitter.im/bbatsov/rubocop). You can often find
 RuboCop's maintainers there and get some interesting news from the project's
 kitchen.
 
@@ -27,7 +27,7 @@ from other RuboCop users there.
 We're also encouraging users to ask RuboCop-related questions on StackOverflow.
 
 When doing so you should use the
-[RuboCop](http://stackoverflow.com/questions/tagged/rubocop) tag (ideally combined
+[RuboCop](https://stackoverflow.com/questions/tagged/rubocop) tag (ideally combined
 with the tag `ruby`).
 
 ## Bountysource

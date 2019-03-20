@@ -9,7 +9,9 @@ RSpec.describe RuboCop::ResultCache, :isolated_environment do
 
   let(:file) { 'example.rb' }
   let(:options) { {} }
-  let(:config_store) { double('config_store', for: RuboCop::Config.new) }
+  let(:config_store) do
+    instance_double(RuboCop::ConfigStore, for: RuboCop::Config.new)
+  end
   let(:cache_root) { "#{Dir.pwd}/rubocop_cache" }
   let(:offenses) do
     [RuboCop::Cop::Offense.new(:warning, location, 'unused var',
@@ -42,6 +44,29 @@ RSpec.describe RuboCop::ResultCache, :isolated_environment do
         expect(cache2.valid?).to eq(true)
         saved_offenses = cache2.load
         expect(saved_offenses).to eq(offenses)
+      end
+    end
+
+    # Fixes https://github.com/rubocop-hq/rubocop/issues/6274
+    context 'when offenses are saved by autocorrect run' do
+      let(:corrected_offense) do
+        RuboCop::Cop::Offense.new(
+          :warning, location, 'unused var', 'Lint/UselessAssignment', :corrected
+        )
+      end
+      let(:uncorrected_offense) do
+        RuboCop::Cop::Offense.new(
+          corrected_offense.severity.name,
+          corrected_offense.location,
+          corrected_offense.message,
+          corrected_offense.cop_name,
+          :uncorrected
+        )
+      end
+
+      it 'serializes them with :uncorrected status' do
+        cache.save([corrected_offense])
+        expect(cache.load).to match_array([uncorrected_offense])
       end
     end
 
@@ -105,11 +130,13 @@ RSpec.describe RuboCop::ResultCache, :isolated_environment do
           cache.save(offenses)
           Find.find(cache_root) do |path|
             next unless File.basename(path) == '_'
+
             FileUtils.rm_rf(path)
             FileUtils.ln_s(attack_target_dir, path)
           end
           $stderr = StringIO.new
         end
+
         after do
           FileUtils.rm_rf(attack_target_dir)
           $stderr = STDERR
@@ -191,10 +218,19 @@ RSpec.describe RuboCop::ResultCache, :isolated_environment do
       end
 
       before { Encoding.default_internal = Encoding::UTF_8 }
+
       after { Encoding.default_internal = nil }
 
       it 'writes non UTF-8 encodable data to file with no exception' do
         cache.save(offenses)
+      end
+    end
+
+    context 'when the @path is not writable' do
+      let(:cache_root) { '/permission_denied_dir' }
+
+      it 'doesn\'t raise an exception' do
+        expect { cache.save([]) }.not_to raise_error
       end
     end
   end
@@ -231,7 +267,9 @@ RSpec.describe RuboCop::ResultCache, :isolated_environment do
   end
 
   describe 'the cache path' do
-    let(:config_store) { double('config_store') }
+    let(:config_store) do
+      instance_double(RuboCop::ConfigStore)
+    end
     let(:puid) { Process.uid.to_s }
 
     before do

@@ -5,7 +5,7 @@ module RuboCop
     module Rails
       # This cop checks dynamic `find_by_*` methods.
       # Use `find_by` instead of dynamic method.
-      # See. https://github.com/bbatsov/rails-style-guide#find_by
+      # See. https://github.com/rubocop-hq/rails-style-guide#find_by
       #
       # @example
       #   # bad
@@ -27,7 +27,7 @@ module RuboCop
       #   User.find_by!(email: email)
       class DynamicFindBy < Cop
         MSG = 'Use `%<static_name>s` instead of dynamic `%<method>s`.'.freeze
-        METHOD_PATTERN = /^find_by_(.+?)(!)?$/
+        METHOD_PATTERN = /^find_by_(.+?)(!)?$/.freeze
 
         def on_send(node)
           method_name = node.method_name.to_s
@@ -42,23 +42,31 @@ module RuboCop
                       message: format(MSG, static_name: static_name,
                                            method: node.method_name))
         end
+        alias on_csend on_send
 
         def autocorrect(node)
-          _receiver, method, *args = *node
-          static_name = static_method_name(method.to_s)
-          keywords = column_keywords(method)
+          keywords = column_keywords(node.method_name)
 
-          return if keywords.size != args.size
+          return if keywords.size != node.arguments.size
 
           lambda do |corrector|
-            corrector.replace(node.loc.selector, static_name)
-            keywords.each.with_index do |keyword, idx|
-              corrector.insert_before(args[idx].loc.expression, keyword)
-            end
+            autocorrect_method_name(corrector, node)
+            autocorrect_argument_keywords(corrector, node, keywords)
           end
         end
 
         private
+
+        def autocorrect_method_name(corrector, node)
+          corrector.replace(node.loc.selector,
+                            static_method_name(node.method_name.to_s))
+        end
+
+        def autocorrect_argument_keywords(corrector, node, keywords)
+          keywords.each.with_index do |keyword, idx|
+            corrector.insert_before(node.arguments[idx].loc.expression, keyword)
+          end
+        end
 
         def whitelist
           cop_config['Whitelist']
@@ -74,6 +82,7 @@ module RuboCop
         def static_method_name(method_name)
           match = METHOD_PATTERN.match(method_name)
           return nil unless match
+
           match[2] ? 'find_by!' : 'find_by'
         end
       end

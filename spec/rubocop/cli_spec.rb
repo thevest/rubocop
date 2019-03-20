@@ -8,56 +8,11 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
   subject(:cli) { described_class.new }
 
   context 'when interrupted' do
-    it 'returns 1' do
+    it 'returns 130' do
       allow_any_instance_of(RuboCop::Runner)
         .to receive(:aborting?).and_return(true)
-      create_file('example.rb', '# encoding: utf-8')
-      expect(cli.run(['example.rb'])).to eq(1)
-    end
-  end
-
-  describe '#trap_interrupt' do
-    let(:runner) { RuboCop::Runner.new({}, RuboCop::ConfigStore.new) }
-    let(:interrupt_handlers) { [] }
-
-    before do
-      allow(Signal).to receive(:trap).with('INT') do |&block|
-        interrupt_handlers << block
-      end
-    end
-
-    def interrupt
-      interrupt_handlers.each(&:call)
-    end
-
-    it 'adds a handler for SIGINT' do
-      expect(interrupt_handlers.empty?).to be(true)
-      cli.trap_interrupt(runner)
-      expect(interrupt_handlers.size).to eq(1)
-    end
-
-    context 'with SIGINT once' do
-      it 'aborts processing' do
-        cli.trap_interrupt(runner)
-        expect(runner).to receive(:abort)
-        interrupt
-      end
-
-      it 'does not exit immediately' do
-        cli.trap_interrupt(runner)
-        expect_any_instance_of(Object).not_to receive(:exit)
-        expect_any_instance_of(Object).not_to receive(:exit!)
-        interrupt
-      end
-    end
-
-    context 'with SIGINT twice' do
-      it 'exits immediately' do
-        cli.trap_interrupt(runner)
-        expect_any_instance_of(Object).to receive(:exit!).with(1)
-        interrupt
-        interrupt
-      end
+      create_empty_file('example.rb')
+      expect(cli.run(['example.rb'])).to eq(130)
     end
   end
 
@@ -65,8 +20,8 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
     shared_examples 'checks Rakefile' do
       it 'checks a Rakefile but Style/FileName does not report' do
         create_file('Rakefile', 'x = 1')
-        create_file('other/empty', '')
-        Dir.chdir('other') do
+        create_empty_file('other/empty')
+        RuboCop::PathUtil.chdir('other') do
           expect(cli.run(['--format', 'simple', checked_path])).to eq(1)
         end
         expect($stdout.string)
@@ -185,7 +140,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
     expect(cli.run(['--format', 'emacs', 'example.rb'])).to eq(1)
     expect($stdout.string)
       .to eq(["#{abs('example.rb')}:3:1: E: Lint/Syntax: unexpected " \
-              'token $end (Using Ruby 2.1 parser; configure using ' \
+              'token $end (Using Ruby 2.2 parser; configure using ' \
               '`TargetRubyVersion` parameter, under `AllCops`)',
               ''].join("\n"))
   end
@@ -416,7 +371,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
   end
 
   it 'does not register any offenses for an empty file' do
-    create_file('example.rb', '')
+    create_empty_file('example.rb')
     expect(cli.run(%w[--format simple])).to eq(0)
     expect($stdout.string)
       .to eq(['', '1 file inspected, no offenses detected', ''].join("\n"))
@@ -647,8 +602,31 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
             Exclude:
               - lib/example.rb
         YAML
-        Dir.chdir('lib') { expect(cli.run([])).to eq(0) }
+        RuboCop::PathUtil.chdir('lib') { expect(cli.run([])).to eq(0) }
         expect($stdout.string).to include('no offenses detected')
+      end
+
+      it 'can merge settings from inherited configuration' do
+        create_file('lib/example.rb', 'puts %x(ls)')
+        create_file('.rubocop.yml', <<-YAML.strip_indent)
+          inherit_from: .rubocop_todo.yml
+
+          inherit_mode:
+            merge:
+              - Exclude
+
+          Style/CommandLiteral:
+            Exclude:
+              - generated/example.rb
+        YAML
+        create_file('.rubocop_todo.yml', <<-YAML.strip_indent)
+          Style/CommandLiteral:
+            Exclude:
+              - lib/example.rb
+        YAML
+        RuboCop::PathUtil.chdir('lib') { expect(cli.run([])).to eq(0) }
+        expect($stdout.string).to include('no offenses detected')
+        expect($stderr.string.empty?).to be(true)
       end
 
       it 'includes some directories by default' do
@@ -713,6 +691,22 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       RuboCop::ConfigLoader.default_configuration = nil
     end
 
+    context 'when a value in a hash is overridden with nil' do
+      it 'acts as if the key/value pair was removed' do
+        create_file('.rubocop.yml', <<-YAML.strip_indent)
+          Style/InverseMethods:
+            InverseMethods:
+              :even?: ~
+          Style/CollectionMethods:
+            Enabled: true
+            PreferredMethods:
+              collect: ~
+        YAML
+        create_file('example.rb', 'array.collect { |e| !e.odd? }')
+        expect(cli.run([])).to eq(0)
+      end
+    end
+
     context 'when configured for rails style indentation' do
       it 'accepts rails style indentation' do
         create_file('.rubocop.yml', <<-YAML.strip_indent)
@@ -720,7 +714,6 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
             EnforcedStyle: rails
         YAML
         create_file('example.rb', <<-RUBY.strip_indent)
-
           # A feline creature
           class Cat
             def meow
@@ -755,7 +748,6 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
               EnforcedStyle: rails
           YAML
           create_file('example.rb', <<-RUBY.strip_indent)
-
             # A feline creature
             #{parent} Cat
               def meow
@@ -785,8 +777,8 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
           expect($stdout.string)
             .to eq(<<-RESULT.strip_indent)
               == example.rb ==
-              C: 10:  3: Layout/IndentationWidth: Use 2 (not 0) spaces for rails indentation.
-              C: 16:  3: Layout/IndentationWidth: Use 2 (not 0) spaces for rails indentation.
+              C:  9:  3: Layout/IndentationWidth: Use 2 (not 0) spaces for rails indentation.
+              C: 15:  3: Layout/IndentationWidth: Use 2 (not 0) spaces for rails indentation.
 
               1 file inspected, 2 offenses detected
           RESULT
@@ -927,7 +919,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
           DisplayStyleGuide: true
       YAML
 
-      url = 'https://github.com/bbatsov/ruby-style-guide#no-trailing-whitespace'
+      url = 'https://github.com/rubocop-hq/ruby-style-guide#no-trailing-whitespace'
 
       expect(cli.run(%w[--format simple])).to eq(1)
       expect($stdout.string).to eq(<<-RESULT.strip_indent)
@@ -963,16 +955,21 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       create_file('file.rb', 'x=0') # Included by default
       create_file('example', 'x=0')
       create_file('regexp', 'x=0')
+      create_file('vendor/bundle/ruby/2.4.0/gems/backports-3.6.8/.irbrc', 'x=0')
       create_file('.dot1/file.rb', 'x=0') # Hidden but explicitly included
       create_file('.dot2/file.rb', 'x=0') # Hidden, excluded by default
       create_file('.dot3/file.rake', 'x=0') # Hidden, not included by wildcard
       create_file('.rubocop.yml', <<-YAML.strip_indent)
         AllCops:
           Include:
+            - "**/.irbrc"
             - example
+            - "**/*.rb"
             - "**/*.rake"
             - !ruby/regexp /regexp$/
             - .dot1/**/*
+          Exclude:
+            - vendor/bundle/**/*
       YAML
       expect(cli.run(%w[--format files])).to eq(1)
       expect($stderr.string).to eq('')
@@ -1077,12 +1074,13 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
           Exclude:
             - ignored/**
       YAML
-      expect(File).not_to receive(:open).with(%r{/ignored/})
       allow(File).to receive(:open).and_call_original
       expect(cli.run(%w[--format simple example])).to eq(0)
-      expect($stdout.string)
-        .to eq(['', '0 files inspected, no offenses detected',
-                ''].join("\n"))
+      expect($stdout.string).to eq(<<-OUTPUT.strip_indent)
+
+        0 files inspected, no offenses detected
+      OUTPUT
+      expect(File).not_to have_received(:open).with(%r{/ignored/})
     end
 
     it 'can be configured with option to disable a certain error' do
@@ -1445,10 +1443,20 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       YAML
 
       expect(cli.run(%w[--format simple example])).to eq(1)
-      expect($stderr.string)
-        .to eq(['Warning: unrecognized parameter Metrics/LineLength:Min ' \
-                'found in example/.rubocop.yml',
-                ''].join("\n"))
+
+      expect($stderr.string).to eq(<<-RESULT.strip_margin('|'))
+        |Warning: Metrics/LineLength does not support Min parameter.
+        |
+        |Supported parameters are:
+        |
+        |  - Enabled
+        |  - Max
+        |  - AllowHeredoc
+        |  - AllowURI
+        |  - URISchemes
+        |  - IgnoreCopDirectives
+        |  - IgnoredPatterns
+      RESULT
     end
 
     it 'prints an error message for an unrecognized EnforcedStyle' do
@@ -1607,14 +1615,14 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
       it 'fails with an error message' do
         create_file('.rubocop.yml', <<-YAML.strip_indent)
           AllCops:
-            TargetRubyVersion: 2.6
+            TargetRubyVersion: 2.7
         YAML
         expect(cli.run([])).to eq(2)
         expect($stderr.string.strip).to match(
-          /\AError: Unknown Ruby version 2.6 found in `TargetRubyVersion`/
+          /\AError: Unknown Ruby version 2.7 found in `TargetRubyVersion`/
         )
         expect($stderr.string.strip).to match(
-          /Supported versions: 2.1, 2.2, 2.3, 2.4, 2.5/
+          /Supported versions: 2.2, 2.3, 2.4, 2.5, 2.6/
         )
       end
     end
@@ -1636,7 +1644,7 @@ RSpec.describe RuboCop::CLI, :isolated_environment do
         )
 
         expect($stderr.string.strip).to match(
-          /Supported versions: 2.1, 2.2, 2.3, 2.4/
+          /Supported versions: 2.2, 2.3, 2.4/
         )
       end
     end

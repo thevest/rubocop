@@ -7,18 +7,18 @@ RSpec.describe RuboCop::Cop::Style::LambdaCall, :config do
     let(:cop_config) { { 'EnforcedStyle' => 'call' } }
 
     it 'registers an offense for x.()' do
-      inspect_source('x.(a, b)')
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.config_to_allow_offenses).to eq('EnforcedStyle' => 'braces')
+      expect_offense(<<-RUBY.strip_indent)
+        x.(a, b)
+        ^^^^^^^^ Prefer the use of `lambda.call(...)` over `lambda.(...)`.
+      RUBY
     end
 
     it 'registers an offense for correct + opposite' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         x.call(a, b)
         x.(a, b)
+        ^^^^^^^^ Prefer the use of `lambda.call(...)` over `lambda.(...)`.
       RUBY
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.config_to_allow_offenses).to eq('Enabled' => false)
     end
 
     it 'accepts x.call()' do
@@ -26,7 +26,7 @@ RSpec.describe RuboCop::Cop::Style::LambdaCall, :config do
     end
 
     it 'auto-corrects x.() to x.call()' do
-      new_source = autocorrect_source(['a.(x)'])
+      new_source = autocorrect_source('a.(x)')
       expect(new_source).to eq('a.call(x)')
     end
   end
@@ -35,18 +35,18 @@ RSpec.describe RuboCop::Cop::Style::LambdaCall, :config do
     let(:cop_config) { { 'EnforcedStyle' => 'braces' } }
 
     it 'registers an offense for x.call()' do
-      inspect_source('x.call(a, b)')
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.config_to_allow_offenses).to eq('EnforcedStyle' => 'call')
+      expect_offense(<<-RUBY.strip_indent)
+        x.call(a, b)
+        ^^^^^^^^^^^^ Prefer the use of `lambda.(...)` over `lambda.call(...)`.
+      RUBY
     end
 
     it 'registers an offense for opposite + correct' do
-      inspect_source(<<-RUBY.strip_indent)
+      expect_offense(<<-RUBY.strip_indent)
         x.call(a, b)
+        ^^^^^^^^^^^^ Prefer the use of `lambda.(...)` over `lambda.call(...)`.
         x.(a, b)
       RUBY
-      expect(cop.offenses.size).to eq(1)
-      expect(cop.config_to_allow_offenses).to eq('Enabled' => false)
     end
 
     it 'accepts x.()' do
@@ -58,17 +58,17 @@ RSpec.describe RuboCop::Cop::Style::LambdaCall, :config do
     end
 
     it 'auto-corrects x.call() to x.()' do
-      new_source = autocorrect_source(['a.call(x)'])
+      new_source = autocorrect_source('a.call(x)')
       expect(new_source).to eq('a.(x)')
     end
 
     it 'auto-corrects x.call to x.()' do
-      new_source = autocorrect_source(['a.call'])
+      new_source = autocorrect_source('a.call')
       expect(new_source).to eq('a.()')
     end
 
     it 'auto-corrects x.call asdf, x123 to x.(asdf, x123)' do
-      new_source = autocorrect_source(['a.call asdf, x123'])
+      new_source = autocorrect_source('a.call asdf, x123')
       expect(new_source).to eq('a.(asdf, x123)')
     end
   end
